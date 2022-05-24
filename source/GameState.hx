@@ -1,8 +1,10 @@
 import Bumper.Color;
 import Bumper.Direction;
 import flixel.FlxG;
+import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.group.FlxGroup.FlxTypedGroup;
+import flixel.math.FlxPoint;
 
 enum GameSM
 {
@@ -21,31 +23,23 @@ abstract class GameState extends FlxState
 	public var gameSM(default, null):GameSM = Starting;
 
 	private var _nextBumper:Bumper = null;
-	private var _bumpers:FlxTypedGroup<Bumper> = new FlxTypedGroup<Bumper>();
+	private var _bumpers = new FlxTypedGroup<Bumper>();
 	private var _delay:Float = 0;
 
 	override function create()
 	{
 		_nextBumper = new Bumper(550, 400, Color.Blue);
 		add(_nextBumper);
-		add(_nextBumper.arrow);
-
-		// var testBumper = new Bumper(72, 72, Color.Red, Direction.Right);
-		// add(testBumper);
-		// add(testBumper.arrow);
-
-		// testBumper.snapToPos();
 
 		add(_bumpers);
 		_bumpers.add(new Bumper(64, 64, Color.Red, Direction.Right));
-		_bumpers.add(new Bumper(320, 64, Color.Green, Direction.Up));
-		_bumpers.forEachAlive(bumper ->
-		{
-			add(bumper.arrow);
-			bumper.snapToPos();
-		});
+		_bumpers.add(new Bumper(320, 64, Color.Green, Direction.None));
+		_bumpers.forEachAlive(bumper -> bumper.snapToPos());
 		_bumpers.getFirstAlive().startMoving(Direction.Right);
 		gameSM = GameSM.Moving;
+
+		// TODO: this should be [tile width/height] / 2 * [board width/height]
+		FlxG.camera.focusOn(new FlxPoint(180, 180));
 
 		super.create();
 	}
@@ -65,10 +59,8 @@ abstract class GameState extends FlxState
 				FlxG.overlap(_bumpers, _bumpers, bumperBump);
 				var isSomethingMoving = false;
 				for (bumper in _bumpers)
-				{
-					if (isSomethingMoving = bumper.velocity.x != 0 || bumper.velocity.y != 0)
+					if (isSomethingMoving = bumper.isMoving)
 						break;
-				}
 				if (!isSomethingMoving)
 				{
 					trace("Done moving");
@@ -80,8 +72,13 @@ abstract class GameState extends FlxState
 		super.update(elapsed);
 	}
 
-	private function bumperBump(lh:Bumper, rh:Bumper)
+	private function bumperBump(lh:FlxSprite, rh:FlxSprite)
 	{
-		lh.snapToPos();
+		if (!lh.alive || !rh.alive)
+			return;
+		// trace("Collision between " + lh.ID + " and " + rh.ID);
+		for (bumper in _bumpers)
+			if (bumper.base == lh)
+				bumper.snapToPos();
 	}
 }

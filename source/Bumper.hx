@@ -1,11 +1,13 @@
 import flixel.FlxSprite;
+import flixel.group.FlxGroup.FlxTypedGroup;
+import flixel.math.FlxPoint;
 import flixel.util.FlxColor;
 
-enum abstract Color(Int)
+enum abstract Color(FlxColor)
 {
-	var Blue = 0x2244cc;
-	var Green = 0x22cc44;
-	var Red = 0xcc3333;
+	var Blue = 0xff2244cc;
+	var Green = 0xff22cc44;
+	var Red = 0xffcc3333;
 }
 
 enum Direction
@@ -19,13 +21,21 @@ enum Direction
 	GameOver;
 }
 
-class Bumper extends FlxSprite
+class Bumper extends FlxTypedGroup<FlxSprite>
 {
 	public var direction(default, set):Direction = None;
 	public var launchDirection(default, set):Direction = None;
 	public var activeDirection(get, never):Direction;
+
+	public var base(default, null):FlxSprite;
 	public var arrow(default, null):FlxSprite;
 
+	public var x(get, set):Float;
+	public var y(get, set):Float;
+	public var velocity(get, never):FlxPoint;
+	public var color(default, set):FlxColor;
+
+	public var isMoving(get, never):Bool;
 	public var boardX(get, set):Int;
 	public var boardY(get, set):Int;
 	public var frontX(get, never):Int;
@@ -45,6 +55,21 @@ class Bumper extends FlxSprite
 			default:
 				arrow.angle = 0;
 		}
+		switch (direction)
+		{
+			case None, GameOver:
+				arrow.animation.frameIndex = 2;
+			case Clearing:
+				arrow.animation.frameIndex = 1;
+			default:
+				arrow.animation.frameIndex = 0;
+		}
+
+		if (direction == Direction.GameOver && this.direction != Direction.GameOver)
+			base.color = arrow.color = FlxColor.RED;
+		else if (this.direction == Direction.GameOver)
+			base.color = arrow.color = this.color;
+
 		return this.direction = direction;
 	}
 
@@ -62,78 +87,123 @@ class Bumper extends FlxSprite
 			return direction;
 	}
 
+	function get_x():Float
+	{
+		return base.x;
+	}
+
+	function set_x(x:Float):Float
+	{
+		return base.x = x;
+	}
+
+	function get_y():Float
+	{
+		return base.y;
+	}
+
+	function set_y(y:Float):Float
+	{
+		return base.y = y;
+	}
+
+	function get_velocity():FlxPoint
+	{
+		return base.velocity;
+	}
+
+	function set_color(color:FlxColor):FlxColor
+	{
+		if (direction != Direction.GameOver)
+			base.color = arrow.color = color;
+		return this.color = color;
+	}
+
+	function get_isMoving():Bool
+	{
+		return Math.abs(base.velocity.x) + Math.abs(base.velocity.y) > 0
+			|| Math.abs(base.acceleration.x) + Math.abs(base.acceleration.y) > 0;
+	}
+
 	function get_boardX():Int
 	{
-		var refX = x + (width / 2);
-		return Math.floor(refX / width);
+		var refX = base.x + (base.width / 2);
+		return Math.floor(refX / base.width);
 	}
 
 	function set_boardX(boardX:Int):Int
 	{
-		x = boardX * width;
+		base.x = boardX * base.width;
 		return boardX;
 	}
 
 	function get_boardY():Int
 	{
-		var refY = y + (height / 2);
-		return Math.floor(refY / height);
+		var refY = base.y + (base.height / 2);
+		return Math.floor(refY / base.height);
 	}
 
 	function set_boardY(boardY:Int):Int
 	{
-		y = boardY * height;
+		base.y = boardY * base.height;
 		return boardY;
 	}
 
 	function get_frontX():Int
 	{
-		var refX = x + (width / 2);
+		var refX = base.x + (base.width / 2);
 		switch (activeDirection)
 		{
 			case Right:
-				refX += width / 2;
-				if (refX % width == 0)
+				refX += base.width / 2;
+				if (refX % base.width == 0)
 					refX--;
 			case Left:
-				refX -= width / 2;
+				refX -= base.width / 2;
 			default:
 		}
 
-		return Math.floor(refX / width);
+		return Math.floor(refX / base.width);
 	}
 
 	function get_frontY():Int
 	{
-		var refY = y + (height / 2);
+		var refY = base.y + (base.height / 2);
 		switch (activeDirection)
 		{
 			case Up:
-				refY += height / 2;
-				if (refY % height == 0)
+				refY += base.height / 2;
+				if (refY % base.height == 0)
 					refY--;
 			case Down:
-				refY -= height / 2;
+				refY -= base.height / 2;
 			default:
 		}
 
-		return Math.floor(refY / height);
+		return Math.floor(refY / base.height);
 	}
 
 	public function new(x:Float, y:Float, color:Color, direction:Direction = Direction.None, launchDirection:Direction = Direction.None)
 	{
-		super(x, y);
-		makeGraphic(64, 64, FlxColor.GRAY);
+		super();
 
-		arrow = new FlxSprite(x + 16, y + 8);
-		arrow.makeGraphic(32, 48, FlxColor.WHITE);
+		base = new FlxSprite(x, y);
+		base.loadGraphic(AssetPaths.BumperBase__png);
+		add(base);
 
-		this.color = cast(color, Int);
+		arrow = new FlxSprite(x, y);
+		arrow.loadGraphic(AssetPaths.BumperSymbols__png, true, cast(base.width, Int), cast(base.height, Int));
+		arrow.alive = false;
+		add(arrow);
+
+		// trace("Created " + base.ID + " and " + arrow.ID);
+
+		this.color = cast(color, FlxColor);
 		this.direction = direction;
 		this.launchDirection = launchDirection;
 
-		maxVelocity.x = width * 8;
-		maxVelocity.y = height * 8;
+		base.maxVelocity.x = base.width * 8;
+		base.maxVelocity.y = base.height * 8;
 	}
 
 	public function startMoving(launched:Direction = Direction.None)
@@ -144,38 +214,38 @@ class Bumper extends FlxSprite
 		switch (activeDirection)
 		{
 			case Up:
-				acceleration.y = -height * 2;
+				base.acceleration.y = -base.height * 2;
 				if (launched != Direction.None)
-					velocity.y = -maxVelocity.y / 2;
+					base.velocity.y = -base.maxVelocity.y / 2;
 			case Right:
-				acceleration.x = width * 2;
+				base.acceleration.x = base.width * 2;
 				if (launched != Direction.None)
-					velocity.x = maxVelocity.x / 2;
+					base.velocity.x = base.maxVelocity.x / 2;
 			case Down:
-				acceleration.y = height * 2;
+				base.acceleration.y = base.height * 2;
 				if (launched != Direction.None)
-					velocity.y = maxVelocity.y / 2;
+					base.velocity.y = base.maxVelocity.y / 2;
 			case Left:
-				acceleration.x = -width * 2;
+				base.acceleration.x = -base.width * 2;
 				if (launched != Direction.None)
-					velocity.x = -maxVelocity.x / 2;
+					base.velocity.x = -base.maxVelocity.x / 2;
 			default:
 		}
 	}
 
 	public function snapToPos()
 	{
-		velocity.x = velocity.y = 0;
-		acceleration.x = acceleration.y = 0;
+		base.velocity.x = base.velocity.y = 0;
+		base.acceleration.x = base.acceleration.y = 0;
 		boardX = boardX;
 		boardY = boardY;
-		trace(x + " " + y);
+		// trace(base.x + " " + base.y);
 	}
 
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
-		arrow.x = x + 16;
-		arrow.y = y + 8;
+		arrow.x = base.x;
+		arrow.y = base.y;
 	}
 }
