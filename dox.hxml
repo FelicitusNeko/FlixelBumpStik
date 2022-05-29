@@ -1,0 +1,19 @@
+-cp src
+-D doc-gen
+--macro include('pack')
+--no-output
+--each
+
+--next
+-xml bin/hashlink.xml
+-hl dummy.hl
+
+--next
+-xml bin/cpp.xml
+-cpp dummy.cpp
+
+--next
+-D html5
+-D html
+-xml bin/html5.xml
+-js dummy.js
