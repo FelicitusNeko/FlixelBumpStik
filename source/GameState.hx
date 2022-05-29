@@ -176,11 +176,18 @@ abstract class GameState extends FlxState
 		if (blh == brh || blh == null || brh == null)
 			return;
 
-		for (bumper in [blh, brh])
-			if (bumper.hasShifted && bumpersAt(bumper.frontX, bumper.frontY, bumper).length > 0)
-			{
-				bumper.snapToPos();
-			}
+		if (blh.hasShifted && brh.hasShifted)
+		{
+			trace("Double-shift collision");
+			if (blh.frontX == brh.lfFrontX && blh.frontY == brh.lfFrontY)
+				blh.snapToPos();
+			else
+				brh.snapToPos();
+		}
+		else
+			for (bumper in [blh, brh])
+				if (bumper.hasShifted)
+					bumper.snapToPos();
 	}
 
 	/**

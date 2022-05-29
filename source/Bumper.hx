@@ -273,6 +273,14 @@ class Bumper extends FlxSpriteGroup
 		return false;
 	}
 
+	/**
+		Pretty sure this function is broken.
+		TODO: unbreak this function
+		It's supposed to determine whether the bumper is found at the given board grid coordinates.
+		@param x The X grid coordinate to check.
+		@param y The Y grid coordinate to check
+		@return Whether the bumper is located at these grid coordinates.
+	**/
 	public function isAt(x:Int, y:Int):Bool
 	{
 		// var rX = x * width, rY = y * height;
