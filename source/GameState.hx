@@ -40,6 +40,12 @@ abstract class GameState extends FlxState
 	/** The current state of the game. **/
 	public var gameSM(default, null):GameSM = Starting;
 
+	/** The board's width, in grid units. **/
+	public var width(default, null):Int = 5;
+
+	/** The board's height, in grid units. **/
+	public var height(default, null):Int = 5;
+
 	/** The next bumper to be put into play. **/
 	private var _nextBumper:Bumper = null;
 
@@ -55,11 +61,9 @@ abstract class GameState extends FlxState
 	override function create()
 	{
 		add(_spaces);
-		for (x in 0...5)
-			for (y in 0...5)
-			{
+		for (x in 0...width)
+			for (y in 0...height)
 				_spaces.add(new BoardSpace(x * 64, y * 64));
-			}
 
 		_nextBumper = new Bumper(550, 400, Color.Blue);
 		add(_nextBumper);
@@ -72,7 +76,7 @@ abstract class GameState extends FlxState
 		// _bumpers.add(new Bumper(0, 64, Color.Red, Direction.Right));
 		// _bumpers.add(new Bumper(256, 64, Color.Blue, Direction.Left));
 
-		// Cross-collision test #1 - both shifting on same frame ❌
+		// Cross-collision test #1 - both shifting on same frame ✔️?
 		_bumpers.add(new Bumper(-128, 64, Color.Red, Direction.Right));
 		_bumpers.add(new Bumper(64, 320, Color.Blue, Direction.Up));
 
@@ -88,8 +92,8 @@ abstract class GameState extends FlxState
 		});
 		gameSM = GameSM.Moving;
 
-		// TODO: this should be [tile width/height] / 2 * [board width/height]
-		FlxG.camera.focusOn(new FlxPoint(160, 160));
+		var firstSpace = _spaces.getFirstAlive();
+		FlxG.camera.focusOn(new FlxPoint(width * (firstSpace.width / 2), height * (firstSpace.height / 2)));
 
 		super.create();
 	}
@@ -178,7 +182,6 @@ abstract class GameState extends FlxState
 
 		if (blh.hasShifted && brh.hasShifted)
 		{
-			trace("Double-shift collision");
 			if (blh.frontX == brh.lfFrontX && blh.frontY == brh.lfFrontY)
 				blh.snapToPos();
 			else
