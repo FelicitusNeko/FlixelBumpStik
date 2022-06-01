@@ -1,6 +1,5 @@
 import flixel.FlxSprite;
 import flixel.group.FlxSpriteGroup;
-import flixel.math.FlxRect;
 import flixel.util.FlxColor;
 
 /** The current color of the bumper, for matching purposes. **/
@@ -68,6 +67,12 @@ class Bumper extends FlxSpriteGroup
 	/** The nearest Y position to the front of the bumper relative to the play field. **/
 	public var frontY(get, never):Int;
 
+	/** The X position ahead of the bumper's current position relative to the play field. **/
+	public var forwardX(get, never):Int;
+
+	/** The Y position ahead of the bumper's current position relative to the play field. **/
+	public var forwardY(get, never):Int;
+
 	/** The nearest X position to the front of the bumper relative to the play field in the previous frame. **/
 	public var lfFrontX(default, null):Int;
 
@@ -77,15 +82,18 @@ class Bumper extends FlxSpriteGroup
 	/** Whether the front of this bumper has moved to a new board position in the last frame. **/
 	public var hasShifted(get, never):Bool;
 
+	/** Whether this bumper has just been launched. **/
+	public var justLaunched(default, null):Bool = false;
+
 	public function new(x:Float, y:Float, color:Color, direction:Direction = Direction.None, launchDirection:Direction = Direction.None)
 	{
 		super(x, y);
 
-		base = new FlxSprite(x, y);
+		base = new FlxSprite(0, 0);
 		base.loadGraphic(AssetPaths.BumperBase__png);
 		add(base);
 
-		arrow = new FlxSprite(x, y);
+		arrow = new FlxSprite(0, 0);
 		arrow.loadGraphic(AssetPaths.BumperSymbols__png, true, cast(width, Int), cast(height, Int));
 		arrow.alive = false;
 		add(arrow);
@@ -112,7 +120,6 @@ class Bumper extends FlxSpriteGroup
 
 	function set_direction(direction:Direction):Direction
 	{
-		// TODO: change sprite based on direction
 		switch (direction)
 		{
 			case Right:
@@ -211,16 +218,42 @@ class Bumper extends FlxSpriteGroup
 		var refY = y + (height / 2);
 		switch (activeDirection)
 		{
-			case Up:
+			case Down:
 				refY += height / 2;
 				if (refY % height == 0)
 					refY--;
-			case Down:
+			case Up:
 				refY -= height / 2;
 			default:
 		}
 
 		return Math.floor(refY / height);
+	}
+
+	function get_forwardX():Int
+	{
+		switch (activeDirection)
+		{
+			case Left:
+				return frontX - 1;
+			case Right:
+				return frontX + 1;
+			default:
+				return frontX;
+		}
+	}
+
+	function get_forwardY():Int
+	{
+		switch (activeDirection)
+		{
+			case Up:
+				return frontY - 1;
+			case Down:
+				return frontY + 1;
+			default:
+				return frontY;
+		}
 	}
 
 	function get_hasShifted():Bool
@@ -236,27 +269,40 @@ class Bumper extends FlxSpriteGroup
 	public function startMoving(launched:Direction = Direction.None)
 	{
 		if (launched != Direction.None)
+		{
+			trace("Bumper " + ID + " being launched " + launched);
+			justLaunched = true;
 			launchDirection = launched;
+		}
+		else
+			trace("Bumper " + ID + " starting movement");
+
+		acceleration.x = acceleration.y = velocity.x = velocity.y = 0;
 
 		switch (activeDirection)
 		{
 			case Up:
-				acceleration.y = -height * 2;
+				trace("Bumper " + ID + " moving up");
+				acceleration.y = -height * 4;
 				if (launched != Direction.None)
 					velocity.y = -maxVelocity.y / 2;
 			case Right:
-				acceleration.x = width * 2;
+				trace("Bumper " + ID + " moving right");
+				acceleration.x = width * 4;
 				if (launched != Direction.None)
 					velocity.x = maxVelocity.x / 2;
 			case Down:
-				acceleration.y = height * 2;
+				trace("Bumper " + ID + " moving down");
+				acceleration.y = height * 4;
 				if (launched != Direction.None)
 					velocity.y = maxVelocity.y / 2;
 			case Left:
-				acceleration.x = -width * 2;
+				trace("Bumper " + ID + " moving left");
+				acceleration.x = -width * 4;
 				if (launched != Direction.None)
 					velocity.x = -maxVelocity.x / 2;
 			default:
+				trace("Bumper " + ID + " has no direction of motion");
 		}
 	}
 
@@ -274,25 +320,6 @@ class Bumper extends FlxSpriteGroup
 	}
 
 	/**
-		Pretty sure this function is broken.
-		TODO: unbreak this function
-		It's supposed to determine whether the bumper is found at the given board grid coordinates.
-		@param x The X grid coordinate to check.
-		@param y The Y grid coordinate to check
-		@return Whether the bumper is located at these grid coordinates.
-	**/
-	public function isAt(x:Int, y:Int):Bool
-	{
-		// var rX = x * width, rY = y * height;
-		// if (rX < this.x || rX > this.x + width)
-		// 	return false;
-		// if (rY < this.y || rY > this.y + height)
-		// 	return false;
-		// return true;
-		return !(new FlxRect(x * width, y * width, width, height).intersection(new FlxRect(this.x, this.y, width, height)).isEmpty);
-	}
-
-	/**
 		Snaps the bumper to the nearest board X/Y location.
 	**/
 	public function snapToPos()
@@ -301,7 +328,8 @@ class Bumper extends FlxSpriteGroup
 		acceleration.x = acceleration.y = 0;
 		boardX = boardX;
 		boardY = boardY;
-		// trace(x + " " + y);
+		launchDirection = Direction.None;
+		trace("Bumper " + ID + " Snap: " + x, y);
 	}
 
 	override function update(elapsed:Float)
@@ -309,10 +337,9 @@ class Bumper extends FlxSpriteGroup
 		lfFrontX = frontX;
 		lfFrontY = frontY;
 		super.update(elapsed);
-		forEach(spr ->
-		{
-			spr.x = x;
-			spr.y = y;
-		});
+		if (hasShifted)
+			trace("Bumper going from " + lfFrontX, lfFrontY + " to " + frontX, frontY);
+		if (justLaunched)
+			justLaunched = false;
 	}
 }
