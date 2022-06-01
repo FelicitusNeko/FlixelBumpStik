@@ -55,20 +55,57 @@ abstract class GameState extends FlxState
 	/** The collection of bumpers in play. **/
 	private var _bumpers = new FlxTypedGroup<Bumper>();
 
+	/** The collection of launchers in play. **/
+	private var _launchers = new FlxTypedGroup<Launcher>();
+
 	/** The number of seconds to wait before the next action should take place. **/
 	private var _delay:Float = 0;
 
 	override function create()
 	{
+		// TODO: make this dynamic based on asset sizes
+		var sWidth:Float = 64, sHeight:Float = 64;
+
 		add(_spaces);
 		for (x in 0...width)
 			for (y in 0...height)
-				_spaces.add(new BoardSpace(x * 64, y * 64));
+				_spaces.add(new BoardSpace(x * sWidth, y * sHeight));
 
 		_nextBumper = new Bumper(550, 400, Color.Blue);
 		add(_nextBumper);
 
 		add(_bumpers);
+
+		for (dir in [Direction.Down, Direction.Left, Direction.Up, Direction.Right])
+		{
+			var ox:Float = 0, oy:Float = 0, count:Int = 0;
+			switch (dir)
+			{
+				case Down:
+					oy = -sHeight;
+					count = cast(width, Int);
+				case Left:
+					ox = sWidth * width;
+					count = cast(height, Int);
+				case Up:
+					oy = sHeight * height;
+					count = cast(width, Int);
+				case Right:
+					ox = -sWidth;
+					count = cast(height, Int);
+				default:
+			}
+
+			for (z in 0...count)
+			{
+				if (dir == Up || dir == Down)
+					_launchers.add(new Launcher(ox + (z * sWidth), oy, dir));
+				else
+					_launchers.add(new Launcher(ox, oy + (z * sHeight), dir));
+			}
+		}
+		add(_launchers);
+
 		// Stationary bumper collision test ✔️
 		// _bumpers.add(new Bumper(320, 64, Color.Green, Direction.None));
 
@@ -77,23 +114,35 @@ abstract class GameState extends FlxState
 		// _bumpers.add(new Bumper(256, 64, Color.Blue, Direction.Left));
 
 		// Cross-collision test #1 - both shifting on same frame ✔️?
-		_bumpers.add(new Bumper(-128, 64, Color.Red, Direction.Right));
-		_bumpers.add(new Bumper(64, 320, Color.Blue, Direction.Up));
+		// _bumpers.add(new Bumper(sWidth * -2, sHeight, Color.Red, Direction.Right));
+		// _bumpers.add(new Bumper(sWidth, sHeight * 5, Color.Blue, Direction.Up));
 
 		// Cross-collision test #2 - shifting on different frame ✔️
 		// _bumpers.add(new Bumper(-100, 64, Color.Red, Direction.Right));
 		// _bumpers.add(new Bumper(64, 320, Color.Blue, Direction.Up));
 
-		_bumpers.forEachAlive(bumper ->
-		{
-			// bumper.snapToPos();
-			if (bumper.direction != Direction.None)
-				bumper.startMoving(bumper.direction);
-		});
+		// Launch test ✔️
+		var lbumper = new Bumper(-400, -400, Color.Blue, Direction.Right);
+		_bumpers.add(lbumper);
+		_launchers.getFirstAlive().launchBumper(lbumper);
+
+		// Driveby test #1 - horizontal ✔️
+		// _bumpers.add(new Bumper(0, sHeight * 1, Color.Blue, Direction.Right));
+		// _bumpers.add(new Bumper(sWidth * 4, sHeight * 2, Color.Red, Direction.Left));
+
+		// Driveby test #2 - vertical ✔️
+		// _bumpers.add(new Bumper(sWidth * 1, 0, Color.Blue, Direction.Down));
+		// _bumpers.add(new Bumper(sWidth * 2, sHeight * 4, Color.Red, Direction.Up));
+
+		// _bumpers.forEachAlive(bumper ->
+		// {
+		// 	// bumper.snapToPos();
+		// 	if (bumper.direction != Direction.None)
+		// 		bumper.startMoving(bumper.direction);
+		// });
 		gameSM = GameSM.Moving;
 
-		var firstSpace = _spaces.getFirstAlive();
-		FlxG.camera.focusOn(new FlxPoint(width * (firstSpace.width / 2), height * (firstSpace.height / 2)));
+		FlxG.camera.focusOn(new FlxPoint(width * (sWidth / 2), height * (sHeight / 2)));
 
 		super.create();
 	}
@@ -112,6 +161,34 @@ abstract class GameState extends FlxState
 			case Moving:
 				FlxG.overlap(_bumpers, _bumpers, bumperBump);
 				FlxG.overlap(_bumpers, _spaces, bumperToSpace);
+				// FlxG.overlap(_bumpers, _launchers, bumperToLauncher);
+
+				_bumpers.forEachAlive(bumper ->
+				{
+					if (bumper.isMoving)
+					{
+						if (!bumper.justLaunched
+							&& bumper.hasShifted
+							&& (bumper.frontX < 0 || bumper.frontY < 0 || bumper.frontX >= width || bumper.frontY >= height))
+						{
+							var wasLaunched = bumper.launchDirection != Direction.None;
+							bumper.snapToPos();
+							if (wasLaunched)
+								bumper.startMoving();
+						}
+					}
+					else
+					{
+						if (bumper.forwardX < 0 || bumper.forwardY < 0 || bumper.forwardX >= width || bumper.forwardY >= height)
+							return;
+						var bumpers = bumpersAt(bumper.forwardX, bumper.forwardY, bumper);
+						for (chkBumper in bumpers)
+							if (chkBumper.activeDirection != bumper.activeDirection || !chkBumper.isMoving)
+								return;
+						bumper.startMoving();
+					}
+				});
+
 				var isSomethingMoving = false;
 				for (bumper in _bumpers)
 					if (isSomethingMoving = bumper.isMoving)
@@ -147,6 +224,21 @@ abstract class GameState extends FlxState
 		return null;
 	}
 
+	/** 
+		Looks for a launcher based on a given sprite.
+		@param bspr The sprite to look for.
+		@return The launcher to which the sprite belongs, or `null` if none was found.
+	**/
+	private function spriteToLauncher(lspr:FlxSprite)
+	{
+		for (launcher in _launchers)
+		{
+			if (launcher.has(lspr))
+				return launcher;
+		}
+		return null;
+	}
+
 	/**
 		Determines which bumpers are located at the given board X and Y grid spaces.
 		@param x The X grid coordinate on the board.
@@ -156,10 +248,18 @@ abstract class GameState extends FlxState
 	**/
 	public function bumpersAt(x:Int, y:Int, exclude:Bumper = null)
 	{
+		var boardSpace:BoardSpace = null;
+
+		for (space in _spaces)
+			if (space.boardX == x && space.boardY == y)
+				boardSpace = space;
+		if (boardSpace == null)
+			return [];
+
 		var retval:Array<Bumper> = [];
 		_bumpers.forEach(bumper ->
 		{
-			if (bumper != exclude && bumper.isAt(x, y))
+			if (bumper != exclude && boardSpace.overlaps(bumper))
 				retval.push(bumper);
 		});
 		return retval;
@@ -198,25 +298,41 @@ abstract class GameState extends FlxState
 		@param lh The bumper's overlapping sprite.
 		@param rh The board space's overlapping sprite.
 	**/
-	private function bumperToSpace(lh:FlxSprite, rh:BoardSpace)
+	private function bumperToSpace(bspr:FlxSprite, space:BoardSpace)
 	{
-		if (!lh.alive)
+		if (!bspr.alive)
 			return;
 
-		var blh = spriteToBumper(lh);
-		if (blh == null)
+		var bumper = spriteToBumper(bspr);
+		if (bumper == null)
 			return;
 
-		if (!blh.isMoving)
+		if (!bumper.isMoving)
 			return;
-		if (rh.boardX == blh.frontX && rh.boardY == blh.frontY)
+		if (space.boardX == bumper.frontX && space.boardY == bumper.frontY)
 		{
-			if (rh.reservedFor == null)
-				rh.reservedFor = blh;
-			else if (rh.reservedFor != blh)
-				blh.snapToPos();
+			if (space.reservedFor == null)
+				space.reservedFor = bumper;
+			else if (space.reservedFor != bumper)
+				bumper.snapToPos();
 		}
-		else if (rh.reservedFor == blh)
-			rh.reservedFor = null;
+		else if (space.reservedFor == bumper)
+			space.reservedFor = null;
+	}
+
+	private function bumperToLauncher(bspr:FlxSprite, lspr:FlxSprite)
+	{
+		if (!bspr.alive || !lspr.alive)
+			return;
+
+		var bumper = spriteToBumper(bspr), launcher = spriteToLauncher(lspr);
+		if (bumper == null || launcher == null)
+			return;
+
+		if (launcher.launching != bumper)
+		{
+			trace("Bumper " + bumper.ID + " colliding with launcher " + launcher.ID);
+			bumper.snapToPos();
+		}
 	}
 }
