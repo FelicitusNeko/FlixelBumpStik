@@ -56,7 +56,7 @@ class Launcher extends FlxSpriteGroup
 	**/
 	public function launchBumper(bumper:Bumper)
 	{
-		trace("Bumper " + bumper.ID + " launching from launcher " + ID);
+		// trace("Bumper " + bumper.ID + " launching from launcher " + ID);
 		launching = bumper;
 		bumper.x = x;
 		bumper.y = y;

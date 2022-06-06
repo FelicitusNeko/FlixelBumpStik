@@ -270,39 +270,39 @@ class Bumper extends FlxSpriteGroup
 	{
 		if (launched != Direction.None)
 		{
-			trace("Bumper " + ID + " being launched " + launched);
+			// trace("Bumper " + ID + " being launched " + launched);
 			justLaunched = true;
 			launchDirection = launched;
 		}
 		else
-			trace("Bumper " + ID + " starting movement");
+			// trace("Bumper " + ID + " starting movement");
 
-		acceleration.x = acceleration.y = velocity.x = velocity.y = 0;
+			acceleration.x = acceleration.y = velocity.x = velocity.y = 0;
 
 		switch (activeDirection)
 		{
 			case Up:
-				trace("Bumper " + ID + " moving up");
+				// trace("Bumper " + ID + " moving up");
 				acceleration.y = -height * 4;
 				if (launched != Direction.None)
 					velocity.y = -maxVelocity.y / 2;
 			case Right:
-				trace("Bumper " + ID + " moving right");
+				// trace("Bumper " + ID + " moving right");
 				acceleration.x = width * 4;
 				if (launched != Direction.None)
 					velocity.x = maxVelocity.x / 2;
 			case Down:
-				trace("Bumper " + ID + " moving down");
+				// trace("Bumper " + ID + " moving down");
 				acceleration.y = height * 4;
 				if (launched != Direction.None)
 					velocity.y = maxVelocity.y / 2;
 			case Left:
-				trace("Bumper " + ID + " moving left");
+				// trace("Bumper " + ID + " moving left");
 				acceleration.x = -width * 4;
 				if (launched != Direction.None)
 					velocity.x = -maxVelocity.x / 2;
 			default:
-				trace("Bumper " + ID + " has no direction of motion");
+				// trace("Bumper " + ID + " has no direction of motion");
 		}
 	}
 
@@ -329,7 +329,7 @@ class Bumper extends FlxSpriteGroup
 		boardX = boardX;
 		boardY = boardY;
 		launchDirection = Direction.None;
-		trace("Bumper " + ID + " Snap: " + x, y);
+		// trace("Bumper " + ID + " Snap: " + x, y);
 	}
 
 	override function update(elapsed:Float)
@@ -337,8 +337,8 @@ class Bumper extends FlxSpriteGroup
 		lfFrontX = frontX;
 		lfFrontY = frontY;
 		super.update(elapsed);
-		if (hasShifted)
-			trace("Bumper going from " + lfFrontX, lfFrontY + " to " + frontX, frontY);
+		// if (hasShifted)
+		// 	trace("Bumper going from " + lfFrontX, lfFrontY + " to " + frontX, frontY);
 		if (justLaunched)
 			justLaunched = false;
 	}
