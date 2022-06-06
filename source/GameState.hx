@@ -201,7 +201,7 @@ abstract class GameState extends FlxState
 			default:
 		}
 
-		#if debug
+		#if (debug && sys)
 		if (FlxG.keys.anyJustPressed([ESCAPE]))
 			System.exit(0);
 		#end
