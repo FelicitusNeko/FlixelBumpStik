@@ -3,32 +3,44 @@ import flixel.FlxG;
 import flixel.FlxState;
 import openfl.system.System;
 
-abstract class GameState extends FlxState
+/** Stats for each player. **/
+typedef PlayerInstance =
 {
 	/** The player's current score. **/
-	public var score(default, null):Int = 0;
+	var score:Int;
 
 	/** The player's current count of bumpers sticked (cleared). **/
-	public var block(default, null):Int = 0;
+	var block:Int;
 
-	/** The board to be used for this game. **/
-	private var _board:Board;
+	/** The board to be used for this player. **/
+	var board:Board;
 
 	/** The next bumper to be put into play. **/
-	private var _nextBumper:Bumper = null;
+	var nextBumper:Bumper;
+}
+
+abstract class GameState extends FlxState
+{
+	/** The list of players for this game. **/
+	private var _players:Array<PlayerInstance> = [];
 
 	/** The number of seconds to wait before the next action should take place. **/
 	private var _delay:Float = 0;
 
 	override function create()
 	{
-		_board = new Board();
-		add(_board);
+		var player:PlayerInstance = {
+			score: 0,
+			block: 0,
+			board: new Board(),
+			nextBumper: new Bumper(550, 400, Color.Blue)
+		};
+		_players.push(player);
 
-		_nextBumper = new Bumper(550, 400, Color.Blue);
-		add(_nextBumper);
+		add(player.board);
+		add(player.nextBumper);
 
-		FlxG.camera.focusOn(_board.center);
+		FlxG.camera.focusOn(player.board.center);
 
 		super.create();
 	}
