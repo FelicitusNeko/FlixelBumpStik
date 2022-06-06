@@ -41,10 +41,18 @@ abstract class GameState extends FlxState
 	public var gameSM(default, null):GameSM = Starting;
 
 	/** The board's width, in grid units. **/
-	public var width(default, null):Int = 5;
+	public var bWidth(default, null):Int = 5;
 
 	/** The board's height, in grid units. **/
-	public var height(default, null):Int = 5;
+	public var bHeight(default, null):Int = 5;
+
+	// TODO: make sWidth and sHeight dynamic based on asset sizes
+
+	/** The width of each space on the board, in pixels. **/
+	public var sWidth(default, null):Float = 64;
+
+	/** The height of each space on the board, in pixels. **/
+	public var sHeight(default, null):Float = 64;
 
 	/** The next bumper to be put into play. **/
 	private var _nextBumper:Bumper = null;
@@ -63,12 +71,9 @@ abstract class GameState extends FlxState
 
 	override function create()
 	{
-		// TODO: make this dynamic based on asset sizes
-		var sWidth:Float = 64, sHeight:Float = 64;
-
 		add(_spaces);
-		for (x in 0...width)
-			for (y in 0...height)
+		for (x in 0...bWidth)
+			for (y in 0...bHeight)
 				_spaces.add(new BoardSpace(x * sWidth, y * sHeight));
 
 		_nextBumper = new Bumper(550, 400, Color.Blue);
@@ -83,16 +88,16 @@ abstract class GameState extends FlxState
 			{
 				case Down:
 					oy = -sHeight;
-					count = cast(width, Int);
+					count = cast(bWidth, Int);
 				case Left:
-					ox = sWidth * width;
-					count = cast(height, Int);
+					ox = sWidth * bWidth;
+					count = cast(bHeight, Int);
 				case Up:
-					oy = sHeight * height;
-					count = cast(width, Int);
+					oy = sHeight * bHeight;
+					count = cast(bWidth, Int);
 				case Right:
 					ox = -sWidth;
-					count = cast(height, Int);
+					count = cast(bHeight, Int);
 				default:
 			}
 
@@ -142,7 +147,7 @@ abstract class GameState extends FlxState
 		// });
 		gameSM = GameSM.Moving;
 
-		FlxG.camera.focusOn(new FlxPoint(width * (sWidth / 2), height * (sHeight / 2)));
+		FlxG.camera.focusOn(new FlxPoint(bWidth * (sWidth / 2), bHeight * (sHeight / 2)));
 
 		super.create();
 	}
@@ -169,7 +174,7 @@ abstract class GameState extends FlxState
 					{
 						if (!bumper.justLaunched
 							&& bumper.hasShifted
-							&& (bumper.frontX < 0 || bumper.frontY < 0 || bumper.frontX >= width || bumper.frontY >= height))
+							&& (bumper.frontX < 0 || bumper.frontY < 0 || bumper.frontX >= bWidth || bumper.frontY >= bHeight))
 						{
 							var wasLaunched = bumper.launchDirection != Direction.None;
 							bumper.snapToPos();
@@ -179,7 +184,7 @@ abstract class GameState extends FlxState
 					}
 					else
 					{
-						if (bumper.forwardX < 0 || bumper.forwardY < 0 || bumper.forwardX >= width || bumper.forwardY >= height)
+						if (bumper.forwardX < 0 || bumper.forwardY < 0 || bumper.forwardX >= bWidth || bumper.forwardY >= bHeight)
 							return;
 						var bumpers = bumpersAt(bumper.forwardX, bumper.forwardY, bumper);
 						for (chkBumper in bumpers)
@@ -195,7 +200,7 @@ abstract class GameState extends FlxState
 						break;
 				if (!isSomethingMoving)
 				{
-					trace("Done moving");
+					// trace("Done moving");
 					gameSM = GameSM.Clearing;
 				}
 			default:
@@ -266,6 +271,23 @@ abstract class GameState extends FlxState
 	}
 
 	/**
+		Determines which bumper is located at the given board X and Y grid spaces. May only be used while the board is not in motion.
+		@param x The X grid coordinate on the board.
+		@param y The Y grid coordinate on the board.
+		@return The bumper found at the given board grid coordinates, or `null` if there is none or if the board is in motion.
+	**/
+	public function bumperAt(x:Int, y:Int):Bumper
+	{
+		if (gameSM != Moving)
+			for (bumper in _bumpers)
+			{
+				if (bumper.boardX == x && bumper.boardY == y)
+					return bumper;
+			}
+		return null;
+	}
+
+	/**
 		This function checks for overlaps between bumpers.
 		@param lh One of the overlapping sprites.
 		@param rh The other overlapping sprite.
@@ -295,8 +317,8 @@ abstract class GameState extends FlxState
 
 	/**
 		This function checks for overlaps between a bumper and a board space.
-		@param lh The bumper's overlapping sprite.
-		@param rh The board space's overlapping sprite.
+		@param bspr The bumper's overlapping sprite.
+		@param space The board space's overlapping sprite.
 	**/
 	private function bumperToSpace(bspr:FlxSprite, space:BoardSpace)
 	{
@@ -320,6 +342,11 @@ abstract class GameState extends FlxState
 			space.reservedFor = null;
 	}
 
+	/**
+		This function checks for overlaps between a bumper and a launcher.
+		@param bspr The bumper's overlapping sprite.
+		@param lspr The launcher's overlapping sprite.
+	**/
 	private function bumperToLauncher(bspr:FlxSprite, lspr:FlxSprite)
 	{
 		if (!bspr.alive || !lspr.alive)
@@ -331,7 +358,7 @@ abstract class GameState extends FlxState
 
 		if (launcher.launching != bumper)
 		{
-			trace("Bumper " + bumper.ID + " colliding with launcher " + launcher.ID);
+			// trace("Bumper " + bumper.ID + " colliding with launcher " + launcher.ID);
 			bumper.snapToPos();
 		}
 	}
