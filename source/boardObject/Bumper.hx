@@ -1,16 +1,18 @@
 package boardObject;
 
 import flixel.FlxSprite;
-import flixel.group.FlxSpriteGroup;
-import flixel.math.FlxPoint;
 import flixel.util.FlxColor;
 
 /** The current color of the bumper, for matching purposes. **/
 enum abstract Color(FlxColor)
 {
+	var None = 0xff000000;
 	var Blue = 0xff2244cc;
 	var Green = 0xff22cc44;
 	var Red = 0xffcc3333;
+	var Purple = 0xffa45ced;
+	var Yellow = 0xfffffb23;
+	var White = 0xffdddddd;
 }
 
 /** The current direction or state of the bumper, for mechanical purposes. **/
