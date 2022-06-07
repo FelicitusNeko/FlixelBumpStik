@@ -3,7 +3,7 @@ import flixel.FlxSprite;
 import flixel.group.FlxSpriteGroup;
 
 /** Launchers are responsible for launching bumpers onto the board. **/
-class Launcher extends FlxSpriteGroup
+class Launcher extends BoardObject
 {
 	/** The facing (and launching) direction of this launcher. **/
 	public var direction(default, set):Direction;
@@ -17,9 +17,9 @@ class Launcher extends FlxSpriteGroup
 	/** The bumper this launcher has just launched. **/
 	public var launching(default, null):Bumper = null;
 
-	public function new(x:Float, y:Float, direction:Direction)
+	public function new(x:Float, y:Float, direction:Direction, owner:Board = null)
 	{
-		super(x, y);
+		super(x, y, owner);
 
 		base = new FlxSprite(0, 0);
 		base.loadGraphic(AssetPaths.BumperBase__png);
@@ -58,22 +58,10 @@ class Launcher extends FlxSpriteGroup
 	{
 		// trace("Bumper " + bumper.ID + " launching from launcher " + ID);
 		launching = bumper;
+		bumper.owner = owner;
 		bumper.x = x;
 		bumper.y = y;
 		bumper.snapToPos();
 		bumper.startMoving(direction);
-	}
-
-	/**
-		Determines whether the given sprite is located in this group.
-		@param spr The sprite for which to check
-		@return Whether the sprite is contained in this sprite group.
-	**/
-	public function has(spr:FlxSprite):Bool
-	{
-		for (mspr in group)
-			if (spr == mspr)
-				return true;
-		return false;
 	}
 }

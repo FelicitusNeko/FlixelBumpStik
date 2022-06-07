@@ -70,7 +70,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 		add(_spaces);
 		for (x in 0...bWidth)
 			for (y in 0...bHeight)
-				_spaces.add(new BoardSpace(x * sWidth + origin.x, y * sHeight + origin.y));
+				_spaces.add(new BoardSpace(x * sWidth, y * sHeight, this));
 
 		for (dir in [Direction.Down, Direction.Left, Direction.Up, Direction.Right])
 		{
@@ -95,20 +95,22 @@ class Board extends FlxTypedGroup<FlxBasic>
 			for (z in 0...count)
 			{
 				if (dir == Up || dir == Down)
-					_launchers.add(new Launcher(ox + (z * sWidth) + origin.x, oy + origin.y, dir));
+					_launchers.add(new Launcher(ox + (z * sWidth), oy, dir, this));
 				else
-					_launchers.add(new Launcher(ox + origin.x, oy + (z * sHeight) + origin.y, dir));
+					_launchers.add(new Launcher(ox, oy + (z * sHeight), dir, this));
 			}
 		}
 		add(_bumpers);
 		add(_launchers);
+
+		setupTest(4);
 
 		boardSM = Moving;
 	}
 
 	function get_center()
 	{
-		return new FlxPoint(bWidth * sWidth / 2, bHeight * sHeight / 2);
+		return new FlxPoint(bWidth * sWidth / 2, bHeight * sHeight / 2).addPoint(origin);
 	}
 
 	/**
@@ -163,37 +165,23 @@ class Board extends FlxTypedGroup<FlxBasic>
 	**/
 	public function putBumperAt(x:Int, y:Int, color:Color, dir:Direction = Direction.None)
 	{
-		var bumper = new Bumper(x * sWidth + origin.x, y * sHeight + origin.y, color, dir, None, this);
+		var bumper = new Bumper(x * sWidth, y * sHeight, color, dir, None, this);
 		_bumpers.add(bumper);
 		return bumper;
 	}
 
 	/** 
-		Looks for a bumper based on a given sprite.
-		@param bspr The sprite to look for.
-		@return The bumper to which the sprite belongs, or `null` if none was found.
+		Looks for a board object based on a given sprite.
+			@param bspr The sprite to look for.
+			@param list The list of objects to retreve from.
+			@return The board object to which the sprite belongs, or `null` if none was found.
 	**/
-	private function spriteToBumper(bspr:FlxSprite)
+	private function spriteTo<T:BoardObject>(spr:FlxSprite, list:FlxTypedGroup<T>):T
 	{
-		for (bumper in _bumpers)
+		for (thing in list)
 		{
-			if (bumper.has(bspr))
-				return bumper;
-		}
-		return null;
-	}
-
-	/** 
-		Looks for a launcher based on a given sprite.
-		@param bspr The sprite to look for.
-		@return The launcher to which the sprite belongs, or `null` if none was found.
-	**/
-	private function spriteToLauncher(lspr:FlxSprite)
-	{
-		for (launcher in _launchers)
-		{
-			if (launcher.has(lspr))
-				return launcher;
+			if (thing.has(spr))
+				return thing;
 		}
 		return null;
 	}
@@ -302,7 +290,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 			return;
 
 		// trace("Collision between " + lh.ID + " and " + rh.ID);
-		var blh = spriteToBumper(lh), brh = spriteToBumper(rh);
+		var blh = spriteTo(lh, _bumpers), brh = spriteTo(rh, _bumpers);
 		if (blh == brh || blh == null || brh == null)
 			return;
 
@@ -324,13 +312,13 @@ class Board extends FlxTypedGroup<FlxBasic>
 		@param bspr The bumper's overlapping sprite.
 		@param space The board space's overlapping sprite.
 	**/
-	private function bumperToSpace(bspr:FlxSprite, space:BoardSpace)
+	private function bumperToSpace(bspr:FlxSprite, sspr:FlxSprite)
 	{
 		if (!bspr.alive)
 			return;
 
-		var bumper = spriteToBumper(bspr);
-		if (bumper == null)
+		var bumper = spriteTo(bspr, _bumpers), space = spriteTo(sspr, _spaces);
+		if (bumper == null || space == null)
 			return;
 
 		if (!bumper.isMoving)
@@ -356,7 +344,8 @@ class Board extends FlxTypedGroup<FlxBasic>
 		if (!bspr.alive || !lspr.alive)
 			return;
 
-		var bumper = spriteToBumper(bspr), launcher = spriteToLauncher(lspr);
+		var bumper = spriteTo(bspr, _bumpers),
+			launcher = spriteTo(lspr, _launchers);
 		if (bumper == null || launcher == null)
 			return;
 

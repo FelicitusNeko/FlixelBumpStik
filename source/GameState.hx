@@ -40,7 +40,7 @@ abstract class GameState extends FlxState
 		add(player.board);
 		add(player.nextBumper);
 
-		// FlxG.camera.focusOn(player.board.center);
+		FlxG.camera.focusOn(player.board.center);
 
 		super.create();
 	}
