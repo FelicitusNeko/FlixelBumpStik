@@ -290,6 +290,20 @@ class Bumper extends BoardObject
 		// trace("Bumper " + ID + " Snap: " + x, y);
 	}
 
+	/**
+		Mark this bumper to be cleared.
+		@return Whether the bumper has been marked for clearing.
+			If the bumper has already been marked, it will not be marked again.
+	**/
+	public function markForClear()
+	{
+		if (direction == Clearing)
+			return false;
+		// TODO: clear animation
+		direction = Clearing;
+		return true;
+	}
+
 	override function update(elapsed:Float)
 	{
 		lfFrontX = frontX;
