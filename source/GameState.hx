@@ -32,7 +32,7 @@ abstract class GameState extends FlxState
 		var player:PlayerInstance = {
 			score: 0,
 			block: 0,
-			board: new Board(),
+			board: new Board(50, 50),
 			nextBumper: new Bumper(550, 400, Color.Blue)
 		};
 		_players.push(player);
@@ -40,7 +40,7 @@ abstract class GameState extends FlxState
 		add(player.board);
 		add(player.nextBumper);
 
-		FlxG.camera.focusOn(player.board.center);
+		// FlxG.camera.focusOn(player.board.center);
 
 		super.create();
 	}

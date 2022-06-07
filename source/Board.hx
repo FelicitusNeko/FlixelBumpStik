@@ -27,6 +27,9 @@ enum BoardSM
 
 class Board extends FlxTypedGroup<FlxBasic>
 {
+	/** The board's top-left corner, excluding Launchers. **/
+	public var origin(default, null):FlxPoint;
+
 	/** The board's width, in grid units. **/
 	public var bWidth(default, null):Int = 5;
 
@@ -59,14 +62,15 @@ class Board extends FlxTypedGroup<FlxBasic>
 	/** The current state of the board. **/
 	public var boardSM(default, null):BoardSM = Idle;
 
-	public function new()
+	public function new(x:Float = 0, y:Float = 0)
 	{
 		super();
+		origin = new FlxPoint(x, y);
 
 		add(_spaces);
 		for (x in 0...bWidth)
 			for (y in 0...bHeight)
-				_spaces.add(new BoardSpace(x * sWidth, y * sHeight));
+				_spaces.add(new BoardSpace(x * sWidth + origin.x, y * sHeight + origin.y));
 
 		for (dir in [Direction.Down, Direction.Left, Direction.Up, Direction.Right])
 		{
@@ -91,9 +95,9 @@ class Board extends FlxTypedGroup<FlxBasic>
 			for (z in 0...count)
 			{
 				if (dir == Up || dir == Down)
-					_launchers.add(new Launcher(ox + (z * sWidth), oy, dir));
+					_launchers.add(new Launcher(ox + (z * sWidth) + origin.x, oy + origin.y, dir));
 				else
-					_launchers.add(new Launcher(ox, oy + (z * sHeight), dir));
+					_launchers.add(new Launcher(ox + origin.x, oy + (z * sHeight) + origin.y, dir));
 			}
 		}
 		add(_bumpers);
@@ -159,7 +163,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 	**/
 	public function putBumperAt(x:Int, y:Int, color:Color, dir:Direction = Direction.None)
 	{
-		var bumper = new Bumper(x * sWidth, y * sHeight, color, dir);
+		var bumper = new Bumper(x * sWidth + origin.x, y * sHeight + origin.y, color, dir, None, this);
 		_bumpers.add(bumper);
 		return bumper;
 	}

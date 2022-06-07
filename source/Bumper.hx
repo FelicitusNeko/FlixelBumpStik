@@ -1,5 +1,6 @@
 import flixel.FlxSprite;
 import flixel.group.FlxSpriteGroup;
+import flixel.math.FlxPoint;
 import flixel.util.FlxColor;
 
 /** The current color of the bumper, for matching purposes. **/
@@ -31,6 +32,12 @@ enum Direction
 /** Bumpers are the basic play pieces for Bumper Stickers. **/
 class Bumper extends FlxSpriteGroup
 {
+	/** The board this bumper belongs to. **/
+	public var owner(default, set):Board;
+
+	/** The board's origin point, or (0,0) if there is no owner board. **/
+	public var bOrigin(get, never):FlxPoint;
+
 	/** The color of this bumper. **/
 	public var bColor(default, set):Color;
 
@@ -54,6 +61,12 @@ class Bumper extends FlxSpriteGroup
 
 	/** Whether this bumper is in motion. **/
 	public var isMoving(get, never):Bool;
+
+	/** The adjusted X position accounting for the board's origin point. **/
+	public var adjustedX(get, set):Float;
+
+	/** The adjusted Y position accounting for the board's origin point. **/
+	public var adjustedY(get, set):Float;
 
 	/** The nearest X position to the center of the bumper relative to the play field. **/
 	public var boardX(get, set):Int;
@@ -85,7 +98,7 @@ class Bumper extends FlxSpriteGroup
 	/** Whether this bumper has just been launched. **/
 	public var justLaunched(default, null):Bool = false;
 
-	public function new(x:Float, y:Float, color:Color, direction:Direction = Direction.None, launchDirection:Direction = Direction.None)
+	public function new(x:Float, y:Float, color:Color, direction:Direction = Direction.None, launchDirection:Direction = Direction.None, owner:Board = null)
 	{
 		super(x, y);
 
@@ -103,12 +116,34 @@ class Bumper extends FlxSpriteGroup
 		this.bColor = color;
 		this.direction = direction;
 		this.launchDirection = launchDirection;
+		this.owner = owner;
 
 		lfFrontX = frontX;
 		lfFrontY = frontY;
 
 		maxVelocity.x = width * 8;
 		maxVelocity.y = height * 8;
+	}
+
+	function set_owner(owner:Board):Board
+	{
+		var oldOrigin = this.owner != null ? this.owner.origin : new FlxPoint(0, 0);
+		var newOrigin = owner != null ? owner.origin : new FlxPoint(0, 0);
+
+		if (oldOrigin.equals(newOrigin))
+		{
+			var deltaOrigin = newOrigin.subtractPoint(oldOrigin);
+
+			x += deltaOrigin.x;
+			y += deltaOrigin.y;
+		}
+
+		return this.owner = owner;
+	}
+
+	function get_bOrigin():FlxPoint
+	{
+		return owner != null ? owner.origin : new FlxPoint(0, 0);
 	}
 
 	function set_bColor(bColor:Color):Color
@@ -168,27 +203,49 @@ class Bumper extends FlxSpriteGroup
 		return Math.abs(velocity.x) + Math.abs(velocity.y) > 0 || Math.abs(acceleration.x) + Math.abs(acceleration.y) > 0;
 	}
 
+	function get_adjustedX():Float
+	{
+		return x - bOrigin.x;
+	}
+
+	function set_adjustedX(adjustedX:Float):Float
+	{
+		x = adjustedX + bOrigin.x;
+		return adjustedX;
+	}
+
+	function get_adjustedY():Float
+	{
+		return y - bOrigin.y;
+	}
+
+	function set_adjustedY(adjustedY:Float):Float
+	{
+		y = adjustedY + bOrigin.y;
+		return adjustedY;
+	}
+
 	function get_boardX():Int
 	{
-		var refX = x + (width / 2);
+		var refX = adjustedX + (width / 2);
 		return Math.floor(refX / width);
 	}
 
 	function set_boardX(boardX:Int):Int
 	{
-		x = boardX * width;
+		adjustedX = boardX * width;
 		return boardX;
 	}
 
 	function get_boardY():Int
 	{
-		var refY = y + (height / 2);
+		var refY = adjustedY + (height / 2);
 		return Math.floor(refY / height);
 	}
 
 	function set_boardY(boardY:Int):Int
 	{
-		y = boardY * height;
+		adjustedY = boardY * height;
 		return boardY;
 	}
 
@@ -196,7 +253,7 @@ class Bumper extends FlxSpriteGroup
 	{
 		if (!isMoving)
 			return boardX;
-		var refX = x + (width / 2);
+		var refX = adjustedX + (width / 2);
 		switch (activeDirection)
 		{
 			case Right:
@@ -215,7 +272,7 @@ class Bumper extends FlxSpriteGroup
 	{
 		if (!isMoving)
 			return boardY;
-		var refY = y + (height / 2);
+		var refY = adjustedY + (height / 2);
 		switch (activeDirection)
 		{
 			case Down:
