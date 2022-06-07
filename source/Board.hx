@@ -9,25 +9,7 @@ import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxPoint;
-
-/** The collection of possible game states. **/
-enum BoardSM
-{
-	/** The game is waiting for user input. **/
-	Idle;
-
-	/** Bumper movement is being processed. **/
-	Moving;
-
-	/** Bumpers are being cleared from the field. **/
-	Clearing;
-
-	/** In certain game modes, Special can be used for nonstandard states. **/
-	Special(x:Int);
-
-	/** The game is over. **/
-	GameOver;
-}
+import haxe.Timer;
 
 class Board extends FlxTypedGroup<FlxBasic>
 {
@@ -63,8 +45,8 @@ class Board extends FlxTypedGroup<FlxBasic>
 	/** The number of seconds to wait before the next action should take place. **/
 	private var _delay:Float = 0;
 
-	/** The current state of the board. **/
-	public var boardSM(default, null):BoardSM = Idle;
+	/** The state machine for this board. **/
+	private var _fsm:FSM;
 
 	public function new(x:Float = 0, y:Float = 0)
 	{
@@ -107,9 +89,9 @@ class Board extends FlxTypedGroup<FlxBasic>
 		add(_bumpers);
 		add(_launchers);
 
-		setupTest(2);
+		setupTest(8);
 
-		boardSM = Moving;
+		_fsm = new FSM(fsmMoving);
 	}
 
 	function get_center()
@@ -150,6 +132,18 @@ class Board extends FlxTypedGroup<FlxBasic>
 			case 6: // Driveby test #2 - vertical ✔️
 				putBumperAt(1, 0, Color.Blue, Direction.Down);
 				putBumperAt(2, 4, Color.Red, Direction.Up);
+			case 7: // Match test #1 - vertical ❌
+				putBumperAt(4, 0, Green, None);
+				putBumperAt(4, 1, Blue, None);
+				putBumperAt(0, 2, Blue, Right);
+				putBumperAt(4, 3, Blue, None);
+				putBumperAt(4, 4, Red, None);
+			case 8: // Match test #2 - horizontal ❌
+				putBumperAt(0, 4, Green, None);
+				putBumperAt(1, 4, Blue, None);
+				putBumperAt(2, 0, Blue, Down);
+				putBumperAt(3, 4, Blue, None);
+				putBumperAt(4, 4, Red, None);
 		}
 		if (autoLaunch)
 			_bumpers.forEachAlive(bumper ->
@@ -176,9 +170,9 @@ class Board extends FlxTypedGroup<FlxBasic>
 
 	/** 
 		Looks for a board object based on a given sprite.
-			@param bspr The sprite to look for.
-			@param list The list of objects to retreve from.
-			@return The board object to which the sprite belongs, or `null` if none was found.
+		@param bspr The sprite to look for.
+		@param list The list of objects to retreve from.
+		@return The board object to which the sprite belongs, or `null` if none was found.
 	**/
 	private function spriteTo<T:BoardObject>(spr:FlxSprite, list:FlxTypedGroup<T>):T
 	{
@@ -217,70 +211,172 @@ class Board extends FlxTypedGroup<FlxBasic>
 	}
 
 	/**
-		Determines which bumper is located at the given board X and Y grid spaces. May only be used while the board is not in motion.
+		Determines which bumper is located at the given board X and Y grid spaces.
+		Should only be used while the board is not in motion; may be unreliable otherwise.
 		@param x The X grid coordinate on the board.
 		@param y The Y grid coordinate on the board.
-		@return The bumper found at the given board grid coordinates, or `null` if there is none or if the board is in motion.
+		@return The bumper found at the given board grid coordinates, or `null` if there is none.
 	**/
 	public function bumperAt(x:Int, y:Int):Bumper
 	{
-		if (boardSM != Moving)
-			for (bumper in _bumpers)
-			{
-				if (bumper.boardX == x && bumper.boardY == y)
-					return bumper;
-			}
+		for (bumper in _bumpers)
+		{
+			if (bumper.boardX == x && bumper.boardY == y)
+				return bumper;
+		}
 		return null;
 	}
 
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
+		_fsm.update(elapsed);
+	}
 
-		switch (boardSM)
+	private function fsmMoving(elapsed:Float)
+	{
+		var start = haxe.Timer.stamp();
+		FlxG.overlap(_bumpers, _bumpers, bumperBump);
+		FlxG.overlap(_bumpers, _spaces, bumperToSpace);
+		// FlxG.overlap(_bumpers, _launchers, bumperToLauncher);
+
+		_bumpers.forEachAlive(bumper ->
 		{
-			case Moving:
-				FlxG.overlap(_bumpers, _bumpers, bumperBump);
-				FlxG.overlap(_bumpers, _spaces, bumperToSpace);
-				// FlxG.overlap(_bumpers, _launchers, bumperToLauncher);
-
-				_bumpers.forEachAlive(bumper ->
+			if (bumper.isMoving)
+			{
+				if (!bumper.justLaunched
+					&& bumper.hasShifted
+					&& (bumper.frontX < 0 || bumper.frontY < 0 || bumper.frontX >= bWidth || bumper.frontY >= bHeight))
 				{
-					if (bumper.isMoving)
+					var wasLaunched = bumper.launchDirection != Direction.None;
+					bumper.snapToPos();
+					if (wasLaunched)
+						bumper.startMoving();
+				}
+			}
+			else
+			{
+				if (bumper.forwardX < 0 || bumper.forwardY < 0 || bumper.forwardX >= bWidth || bumper.forwardY >= bHeight)
+					return;
+				var bumpers = bumpersAt(bumper.forwardX, bumper.forwardY, bumper);
+				for (chkBumper in bumpers)
+					if (chkBumper.activeDirection != bumper.activeDirection || !chkBumper.isMoving)
+						return;
+				bumper.startMoving();
+			}
+		});
+
+		var isSomethingMoving = false;
+		for (bumper in _bumpers)
+			if (isSomethingMoving = bumper.isMoving)
+				break;
+		if (!isSomethingMoving)
+		{
+			_fsm.activeState = null;
+			checkMatch();
+		}
+
+		if (Timer.stamp() - start > elapsed)
+			trace("Working overtime");
+	}
+
+	/** Checks for Bumper Stickers, and marks bumpers to be cleared if any have been formed. **/
+	private function checkMatch()
+	{
+		// BUG: This is getting called twice for some reason
+		trace("checkMatch()");
+		var clearCount:Int = 0;
+		function clear(x:Int, y:Int, count:Int, horizontal:Bool)
+		{
+			for (_ in 0...count)
+			{
+				if (horizontal)
+					x--;
+				else
+					y--;
+				var bumper = bumperAt(x, y);
+				if (bumper != null && bumper.markForClear())
+					clearCount++;
+			}
+		}
+
+		function check(horizontal:Bool)
+		{
+			// if (horizontal)
+			//   trace("Checking horizontal");
+			// else
+			//   trace("Checking vertical");
+			for (y in 0...(horizontal ? bHeight : bWidth))
+			{
+				var streakColor:Color = None, streakLength:Int = 0;
+				for (x in 0...(horizontal ? bWidth : bHeight))
+				{
+					var bumper = horizontal ? bumperAt(x, y) : bumperAt(y, x);
+					if (bumper != null && bumper.bColor == streakColor)
 					{
-						if (!bumper.justLaunched
-							&& bumper.hasShifted
-							&& (bumper.frontX < 0 || bumper.frontY < 0 || bumper.frontX >= bWidth || bumper.frontY >= bHeight))
-						{
-							var wasLaunched = bumper.launchDirection != Direction.None;
-							bumper.snapToPos();
-							if (wasLaunched)
-								bumper.startMoving();
-						}
+						streakLength++;
+						// trace("  Streaking on " + streakColor, streakLength);
 					}
 					else
 					{
-						if (bumper.forwardX < 0 || bumper.forwardY < 0 || bumper.forwardX >= bWidth || bumper.forwardY >= bHeight)
-							return;
-						var bumpers = bumpersAt(bumper.forwardX, bumper.forwardY, bumper);
-						for (chkBumper in bumpers)
-							if (chkBumper.activeDirection != bumper.activeDirection || !chkBumper.isMoving)
-								return;
-						bumper.startMoving();
+						// if (streakLength > 0)
+						//   trace("  " + streakColor, streakLength, x, y, horizontal);
+						if (streakLength >= 3)
+						{
+							// trace("  Match found at " + x, y, horizontal);
+							clear(x, y, streakLength, horizontal);
+						}
+						streakColor = bumper != null ? bumper.bColor : None;
+						streakLength = streakColor == None ? 0 : 1;
 					}
-				});
-
-				var isSomethingMoving = false;
-				for (bumper in _bumpers)
-					if (isSomethingMoving = bumper.isMoving)
-						break;
-				if (!isSomethingMoving)
-				{
-					// trace("Done moving");
-					boardSM = Clearing;
 				}
-			default:
+				if (streakLength >= 3)
+					clear(bWidth, y, streakLength, horizontal);
+			}
 		}
+
+		for (horizontal in [true, false])
+			check(horizontal);
+
+		if (clearCount > 0)
+		{
+			trace("Match " + clearCount);
+			_delay = .5;
+			// TODO: play sound
+			_fsm.activeState = fsmClearing;
+		}
+		else
+		{
+			trace("Board entering idle state");
+			_fsm.activeState = null;
+		}
+	}
+
+	private function fsmClearing(elapsed:Float)
+	{
+		_delay -= elapsed;
+		if (_delay <= 0)
+			for (y in 0...bHeight)
+				for (x in 0...bWidth)
+				{
+					var bumper = bumperAt(x, y);
+					if (bumper != null && bumper.direction == Clearing)
+					{
+						bumper.kill();
+						_delay += .2;
+						return;
+					}
+				}
+
+		_delay = 0;
+		_bumpers.forEachDead(bumper -> _bumpers.remove(bumper));
+		if (_bumpers.length == 0)
+		{
+			// TODO: All Clear
+			_fsm.activeState = null;
+		}
+		else
+			_fsm.activeState = fsmMoving;
 	}
 
 	/**
