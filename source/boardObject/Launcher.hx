@@ -1,6 +1,7 @@
-import Bumper.Direction;
+package boardObject;
+
+import boardObject.Bumper.Direction;
 import flixel.FlxSprite;
-import flixel.group.FlxSpriteGroup;
 
 /** Launchers are responsible for launching bumpers onto the board. **/
 class Launcher extends BoardObject

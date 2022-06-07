@@ -1,4 +1,6 @@
-import Bumper.Color;
+package;
+
+import boardObject.Bumper;
 import flixel.FlxG;
 import flixel.FlxState;
 import openfl.system.System;

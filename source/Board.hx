@@ -1,5 +1,9 @@
-import Bumper.Color;
-import Bumper.Direction;
+package;
+
+import boardObject.BoardObject;
+import boardObject.BoardSpace;
+import boardObject.Bumper;
+import boardObject.Launcher;
 import flixel.FlxBasic;
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -103,7 +107,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 		add(_bumpers);
 		add(_launchers);
 
-		setupTest(4);
+		setupTest(2);
 
 		boardSM = Moving;
 	}
