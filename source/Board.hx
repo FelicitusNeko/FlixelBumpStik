@@ -48,6 +48,9 @@ class Board extends FlxTypedGroup<FlxBasic>
 	/** The state machine for this board. **/
 	private var _fsm:FSM;
 
+	/** The currently selected launcher. **/
+	private var _selectedLauncher:Launcher = null;
+
 	public function new(x:Float = 0, y:Float = 0)
 	{
 		super();
@@ -89,9 +92,9 @@ class Board extends FlxTypedGroup<FlxBasic>
 		add(_bumpers);
 		add(_launchers);
 
-		setupTest(8);
+		_fsm = new FSM(fsmIdle);
 
-		_fsm = new FSM(fsmMoving);
+		setupTest(9);
 	}
 
 	function get_center()
@@ -132,18 +135,23 @@ class Board extends FlxTypedGroup<FlxBasic>
 			case 6: // Driveby test #2 - vertical ✔️
 				putBumperAt(1, 0, Color.Blue, Direction.Down);
 				putBumperAt(2, 4, Color.Red, Direction.Up);
-			case 7: // Match test #1 - vertical ❌
+			case 7: // Match test #1 - vertical ✔️
 				putBumperAt(4, 0, Green, None);
 				putBumperAt(4, 1, Blue, None);
 				putBumperAt(0, 2, Blue, Right);
 				putBumperAt(4, 3, Blue, None);
 				putBumperAt(4, 4, Red, None);
-			case 8: // Match test #2 - horizontal ❌
+			case 8: // Match test #2 - horizontal ✔️
 				putBumperAt(0, 4, Green, None);
 				putBumperAt(1, 4, Blue, None);
 				putBumperAt(2, 0, Blue, Down);
 				putBumperAt(3, 4, Blue, None);
 				putBumperAt(4, 4, Red, None);
+			case 9: // Corner collision ❌
+				// BUG: Rounding/precision issues causing collisions where they shouldn't happen
+				putBumperAt(2, 4, Blue, Right);
+				putBumperAt(4, 4, Blue, Right);
+				putBumperAt(2, 0, Green, Down);
 		}
 		if (autoLaunch)
 			_bumpers.forEachAlive(bumper ->
@@ -151,6 +159,8 @@ class Board extends FlxTypedGroup<FlxBasic>
 				if (bumper.direction != Direction.None)
 					bumper.startMoving(bumper.direction);
 			});
+
+		_fsm.activeState = fsmMoving;
 	}
 
 	/**
@@ -221,9 +231,22 @@ class Board extends FlxTypedGroup<FlxBasic>
 	{
 		for (bumper in _bumpers)
 		{
-			if (bumper.boardX == x && bumper.boardY == y)
+			if (bumper.boardX == x && bumper.boardY == y && bumper.alive)
 				return bumper;
 		}
+		return null;
+	}
+
+	/**
+		Determines which launcher, if any, is located at the given `FlxPoint` coordinates.
+		@param pt The world position to check at.
+		@return The launcher at that point, or `null` if there is none.
+	**/
+	public function launcherAtPoint(pt:FlxPoint):Launcher
+	{
+		for (launcher in _launchers)
+			if (launcher.overlapsPoint(pt))
+				return launcher;
 		return null;
 	}
 
@@ -233,9 +256,56 @@ class Board extends FlxTypedGroup<FlxBasic>
 		_fsm.update(elapsed);
 	}
 
+	private function fsmIdle(elapsed:Float)
+	{
+		// TODO: tell the game state to generate a next bumper if one doesn't exist
+		if (_fsm.justChanged)
+			trace("State just now changed to idle");
+		if (FlxG.mouse.justMoved || _fsm.justChanged)
+		{
+			if (FlxG.mouse.pressed && _selectedLauncher != null)
+			{
+				_selectedLauncher.state = _selectedLauncher == launcherAtPoint(FlxG.mouse.getWorldPosition()) ? Selected : SelectedNotHovering;
+			}
+			else
+			{
+				var launcher = launcherAtPoint(FlxG.mouse.getWorldPosition());
+				if (_selectedLauncher != launcher)
+				{
+					if (_selectedLauncher != null)
+						_selectedLauncher.state = Open;
+					_selectedLauncher = launcher;
+					if (_selectedLauncher != null && _selectedLauncher.state != Blocked)
+						_selectedLauncher.state = Hovering;
+				}
+			}
+		}
+
+		if (FlxG.mouse.justPressed && _selectedLauncher != null && _selectedLauncher.state == Hovering)
+		{
+			_selectedLauncher.state = Selected;
+			trace("Launcher selected");
+		}
+		if (FlxG.mouse.justReleased && _selectedLauncher != null && _selectedLauncher.state == Selected)
+		{
+			// TODO: get the next bumper from the game state
+			// for now, just hard-coding it
+			_selectedLauncher.state = Open;
+			var launcher = launcherAtPoint(FlxG.mouse.getWorldPosition());
+			if (launcher == _selectedLauncher)
+			{
+				trace("Launching");
+				var bumper = new Bumper(0, 0, Blue, Right);
+				_bumpers.add(bumper);
+				_selectedLauncher.launchBumper(bumper);
+				_fsm.activeState = fsmMoving;
+			}
+			_selectedLauncher = null;
+		}
+	}
+
 	private function fsmMoving(elapsed:Float)
 	{
-		var start = haxe.Timer.stamp();
 		FlxG.overlap(_bumpers, _bumpers, bumperBump);
 		FlxG.overlap(_bumpers, _spaces, bumperToSpace);
 		// FlxG.overlap(_bumpers, _launchers, bumperToLauncher);
@@ -272,19 +342,14 @@ class Board extends FlxTypedGroup<FlxBasic>
 				break;
 		if (!isSomethingMoving)
 		{
-			_fsm.activeState = null;
-			checkMatch();
+			_fsm.activeState = fsmChecking;
 		}
-
-		if (Timer.stamp() - start > elapsed)
-			trace("Working overtime");
 	}
 
 	/** Checks for Bumper Stickers, and marks bumpers to be cleared if any have been formed. **/
-	private function checkMatch()
+	private function fsmChecking(elapsed:Float)
 	{
-		// BUG: This is getting called twice for some reason
-		trace("checkMatch()");
+		_fsm.activeState = null;
 		var clearCount:Int = 0;
 		function clear(x:Int, y:Int, count:Int, horizontal:Bool)
 		{
@@ -302,10 +367,6 @@ class Board extends FlxTypedGroup<FlxBasic>
 
 		function check(horizontal:Bool)
 		{
-			// if (horizontal)
-			//   trace("Checking horizontal");
-			// else
-			//   trace("Checking vertical");
 			for (y in 0...(horizontal ? bHeight : bWidth))
 			{
 				var streakColor:Color = None, streakLength:Int = 0;
@@ -313,25 +374,17 @@ class Board extends FlxTypedGroup<FlxBasic>
 				{
 					var bumper = horizontal ? bumperAt(x, y) : bumperAt(y, x);
 					if (bumper != null && bumper.bColor == streakColor)
-					{
 						streakLength++;
-						// trace("  Streaking on " + streakColor, streakLength);
-					}
 					else
 					{
-						// if (streakLength > 0)
-						//   trace("  " + streakColor, streakLength, x, y, horizontal);
 						if (streakLength >= 3)
-						{
-							// trace("  Match found at " + x, y, horizontal);
-							clear(x, y, streakLength, horizontal);
-						}
+							horizontal ? clear(x, y, streakLength, horizontal) : clear(y, x, streakLength, horizontal);
 						streakColor = bumper != null ? bumper.bColor : None;
 						streakLength = streakColor == None ? 0 : 1;
 					}
 				}
 				if (streakLength >= 3)
-					clear(bWidth, y, streakLength, horizontal);
+					horizontal ? clear(bWidth, y, streakLength, horizontal) : clear(y, bHeight, streakLength, horizontal);
 			}
 		}
 
@@ -348,7 +401,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 		else
 		{
 			trace("Board entering idle state");
-			_fsm.activeState = null;
+			_fsm.activeState = fsmIdle;
 		}
 	}
 
@@ -356,6 +409,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 	{
 		_delay -= elapsed;
 		if (_delay <= 0)
+		{
 			for (y in 0...bHeight)
 				for (x in 0...bWidth)
 				{
@@ -368,15 +422,30 @@ class Board extends FlxTypedGroup<FlxBasic>
 					}
 				}
 
-		_delay = 0;
-		_bumpers.forEachDead(bumper -> _bumpers.remove(bumper));
-		if (_bumpers.length == 0)
-		{
-			// TODO: All Clear
-			_fsm.activeState = null;
+			_delay = 0;
+
+			var deadBuffer:Array<Bumper> = [];
+			_bumpers.forEachDead(bumper -> _bumpers.remove(bumper));
+			for (bumper in deadBuffer)
+			{
+				_bumpers.remove(bumper);
+				bumper.destroy();
+			}
+
+			trace(_bumpers.length);
+			for (space in _spaces)
+				space.reservedFor = null;
+			if (_bumpers.length == 0)
+			{
+				// TODO: All Clear
+				_fsm.activeState = fsmIdle;
+			}
+			else
+			{
+				FlxG.overlap(_bumpers, _spaces, bumperToSpace);
+				_fsm.activeState = fsmMoving;
+			}
 		}
-		else
-			_fsm.activeState = fsmMoving;
 	}
 
 	/**
@@ -404,7 +473,11 @@ class Board extends FlxTypedGroup<FlxBasic>
 		else
 			for (bumper in [blh, brh])
 				if (bumper.hasShifted)
+				{
+					trace(bumper.bColor);
+					trace(blh.x, brh.x);
 					bumper.snapToPos();
+				}
 	}
 
 	/**
@@ -428,7 +501,10 @@ class Board extends FlxTypedGroup<FlxBasic>
 			if (space.reservedFor == null)
 				space.reservedFor = bumper;
 			else if (space.reservedFor != bumper)
+			{
+				trace(bumper.bColor);
 				bumper.snapToPos();
+			}
 		}
 		else if (space.reservedFor == bumper)
 			space.reservedFor = null;
