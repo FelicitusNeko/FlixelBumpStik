@@ -66,17 +66,17 @@ class Bumper extends BoardObject
 	/** The nearest Y position to the front of the bumper relative to the play field. **/
 	public var frontY(get, never):Int;
 
-	/** The X position ahead of the bumper's current position relative to the play field. **/
-	public var forwardX(get, never):Int;
-
-	/** The Y position ahead of the bumper's current position relative to the play field. **/
-	public var forwardY(get, never):Int;
-
 	/** The nearest X position to the front of the bumper relative to the play field in the previous frame. **/
 	public var lfFrontX(default, null):Int;
 
 	/** The nearest Y position to the front of the bumper relative to the play field in the previous frame. **/
 	public var lfFrontY(default, null):Int;
+
+	/** The X position ahead of the bumper's current position relative to the play field. **/
+	public var forwardX(get, never):Int;
+
+	/** The Y position ahead of the bumper's current position relative to the play field. **/
+	public var forwardY(get, never):Int;
 
 	/** Whether the front of this bumper has moved to a new board position in the last frame. **/
 	public var hasShifted(get, never):Bool;
