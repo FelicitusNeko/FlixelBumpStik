@@ -85,7 +85,7 @@ abstract class BoardObject extends FlxSpriteGroup
 
 	function set_boardX(boardX:Int):Int
 	{
-		adjustedX = boardX * width;
+		adjustedX = Math.round(boardX * width);
 		return boardX;
 	}
 
@@ -97,7 +97,7 @@ abstract class BoardObject extends FlxSpriteGroup
 
 	function set_boardY(boardY:Int):Int
 	{
-		adjustedY = boardY * height;
+		adjustedY = Math.round(boardY * height);
 		return boardY;
 	}
 
