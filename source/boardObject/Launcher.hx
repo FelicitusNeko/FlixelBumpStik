@@ -2,6 +2,16 @@ package boardObject;
 
 import boardObject.Bumper.Direction;
 import flixel.FlxSprite;
+import flixel.util.FlxColor;
+
+enum LState
+{
+	Open;
+	Hovering;
+	Selected;
+	SelectedNotHovering;
+	Blocked;
+}
 
 /** Launchers are responsible for launching bumpers onto the board. **/
 class Launcher extends BoardObject
@@ -17,6 +27,9 @@ class Launcher extends BoardObject
 
 	/** The bumper this launcher has just launched. **/
 	public var launching(default, null):Bumper = null;
+
+	/** The current state of the launcher. **/
+	public var state(default, set):LState = Open;
 
 	public function new(x:Float, y:Float, direction:Direction, owner:Board = null)
 	{
@@ -49,6 +62,24 @@ class Launcher extends BoardObject
 				arrow.angle = 0;
 		}
 		return this.direction = direction;
+	}
+
+	function set_state(state:LState):LState
+	{
+		switch (state)
+		{
+			case Open:
+				color = FlxColor.WHITE;
+			case Hovering:
+				color = FlxColor.fromRGB(225, 225, 225);
+			case Selected:
+				color = FlxColor.BLUE;
+			case SelectedNotHovering:
+				color = FlxColor.CYAN;
+			case Blocked:
+				color = FlxColor.RED;
+		}
+		return this.state = state;
 	}
 
 	/**
