@@ -26,23 +26,35 @@ abstract class GameState extends FlxState
 	/** The list of players for this game. **/
 	private var _players:Array<PlayerInstance> = [];
 
+	/** The GUI for this game. **/
+	private var _gui:StandardGUI;
+
 	/** The number of seconds to wait before the next action should take place. **/
 	private var _delay:Float = 0;
 
 	override function create()
 	{
-		var player:PlayerInstance = {
-			score: 0,
-			block: 0,
-			board: new Board(50, 50),
-			nextBumper: new Bumper(550, 400, Color.Blue)
-		};
-		_players.push(player);
+		if (_players.length == 0)
+		{
+			_players.push({
+				score: 0,
+				block: 0,
+				board: new Board(50, 50),
+				nextBumper: new Bumper(550, 400, Color.Blue)
+			});
+		}
 
-		add(player.board);
-		add(player.nextBumper);
+		for (player in _players)
+		{
+			add(player.board);
+			add(player.nextBumper);
+			FlxG.camera.focusOn(player.board.center);
+		}
 
-		FlxG.camera.focusOn(player.board.center);
+		if (_gui == null)
+			_gui = new StandardGUI();
+
+		add(_gui);
 
 		super.create();
 	}
