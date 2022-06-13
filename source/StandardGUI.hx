@@ -22,7 +22,6 @@ class StandardGUI extends FlxSpriteGroup
 		_scoreDisplay.setBorderStyle(FlxTextBorderStyle.SHADOW);
 		_scoreDisplay.alignment = FlxTextAlign.RIGHT;
 		_scoreDisplay.color = FlxColor.GREEN;
-		_scoreDisplay.text = "12345";
 		_scoreDisplay.scale = new FlxPoint(.5, .5);
 
 		if (rightSide)
@@ -43,10 +42,15 @@ class StandardGUI extends FlxSpriteGroup
 
 		for (sprite in group)
 			sprite.scrollFactor.set(0, 0);
+
+		score = 12345;
 	}
 
 	function set_score(score:Int):Int
 	{
+		_scoreDisplay.text = Std.string(Math.min(score, 99999));
+		// _scoreDisplay.x = x + width - 20 - (_scoreDisplay.textWidth * scale.x);
+		_scoreDisplay.x = 0;
 		return this.score = score;
 	}
 }
