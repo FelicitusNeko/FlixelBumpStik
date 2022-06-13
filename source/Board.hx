@@ -95,6 +95,8 @@ class Board extends FlxTypedGroup<FlxBasic>
 		_fsm = new FSM(fsmIdle);
 
 		setupTest(9);
+
+		trace((bWidth + 2) * sWidth, (bHeight + 2) * sHeight);
 	}
 
 	function get_center()
@@ -259,8 +261,6 @@ class Board extends FlxTypedGroup<FlxBasic>
 	private function fsmIdle(elapsed:Float)
 	{
 		// TODO: tell the game state to generate a next bumper if one doesn't exist
-		if (_fsm.justChanged)
-			trace("State just now changed to idle");
 		if (FlxG.mouse.justMoved || _fsm.justChanged)
 		{
 			if (FlxG.mouse.pressed && _selectedLauncher != null)
@@ -284,7 +284,6 @@ class Board extends FlxTypedGroup<FlxBasic>
 		if (FlxG.mouse.justPressed && _selectedLauncher != null && _selectedLauncher.state == Hovering)
 		{
 			_selectedLauncher.state = Selected;
-			trace("Launcher selected");
 		}
 		if (FlxG.mouse.justReleased && _selectedLauncher != null && _selectedLauncher.state == Selected)
 		{
@@ -294,7 +293,6 @@ class Board extends FlxTypedGroup<FlxBasic>
 			var launcher = launcherAtPoint(FlxG.mouse.getWorldPosition());
 			if (launcher == _selectedLauncher)
 			{
-				trace("Launching");
 				var bumper = new Bumper(0, 0, Blue, Right);
 				_bumpers.add(bumper);
 				_selectedLauncher.launchBumper(bumper);
@@ -393,14 +391,12 @@ class Board extends FlxTypedGroup<FlxBasic>
 
 		if (clearCount > 0)
 		{
-			trace("Match " + clearCount);
 			_delay = .5;
 			// TODO: play sound
 			_fsm.activeState = fsmClearing;
 		}
 		else
 		{
-			trace("Board entering idle state");
 			_fsm.activeState = fsmIdle;
 		}
 	}
@@ -432,7 +428,6 @@ class Board extends FlxTypedGroup<FlxBasic>
 				bumper.destroy();
 			}
 
-			trace(_bumpers.length);
 			for (space in _spaces)
 				space.reservedFor = null;
 			if (_bumpers.length == 0)
@@ -458,7 +453,6 @@ class Board extends FlxTypedGroup<FlxBasic>
 		if (!lh.alive || !rh.alive)
 			return;
 
-		// trace("Collision between " + lh.ID + " and " + rh.ID);
 		var blh = spriteTo(lh, _bumpers), brh = spriteTo(rh, _bumpers);
 		if (blh == brh || blh == null || brh == null)
 			return;
@@ -473,11 +467,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 		else
 			for (bumper in [blh, brh])
 				if (bumper.hasShifted)
-				{
-					trace(bumper.bColor);
-					trace(blh.x, brh.x);
 					bumper.snapToPos();
-				}
 	}
 
 	/**
@@ -501,10 +491,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 			if (space.reservedFor == null)
 				space.reservedFor = bumper;
 			else if (space.reservedFor != bumper)
-			{
-				trace(bumper.bColor);
 				bumper.snapToPos();
-			}
 		}
 		else if (space.reservedFor == bumper)
 			space.reservedFor = null;
@@ -526,9 +513,6 @@ class Board extends FlxTypedGroup<FlxBasic>
 			return;
 
 		if (launcher.launching != bumper)
-		{
-			// trace("Bumper " + bumper.ID + " colliding with launcher " + launcher.ID);
 			bumper.snapToPos();
-		}
 	}
 }

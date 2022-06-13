@@ -97,8 +97,6 @@ class Bumper extends BoardObject
 		arrow.alive = false;
 		add(arrow);
 
-		// trace("Created " + ID + " with " + base.ID + " and " + arrow.ID);
-
 		this.bColor = color;
 		this.direction = direction;
 		this.launchDirection = launchDirection;
@@ -245,39 +243,31 @@ class Bumper extends BoardObject
 	{
 		if (launched != Direction.None)
 		{
-			// trace("Bumper " + ID + " being launched " + launched);
 			justLaunched = true;
 			launchDirection = launched;
 		}
-		else
-			// trace("Bumper " + ID + " starting movement");
 
-			acceleration.x = acceleration.y = velocity.x = velocity.y = 0;
+		acceleration.x = acceleration.y = velocity.x = velocity.y = 0;
 
 		switch (activeDirection)
 		{
 			case Up:
-				// trace("Bumper " + ID + " moving up");
 				acceleration.y = -height * 4;
 				if (launched != Direction.None)
 					velocity.y = -maxVelocity.y / 2;
 			case Right:
-				// trace("Bumper " + ID + " moving right");
 				acceleration.x = width * 4;
 				if (launched != Direction.None)
 					velocity.x = maxVelocity.x / 2;
 			case Down:
-				// trace("Bumper " + ID + " moving down");
 				acceleration.y = height * 4;
 				if (launched != Direction.None)
 					velocity.y = maxVelocity.y / 2;
 			case Left:
-				// trace("Bumper " + ID + " moving left");
 				acceleration.x = -width * 4;
 				if (launched != Direction.None)
 					velocity.x = -maxVelocity.x / 2;
 			default:
-				// trace("Bumper " + ID + " has no direction of motion");
 		}
 	}
 
@@ -291,7 +281,6 @@ class Bumper extends BoardObject
 		boardX = boardX;
 		boardY = boardY;
 		launchDirection = Direction.None;
-		// trace("Bumper " + ID + " Snap: " + x, y);
 	}
 
 	/**
@@ -313,8 +302,6 @@ class Bumper extends BoardObject
 		lfFrontX = frontX;
 		lfFrontY = frontY;
 		super.update(elapsed);
-		// if (hasShifted)
-		// 	trace("Bumper going from " + lfFrontX, lfFrontY + " to " + frontX, frontY);
 		if (justLaunched)
 			justLaunched = false;
 	}

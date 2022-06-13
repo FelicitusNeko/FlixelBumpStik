@@ -21,7 +21,6 @@ class FSM
 
 	function set_activeState(activeState:Null<Float->Void>):Null<Float->Void>
 	{
-		// trace("state change");
 		_justChanging = true;
 		return this.activeState = activeState;
 	}
@@ -29,8 +28,6 @@ class FSM
 	/** Calls the update function in this state machine, if any. **/
 	public function update(elapsed:Float)
 	{
-		// if (justChanged)
-		// 	trace("calling new state for first frame");
 		if (activeState != null)
 			activeState(elapsed);
 		justChanged = _justChanging;

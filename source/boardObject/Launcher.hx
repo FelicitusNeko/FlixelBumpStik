@@ -88,7 +88,6 @@ class Launcher extends BoardObject
 	**/
 	public function launchBumper(bumper:Bumper)
 	{
-		// trace("Bumper " + bumper.ID + " launching from launcher " + ID);
 		launching = bumper;
 		bumper.owner = owner;
 		bumper.x = x;
