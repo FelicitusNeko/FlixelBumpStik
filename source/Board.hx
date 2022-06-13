@@ -51,6 +51,14 @@ class Board extends FlxTypedGroup<FlxBasic>
 	/** The currently selected launcher. **/
 	private var _selectedLauncher:Launcher = null;
 
+	/** The current chain progression in steps. **/
+	public var curChain(default, null):Int = 0;
+
+	public var onRequestGenerate:Void->Void = null;
+	public var onLaunchBumper:Void->Bumper = null;
+	public var onMatch:(Int, Int) -> Void = null;
+	public var onClear:Void->Void = null;
+
 	public function new(x:Float = 0, y:Float = 0)
 	{
 		super();
@@ -260,7 +268,13 @@ class Board extends FlxTypedGroup<FlxBasic>
 
 	private function fsmIdle(elapsed:Float)
 	{
-		// TODO: tell the game state to generate a next bumper if one doesn't exist
+		if (_fsm.justChanged)
+		{
+			if (onRequestGenerate != null)
+				onRequestGenerate();
+			curChain = 0;
+		}
+
 		if (FlxG.mouse.justMoved || _fsm.justChanged)
 		{
 			if (FlxG.mouse.pressed && _selectedLauncher != null)
@@ -293,7 +307,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 			var launcher = launcherAtPoint(FlxG.mouse.getWorldPosition());
 			if (launcher == _selectedLauncher)
 			{
-				var bumper = new Bumper(0, 0, Blue, Right);
+				var bumper = onLaunchBumper != null ? onLaunchBumper() : new Bumper(0, 0, Blue, Right);
 				_bumpers.add(bumper);
 				_selectedLauncher.launchBumper(bumper);
 				_fsm.activeState = fsmMoving;
@@ -393,6 +407,9 @@ class Board extends FlxTypedGroup<FlxBasic>
 		{
 			_delay = .5;
 			// TODO: play sound
+			curChain++;
+			if (onMatch != null)
+				onMatch(curChain, clearCount);
 			_fsm.activeState = fsmClearing;
 		}
 		else
@@ -424,6 +441,8 @@ class Board extends FlxTypedGroup<FlxBasic>
 			_bumpers.forEachDead(bumper -> _bumpers.remove(bumper));
 			for (bumper in deadBuffer)
 			{
+				if (onClear != null)
+					onClear();
 				_bumpers.remove(bumper);
 				bumper.destroy();
 			}
