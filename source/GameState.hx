@@ -14,6 +14,9 @@ typedef PlayerInstance =
 	/** The player's current count of bumpers sticked (cleared). **/
 	var block:Int;
 
+	/** The player's current score multiplier stack. **/
+	var multStack:Array<Float>;
+
 	/** The board to be used for this player. **/
 	var board:Board;
 
@@ -29,8 +32,11 @@ abstract class GameState extends FlxState
 	/** The GUI for this game. **/
 	private var _hud:StandardHUD;
 
-	/** The number of seconds to wait before the next action should take place. **/
-	private var _delay:Float = 0;
+	/** A shortcut to the first player on the list. **/
+	private var _player(get, never):PlayerInstance;
+
+	/** The bumper generator for this game. **/
+	private var _bg = new BumperGenerator(3);
 
 	override function create()
 	{
@@ -39,37 +45,50 @@ abstract class GameState extends FlxState
 			_players.push({
 				score: 0,
 				block: 0,
+				multStack: [1],
 				board: new Board(0, 0),
-				nextBumper: new Bumper(550, 400, Color.Blue)
+				nextBumper: _bg.generate()
 			});
+
+			_player.board.onRequestGenerate = onRequestGenerate;
+			_player.board.onLaunchBumper = onLaunch;
 		}
 
 		for (player in _players)
-		{
 			add(player.board);
-			add(player.nextBumper);
-		}
 
 		if (_hud == null)
 			_hud = new StandardHUD();
 
+		_hud.nextBumper = _player.nextBumper;
 		add(_hud);
-		FlxG.camera.focusOn(_players[0].board.center.add(_hud.width / 2, 0));
+		FlxG.camera.focusOn(_player.board.center.add(_hud.width / 2, 0));
 		// TODO: figure out how to make the HUD not be affected by zoom
 		// FlxG.camera.zoom = .9;
 
 		super.create();
 	}
 
+	function onRequestGenerate()
+	{
+		if (_player.nextBumper == null)
+			_player.nextBumper = _hud.nextBumper = _bg.generate();
+	}
+
+	function onLaunch()
+	{
+		var retval = _hud.nextBumper != null ? _hud.nextBumper : _bg.generate();
+		_player.nextBumper = _hud.nextBumper = null;
+		return retval;
+	}
+
+	function get__player()
+	{
+		return _players.length == 0 ? null : _players[0];
+	}
+
 	override function update(elapsed:Float)
 	{
-		_delay -= elapsed;
-		if (_delay < 0)
-		{
-			// TODO: do movement things based on the negative of _delay
-			_delay = 0;
-		}
-
 		#if (debug && sys)
 		if (FlxG.keys.anyJustPressed([ESCAPE]))
 			System.exit(0);
