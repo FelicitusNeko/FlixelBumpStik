@@ -11,7 +11,13 @@ class StandardHUD extends FlxSpriteGroup
 {
 	var _scoreDisplay:FlxBitmapText;
 
+	var _blockDisplay:FlxBitmapText;
+
+	/** The current score displayed on the HUD. **/
 	public var score(default, set):Int;
+
+	/** The current count of cleared bumpers displayed on the HUD. **/
+	public var block(default, set):Int;
 
 	public function new()
 	{
@@ -19,11 +25,17 @@ class StandardHUD extends FlxSpriteGroup
 		var rightSide = FlxG.width > FlxG.height;
 
 		_scoreDisplay = new FlxBitmapText(diginum);
-		_scoreDisplay.autoSize = false;
-		_scoreDisplay.setBorderStyle(FlxTextBorderStyle.SHADOW);
+		_blockDisplay = new FlxBitmapText(diginum);
+
+		for (display in [_scoreDisplay, _blockDisplay])
+		{
+			display.autoSize = false;
+			display.setBorderStyle(FlxTextBorderStyle.SHADOW);
+			display.alignment = FlxTextAlign.RIGHT;
+			display.scale = new FlxPoint(.6, .6);
+		}
 		_scoreDisplay.color = FlxColor.GREEN;
-		_scoreDisplay.alignment = FlxTextAlign.RIGHT;
-		_scoreDisplay.scale = new FlxPoint(.6, .6);
+		_blockDisplay.color = FlxColor.RED;
 
 		if (rightSide)
 		{
@@ -35,7 +47,10 @@ class StandardHUD extends FlxSpriteGroup
 			_scoreDisplay.setPosition(quarterWidth - 20, _scoreDisplay.lineHeight);
 			_scoreDisplay.width = width * (1 / _scoreDisplay.scale.x);
 			add(_scoreDisplay);
-			trace(x, _scoreDisplay.x);
+
+			_blockDisplay.setPosition(quarterWidth - 20, _blockDisplay.lineHeight * 2);
+			_blockDisplay.width = width * (1 / _blockDisplay.scale.x);
+			add(_blockDisplay);
 		}
 		else
 		{
@@ -46,6 +61,7 @@ class StandardHUD extends FlxSpriteGroup
 			sprite.scrollFactor.set(0, 0);
 
 		score = 0;
+		block = 0;
 	}
 
 	override function update(elapsed:Float)
@@ -61,5 +77,15 @@ class StandardHUD extends FlxSpriteGroup
 		_scoreDisplay.text = output;
 
 		return this.score = score;
+	}
+
+	function set_block(block:Int):Int
+	{
+		var output = Std.string(Math.min(block, 99999));
+		while (output.length < 5)
+			output = "z" + output;
+		_blockDisplay.text = output;
+
+		return this.block = block;
 	}
 }
