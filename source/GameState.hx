@@ -27,7 +27,7 @@ abstract class GameState extends FlxState
 	private var _players:Array<PlayerInstance> = [];
 
 	/** The GUI for this game. **/
-	private var _gui:StandardGUI;
+	private var _hud:StandardHUD;
 
 	/** The number of seconds to wait before the next action should take place. **/
 	private var _delay:Float = 0;
@@ -39,7 +39,7 @@ abstract class GameState extends FlxState
 			_players.push({
 				score: 0,
 				block: 0,
-				board: new Board(50, 50),
+				board: new Board(0, 0),
 				nextBumper: new Bumper(550, 400, Color.Blue)
 			});
 		}
@@ -48,13 +48,15 @@ abstract class GameState extends FlxState
 		{
 			add(player.board);
 			add(player.nextBumper);
-			FlxG.camera.focusOn(player.board.center);
 		}
 
-		if (_gui == null)
-			_gui = new StandardGUI();
+		if (_hud == null)
+			_hud = new StandardHUD();
 
-		add(_gui);
+		add(_hud);
+		FlxG.camera.focusOn(_players[0].board.center.add(_hud.width / 2, 0));
+		// TODO: figure out how to make the HUD not be affected by zoom
+		// FlxG.camera.zoom = .9;
 
 		super.create();
 	}

@@ -7,7 +7,7 @@ import flixel.text.FlxBitmapText;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 
-class StandardGUI extends FlxSpriteGroup
+class StandardHUD extends FlxSpriteGroup
 {
 	var _scoreDisplay:FlxBitmapText;
 
@@ -19,10 +19,11 @@ class StandardGUI extends FlxSpriteGroup
 		var rightSide = FlxG.width > FlxG.height;
 
 		_scoreDisplay = new FlxBitmapText(diginum);
+		_scoreDisplay.autoSize = false;
 		_scoreDisplay.setBorderStyle(FlxTextBorderStyle.SHADOW);
-		_scoreDisplay.alignment = FlxTextAlign.RIGHT;
 		_scoreDisplay.color = FlxColor.GREEN;
-		_scoreDisplay.scale = new FlxPoint(.5, .5);
+		_scoreDisplay.alignment = FlxTextAlign.RIGHT;
+		_scoreDisplay.scale = new FlxPoint(.6, .6);
 
 		if (rightSide)
 		{
@@ -31,9 +32,10 @@ class StandardGUI extends FlxSpriteGroup
 			super(quarterWidth * 3, 0);
 			add(new FlxSprite().makeGraphic(quarterWidth, FlxG.height, FlxColor.fromRGBFloat(.1, .1, .8, .5)));
 
-			_scoreDisplay.x = quarterWidth - 20;
-			_scoreDisplay.y = _scoreDisplay.height * 2;
+			_scoreDisplay.setPosition(quarterWidth - 20, _scoreDisplay.lineHeight);
+			_scoreDisplay.width = width * (1 / _scoreDisplay.scale.x);
 			add(_scoreDisplay);
+			trace(x, _scoreDisplay.x);
 		}
 		else
 		{
@@ -43,14 +45,21 @@ class StandardGUI extends FlxSpriteGroup
 		for (sprite in group)
 			sprite.scrollFactor.set(0, 0);
 
-		score = 12345;
+		score = 0;
+	}
+
+	override function update(elapsed:Float)
+	{
+		score++;
 	}
 
 	function set_score(score:Int):Int
 	{
-		_scoreDisplay.text = Std.string(Math.min(score, 99999));
-		// _scoreDisplay.x = x + width - 20 - (_scoreDisplay.textWidth * scale.x);
-		_scoreDisplay.x = 0;
+		var output = Std.string(Math.min(score, 99999));
+		while (output.length < 5)
+			output = "z" + output;
+		_scoreDisplay.text = output;
+
 		return this.score = score;
 	}
 }
