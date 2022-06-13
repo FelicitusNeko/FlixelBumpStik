@@ -1,3 +1,4 @@
+import boardObject.Bumper;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.graphics.frames.FlxBitmapFont;
@@ -18,6 +19,9 @@ class StandardHUD extends FlxSpriteGroup
 
 	/** The current count of cleared bumpers displayed on the HUD. **/
 	public var block(default, set):Int;
+
+	/** The current next bumper displayed on the HUD. **/
+	public var nextBumper(default, set):Bumper = null;
 
 	public function new()
 	{
@@ -64,11 +68,6 @@ class StandardHUD extends FlxSpriteGroup
 		block = 0;
 	}
 
-	override function update(elapsed:Float)
-	{
-		score++;
-	}
-
 	function set_score(score:Int):Int
 	{
 		var output = Std.string(Math.min(score, 99999));
@@ -87,5 +86,22 @@ class StandardHUD extends FlxSpriteGroup
 		_blockDisplay.text = output;
 
 		return this.block = block;
+	}
+
+	function set_nextBumper(nextBumper:Bumper):Bumper
+	{
+		if (this.nextBumper != null)
+		{
+			remove(this.nextBumper);
+			this.nextBumper.scrollFactor = new FlxPoint(1, 1);
+		}
+		if (nextBumper != null)
+		{
+			nextBumper.setPosition(width - nextBumper.width - 5, height - nextBumper.height - 5);
+			add(nextBumper);
+			nextBumper.scrollFactor = new FlxPoint(0, 0);
+			trace(nextBumper.getPosition());
+		}
+		return this.nextBumper = nextBumper;
 	}
 }
