@@ -36,6 +36,8 @@ enum Direction
 /** Bumpers are the basic play pieces for Bumper Stickers. **/
 class Bumper extends BoardObject
 {
+	static final ACCELFACTOR:Float = 8;
+
 	/** The color of this bumper. **/
 	public var bColor(default, set):Color;
 
@@ -252,19 +254,19 @@ class Bumper extends BoardObject
 		switch (activeDirection)
 		{
 			case Up:
-				acceleration.y = -height * 4;
+				acceleration.y = -height * ACCELFACTOR;
 				if (launched != Direction.None)
 					velocity.y = -maxVelocity.y / 2;
 			case Right:
-				acceleration.x = width * 4;
+				acceleration.x = width * ACCELFACTOR;
 				if (launched != Direction.None)
 					velocity.x = maxVelocity.x / 2;
 			case Down:
-				acceleration.y = height * 4;
+				acceleration.y = height * ACCELFACTOR;
 				if (launched != Direction.None)
 					velocity.y = maxVelocity.y / 2;
 			case Left:
-				acceleration.x = -width * 4;
+				acceleration.x = -width * ACCELFACTOR;
 				if (launched != Direction.None)
 					velocity.x = -maxVelocity.x / 2;
 			default:
