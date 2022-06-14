@@ -29,11 +29,17 @@ class Launcher extends BoardObject
 	/** The bumper this launcher has just launched. **/
 	public var launching(default, null):Bumper = null;
 
+	/** The X position ahead of the launcher's current position relative to the play field. **/
+	public var forwardX(get, never):Int;
+
+	/** The Y position ahead of the launcher's current position relative to the play field. **/
+	public var forwardY(get, never):Int;
+
 	/** The current state of the launcher. **/
 	public var state(default, set):LState = Open;
 
-	/** The board space in front of the launcher. Used for determining whether the launcher is blocked. **/
-	public var spaceInFront:BoardSpace;
+	/** Whether this launcher is currently enabled. **/
+	public var enabled(default, set):Bool = true;
 
 	public function new(x:Float, y:Float, direction:Direction, owner:Board = null)
 	{
@@ -86,22 +92,39 @@ class Launcher extends BoardObject
 		return this.state = state;
 	}
 
-	override function update(elapsed:Float)
+	function get_forwardX():Int
 	{
-		super.update(elapsed);
-		if (spaceInFront != null)
+		switch (direction)
 		{
-			if (state == Blocked)
-			{
-				if (spaceInFront.reservedFor == null)
-					state = Open;
-			}
-			else if (state == Open)
-			{
-				if (spaceInFront.reservedFor != null)
-					state = Blocked;
-			}
+			case Left:
+				return boardX - 1;
+			case Right:
+				return boardX + 1;
+			default:
+				return boardX;
 		}
+	}
+
+	function get_forwardY():Int
+	{
+		switch (direction)
+		{
+			case Up:
+				return boardY - 1;
+			case Down:
+				return boardY + 1;
+			default:
+				return boardY;
+		}
+	}
+
+	function set_enabled(enabled:Bool):Bool
+	{
+		if (enabled)
+			state = (owner != null && owner.bumperAt(forwardX, forwardY) != null) ? Blocked : Open;
+		else
+			state = Blocked;
+		return this.enabled = enabled;
 	}
 
 	/**
