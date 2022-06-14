@@ -102,9 +102,9 @@ class Board extends FlxTypedGroup<FlxBasic>
 
 		_fsm = new FSM(fsmIdle);
 
-		setupTest(9);
+		// setupTest(9);
 
-		trace((bWidth + 2) * sWidth, (bHeight + 2) * sHeight);
+		// trace((bWidth + 2) * sWidth, (bHeight + 2) * sHeight);
 	}
 
 	function get_center()
@@ -430,7 +430,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 					if (bumper != null && bumper.direction == Clearing)
 					{
 						bumper.kill();
-						_delay += .2;
+						_delay += .15;
 						return;
 					}
 				}
