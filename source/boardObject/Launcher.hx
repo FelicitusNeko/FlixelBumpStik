@@ -2,6 +2,7 @@ package boardObject;
 
 import boardObject.Bumper.Direction;
 import flixel.FlxSprite;
+import flixel.math.FlxRect;
 import flixel.util.FlxColor;
 
 enum LState
@@ -30,6 +31,9 @@ class Launcher extends BoardObject
 
 	/** The current state of the launcher. **/
 	public var state(default, set):LState = Open;
+
+	/** The board space in front of the launcher. Used for determining whether the launcher is blocked. **/
+	public var spaceInFront:BoardSpace;
 
 	public function new(x:Float, y:Float, direction:Direction, owner:Board = null)
 	{
@@ -77,9 +81,27 @@ class Launcher extends BoardObject
 			case SelectedNotHovering:
 				color = FlxColor.CYAN;
 			case Blocked:
-				color = FlxColor.RED;
+				color = FlxColor.GRAY;
 		}
 		return this.state = state;
+	}
+
+	override function update(elapsed:Float)
+	{
+		super.update(elapsed);
+		if (spaceInFront != null)
+		{
+			if (state == Blocked)
+			{
+				if (spaceInFront.reservedFor == null)
+					state = Open;
+			}
+			else if (state == Open)
+			{
+				if (spaceInFront.reservedFor != null)
+					state = Blocked;
+			}
+		}
 	}
 
 	/**
