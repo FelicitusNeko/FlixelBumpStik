@@ -260,59 +260,67 @@ class Board extends FlxTypedGroup<FlxBasic>
 		return null;
 	}
 
+	public function spaceAt(x:Int, y:Int)
+	{
+		for (space in _spaces)
+			if (space.boardX == x && space.boardY == y)
+				return space;
+
+		return null;
+	}
+
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
 		_fsm.update(elapsed);
 	}
 
+	/** State machine call for idle state. **/
 	private function fsmIdle(elapsed:Float)
 	{
-		if (_fsm.justChanged)
+		if (_fsm.justChanged) // If the state just changed to idle:
 		{
 			if (onRequestGenerate != null)
-				onRequestGenerate();
-			curChain = 0;
+				onRequestGenerate(); // Request that a new next bumper be generated
+			curChain = 0; // Reset chain to zero
 		}
 
-		if (FlxG.mouse.justMoved || _fsm.justChanged)
+		if (FlxG.mouse.justMoved || _fsm.justChanged) // If the mouse just moved, or the state just changed:
 		{
-			if (FlxG.mouse.pressed && _selectedLauncher != null)
+			if (FlxG.mouse.pressed && _selectedLauncher != null) // If the mouse is held and there is a selected bumper:
 			{
+				// If the mouse is over the selected bumper, use Selected state; if not, use SelectedNotHovering
 				_selectedLauncher.state = _selectedLauncher == launcherAtPoint(FlxG.mouse.getWorldPosition()) ? Selected : SelectedNotHovering;
 			}
-			else
+			else // If the mouse is not held or there's no selected bumper:
 			{
-				var launcher = launcherAtPoint(FlxG.mouse.getWorldPosition());
-				if (_selectedLauncher != launcher)
+				var launcher = launcherAtPoint(FlxG.mouse.getWorldPosition()); // Determine if there's a bumper under the cursor
+				if (_selectedLauncher != launcher) // If what's under the cursor is not the selected launcher:
 				{
-					if (_selectedLauncher != null)
-						_selectedLauncher.state = Open;
-					_selectedLauncher = launcher;
-					if (_selectedLauncher != null && _selectedLauncher.state != Blocked)
-						_selectedLauncher.state = Hovering;
+					if (_selectedLauncher != null && _selectedLauncher.state != Blocked) // If there is a previously selected launcher and it's not Blocked:
+						_selectedLauncher.state = Open; // Set its state to Open
+					_selectedLauncher = launcher; // Assign what's under the bumper as the selected launcher
+					if (_selectedLauncher != null && _selectedLauncher.state != Blocked) // If there is a newly selected launcher and it's not Blocked:
+						_selectedLauncher.state = Hovering; // Set its state to Hovering
 				}
 			}
 		}
 
-		if (FlxG.mouse.justPressed && _selectedLauncher != null && _selectedLauncher.state == Hovering)
+		if (FlxG.mouse.justPressed && _selectedLauncher != null && _selectedLauncher.state == Hovering) // If the mouse was just clicked on a launcher that's in Hovering state:
 		{
-			_selectedLauncher.state = Selected;
+			_selectedLauncher.state = Selected; // Set its state to Selected
 		}
-		if (FlxG.mouse.justReleased && _selectedLauncher != null && _selectedLauncher.state == Selected)
+		if (FlxG.mouse.justReleased && _selectedLauncher != null && _selectedLauncher.state == Selected) // If the mouse was just released from a launcher that's in Selected state:
 		{
-			// TODO: get the next bumper from the game state
-			// for now, just hard-coding it
-			_selectedLauncher.state = Open;
-			var launcher = launcherAtPoint(FlxG.mouse.getWorldPosition());
-			if (launcher == _selectedLauncher)
-			{
-				var bumper = onLaunchBumper != null ? onLaunchBumper() : new Bumper(0, 0, Blue, Right);
-				_bumpers.add(bumper);
-				_selectedLauncher.launchBumper(bumper);
-				_fsm.activeState = fsmMoving;
-			}
-			_selectedLauncher = null;
+			// _selectedLauncher.state = Open;
+			var bumper = onLaunchBumper != null ? onLaunchBumper() : new Bumper(0, 0, Blue,
+				Right); // Get the next bumper from the game state (if there's no callback, just make a bumper)
+			_bumpers.add(bumper); // Add the bumper to the board collection
+			_selectedLauncher.launchBumper(bumper); // Launch the bumper from the launcher
+			_launchers.forEach(launcher -> launcher.enabled = false); // Disable all the launchers
+			_fsm.activeState = fsmMoving; // Set the board state to Moving
+
+			_selectedLauncher = null; // Clear the launcher selection
 		}
 	}
 
@@ -414,7 +422,21 @@ class Board extends FlxTypedGroup<FlxBasic>
 		}
 		else
 		{
-			_fsm.activeState = fsmIdle;
+			var launchersAvailable = 0;
+			_launchers.forEachAlive(launcher ->
+			{
+				launcher.enabled = true;
+				if (launcher.state != Blocked)
+					launchersAvailable++;
+			});
+			if (launchersAvailable > 0)
+				_fsm.activeState = fsmIdle;
+			else
+			{
+				// TODO: Game over
+				_bumpers.forEach(bumper -> bumper.direction = GameOver);
+				_fsm.activeState = null;
+			}
 		}
 	}
 
@@ -452,6 +474,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 			if (_bumpers.length == 0)
 			{
 				// TODO: All Clear
+				_launchers.forEach(launcher -> launcher.enabled = true);
 				_fsm.activeState = fsmIdle;
 			}
 			else
