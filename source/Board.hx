@@ -57,7 +57,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 	public var onRequestGenerate:Void->Void = null;
 	public var onLaunchBumper:Void->Bumper = null;
 	public var onMatch:(Int, Int) -> Void = null;
-	public var onClear:Void->Void = null;
+	public var onClear:Int->Void = null;
 
 	public function new(x:Float = 0, y:Float = 0)
 	{
@@ -451,6 +451,8 @@ class Board extends FlxTypedGroup<FlxBasic>
 					var bumper = bumperAt(x, y);
 					if (bumper != null && bumper.direction == Clearing)
 					{
+						if (onClear != null)
+							onClear(curChain);
 						bumper.kill();
 						_delay += .15;
 						return;
@@ -463,8 +465,6 @@ class Board extends FlxTypedGroup<FlxBasic>
 			_bumpers.forEachDead(bumper -> _bumpers.remove(bumper));
 			for (bumper in deadBuffer)
 			{
-				if (onClear != null)
-					onClear();
 				_bumpers.remove(bumper);
 				bumper.destroy();
 			}
