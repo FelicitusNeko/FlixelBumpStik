@@ -52,6 +52,8 @@ abstract class GameState extends FlxState
 
 			_player.board.onRequestGenerate = onRequestGenerate;
 			_player.board.onLaunchBumper = onLaunch;
+			_player.board.onMatch = onMatch;
+			_player.board.onClear = onClear;
 		}
 
 		for (player in _players)
@@ -69,6 +71,15 @@ abstract class GameState extends FlxState
 		super.create();
 	}
 
+	function addScore(addScore:Int)
+	{
+		// TODO: pre-mult addScore goes into jackpot
+		var mult:Float = 1;
+		for (factor in _player.multStack)
+			mult *= factor;
+		_hud.score = _player.score += Math.floor(addScore * mult);
+	}
+
 	function onRequestGenerate()
 	{
 		if (_player.nextBumper == null)
@@ -79,7 +90,21 @@ abstract class GameState extends FlxState
 	{
 		var retval = _hud.nextBumper != null ? _hud.nextBumper : _bg.generate();
 		_player.nextBumper = _hud.nextBumper = null;
+		addScore(5);
 		return retval;
+	}
+
+	function onMatch(chain:Int, combo:Int)
+	{
+		var bonus = ((combo - 3) + (chain - 1)) * Math.floor(Math.pow(2, (chain - 1))) * 50;
+		// TODO: display bonus on HUD
+		addScore(bonus);
+	}
+
+	function onClear(chain:Int)
+	{
+		_hud.block = ++_player.block;
+		addScore(10 * Math.floor(Math.pow(2, chain - 1)));
 	}
 
 	function get__player()
