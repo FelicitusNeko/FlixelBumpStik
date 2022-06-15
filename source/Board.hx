@@ -54,6 +54,9 @@ class Board extends FlxTypedGroup<FlxBasic>
 	/** The current chain progression in steps. **/
 	public var curChain(default, null):Int = 0;
 
+	/** The current count of bumpers on the field. **/
+	public var bCount(get, never):Int;
+
 	public var onRequestGenerate:Void->Void = null;
 	public var onLaunchBumper:Void->Bumper = null;
 	public var onMatch:(Int, Int) -> Void = null;
@@ -102,7 +105,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 
 		_fsm = new FSM(fsmIdle);
 
-		// setupTest(9);
+		// setupTest(10);
 
 		// trace((bWidth + 2) * sWidth, (bHeight + 2) * sHeight);
 	}
@@ -110,6 +113,11 @@ class Board extends FlxTypedGroup<FlxBasic>
 	function get_center()
 	{
 		return new FlxPoint(bWidth * sWidth / 2, bHeight * sHeight / 2).addPoint(origin);
+	}
+
+	function get_bCount()
+	{
+		return _bumpers.countLiving();
 	}
 
 	/**
@@ -157,11 +165,23 @@ class Board extends FlxTypedGroup<FlxBasic>
 				putBumperAt(2, 0, Blue, Down);
 				putBumperAt(3, 4, Blue, None);
 				putBumperAt(4, 4, Red, None);
-			case 9: // Corner collision ❌
-				// BUG: Rounding/precision issues causing collisions where they shouldn't happen
+			case 9: // Corner collision ✔️
 				putBumperAt(2, 4, Blue, Right);
 				putBumperAt(4, 4, Blue, Right);
 				putBumperAt(2, 0, Green, Down);
+			case 10: // Chain scoring (×3)
+				putBumperAt(2, 2, Blue, Down);
+				putBumperAt(2, 3, Blue, Up);
+				putBumperAt(0, 2, Green, Left);
+				putBumperAt(1, 2, Green, Left);
+				putBumperAt(3, 2, Green, Left);
+				putBumperAt(0, 0, Red, Up);
+				putBumperAt(0, 1, Red, Up);
+				putBumperAt(0, 3, Red, Up);
+				var launcher = launcherAtPoint(new FlxPoint(origin.x, origin.y).add(sWidth * 2.5, sHeight * 5.5));
+				if (launcher != null)
+					launcher.launchBumper(new Bumper(0, 0, Blue, Up));
+				autoLaunch = false;
 		}
 		if (autoLaunch)
 			_bumpers.forEachAlive(bumper ->
@@ -260,6 +280,12 @@ class Board extends FlxTypedGroup<FlxBasic>
 		return null;
 	}
 
+	/**
+		Determines which board space is located at the given board X and Y grid spaces.
+		@param x The X grid coordinate on the board.
+		@param y The Y grid coordinate on the board.
+		@return The space found at the given board grid coordinates, or `null` if there is none.
+	**/
 	public function spaceAt(x:Int, y:Int)
 	{
 		for (space in _spaces)
@@ -324,6 +350,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 		}
 	}
 
+	/** State machine call for moving state. **/
 	private function fsmMoving(elapsed:Float)
 	{
 		FlxG.overlap(_bumpers, _bumpers, bumperBump);
@@ -440,6 +467,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 		}
 	}
 
+	/** State machine call for clearing state. **/
 	private function fsmClearing(elapsed:Float)
 	{
 		_delay -= elapsed;
