@@ -62,6 +62,10 @@ class Board extends FlxTypedGroup<FlxBasic>
 	public var onMatch:(Int, Int) -> Void = null;
 	public var onClear:Int->Void = null;
 
+	#if mobile
+	var _lastPosition = new FlxPoint(0, 0);
+	#end
+
 	public function new(x:Float = 0, y:Float = 0)
 	{
 		super();
@@ -304,6 +308,33 @@ class Board extends FlxTypedGroup<FlxBasic>
 	/** State machine call for idle state. **/
 	private function fsmIdle(elapsed:Float)
 	{
+		#if mobile
+		var touch = FlxG.touches.getFirst();
+		var justMoved = false,
+			justPressed = false,
+			justReleased = false,
+			pressed = false,
+			position:FlxPoint = new FlxPoint(0, 0);
+
+		if (touch != null)
+		{
+			justPressed = touch.justPressed;
+			justReleased = touch.justReleased;
+			pressed = touch.pressed;
+			position = touch.getWorldPosition();
+			justMoved = position.equals(_lastPosition);
+			_lastPosition = position;
+		}
+		else
+			_lastPosition = new FlxPoint(0, 0);
+		#else
+		var justMoved = FlxG.mouse.justMoved;
+		var justPressed = FlxG.mouse.justPressed;
+		var justReleased = FlxG.mouse.justReleased;
+		var pressed = FlxG.mouse.pressed;
+		var position = FlxG.mouse.getWorldPosition();
+		#end
+
 		if (_fsm.justChanged) // If the state just changed to idle:
 		{
 			if (onRequestGenerate != null)
@@ -311,16 +342,17 @@ class Board extends FlxTypedGroup<FlxBasic>
 			curChain = 0; // Reset chain to zero
 		}
 
-		if (FlxG.mouse.justMoved || _fsm.justChanged) // If the mouse just moved, or the state just changed:
+		if (justMoved || _fsm.justChanged) // If the mouse/touch just moved, or the state just changed:
 		{
-			if (FlxG.mouse.pressed && _selectedLauncher != null) // If the mouse is held and there is a selected bumper:
+			if (pressed && _selectedLauncher != null) // If the mouse/touch is held and there is a selected bumper:
 			{
-				// If the mouse is over the selected bumper, use Selected state; if not, use SelectedNotHovering
-				_selectedLauncher.state = _selectedLauncher == launcherAtPoint(FlxG.mouse.getWorldPosition()) ? Selected : SelectedNotHovering;
+				// If the mouse/touch is over the selected bumper, use Selected state; if not, use SelectedNotHovering
+				_selectedLauncher.state = _selectedLauncher == launcherAtPoint(position) ? Selected : SelectedNotHovering;
 			}
+			#if (!mobile)
 			else // If the mouse is not held or there's no selected bumper:
 			{
-				var launcher = launcherAtPoint(FlxG.mouse.getWorldPosition()); // Determine if there's a bumper under the cursor
+				var launcher = launcherAtPoint(position); // Determine if there's a bumper under the cursor
 				if (_selectedLauncher != launcher) // If what's under the cursor is not the selected launcher:
 				{
 					if (_selectedLauncher != null && _selectedLauncher.state != Blocked) // If there is a previously selected launcher and it's not Blocked:
@@ -330,17 +362,31 @@ class Board extends FlxTypedGroup<FlxBasic>
 						_selectedLauncher.state = Hovering; // Set its state to Hovering
 				}
 			}
+			#end
 		}
 
-		if (FlxG.mouse.justPressed && _selectedLauncher != null && _selectedLauncher.state == Hovering) // If the mouse was just clicked on a launcher that's in Hovering state:
+		#if mobile
+		if (justPressed) // When the user touches the screen:
+		{
+			var launcher = launcherAtPoint(position); // Determine if there's a launcher at the touch location
+			if (launcher != null && launcher.state != Blocked) // If there is a launcher and it's not blocked:
+			{
+				_selectedLauncher = launcher; // Make it the selected launcher
+				_selectedLauncher.state = Selected; // Set its state to Selected
+			}
+		}
+		#else
+		// If the mouse was just clicked on a launcher that's in Hovering state:
+		if (justPressed && _selectedLauncher != null && _selectedLauncher.state == Hovering)
 		{
 			_selectedLauncher.state = Selected; // Set its state to Selected
 		}
-		if (FlxG.mouse.justReleased && _selectedLauncher != null && _selectedLauncher.state == Selected) // If the mouse was just released from a launcher that's in Selected state:
+		#end
+		// If the mouse/touch was just released from a launcher that's in Selected state:
+		if (justReleased && _selectedLauncher != null && _selectedLauncher.state == Selected)
 		{
-			// _selectedLauncher.state = Open;
-			var bumper = onLaunchBumper != null ? onLaunchBumper() : new Bumper(0, 0, Blue,
-				Right); // Get the next bumper from the game state (if there's no callback, just make a bumper)
+			// Get the next bumper from the game state (if there's no callback, just make a bumper)
+			var bumper = onLaunchBumper != null ? onLaunchBumper() : new Bumper(0, 0, Blue, Right);
 			_bumpers.add(bumper); // Add the bumper to the board collection
 			_selectedLauncher.launchBumper(bumper); // Launch the bumper from the launcher
 			_launchers.forEach(launcher -> launcher.enabled = false); // Disable all the launchers
