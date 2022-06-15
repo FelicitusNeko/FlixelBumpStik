@@ -55,6 +55,8 @@ class StandardHUD extends FlxSpriteGroup
 			_blockDisplay.setPosition(quarterWidth - 20, _blockDisplay.lineHeight * 2);
 			_blockDisplay.width = width * (1 / _blockDisplay.scale.x);
 			add(_blockDisplay);
+
+			trace(quarterWidth, width, x + width);
 		}
 		else
 		{
@@ -92,14 +94,17 @@ class StandardHUD extends FlxSpriteGroup
 	{
 		if (this.nextBumper != null)
 		{
+			trace("Removing old next bumper");
 			remove(this.nextBumper);
-			this.nextBumper.scrollFactor = new FlxPoint(1, 1);
+			this.nextBumper.scrollFactor.set(1, 1);
 		}
 		if (nextBumper != null)
 		{
+			trace("Adding new next bumper");
 			nextBumper.setPosition(width - nextBumper.width - 5, height - nextBumper.height - 5);
 			add(nextBumper);
-			nextBumper.scrollFactor = new FlxPoint(0, 0);
+			// nextBumper.setPosition(FlxG.width - nextBumper.width - 5, FlxG.height - nextBumper.height - 5);
+			nextBumper.scrollFactor.set(0, 0);
 			trace(nextBumper.getPosition());
 		}
 		return this.nextBumper = nextBumper;
