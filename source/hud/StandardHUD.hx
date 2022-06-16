@@ -12,9 +12,14 @@ import flixel.util.FlxColor;
 
 class StandardHUD extends FlxSpriteGroup
 {
+	/** The diginum respresentation of the current score. **/
 	var _scoreDisplay:FlxBitmapText;
 
+	/** The diginum respresentation of the current clear count. **/
 	var _blockDisplay:FlxBitmapText;
+
+	/** Whether the HUD is displayed on the right side (`true`) or bottom (`false`). **/
+	var _rightSide = true;
 
 	/** The current score displayed on the HUD. **/
 	public var score(default, set):Int;
@@ -28,7 +33,7 @@ class StandardHUD extends FlxSpriteGroup
 	public function new()
 	{
 		var diginum = FlxBitmapFont.fromAngelCode(AssetPaths.Diginum__png, AssetPaths.Diginum__xml);
-		var rightSide = FlxG.width > FlxG.height;
+		_rightSide = FlxG.width > FlxG.height;
 
 		_scoreDisplay = new FlxBitmapText(diginum);
 		_blockDisplay = new FlxBitmapText(diginum);
@@ -43,7 +48,7 @@ class StandardHUD extends FlxSpriteGroup
 		_scoreDisplay.color = FlxColor.GREEN;
 		_blockDisplay.color = FlxColor.RED;
 
-		if (rightSide)
+		if (_rightSide)
 		{
 			var quarterWidth = Math.round(FlxG.width / 4);
 
