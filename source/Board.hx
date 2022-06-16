@@ -272,6 +272,19 @@ class Board extends FlxTypedGroup<FlxBasic>
 	}
 
 	/**
+		Determines which bumper, if any, is located at the given `FlxPoint` coordinates.
+		@param pt The world position to check at.
+		@return The bumper at that point, or `null` if there is none.
+	**/
+	public function bumperAtPoint(pt:FlxPoint):Bumper
+	{
+		for (bumper in _bumpers)
+			if (bumper.overlapsPoint(pt))
+				return bumper;
+		return null;
+	}
+
+	/**
 		Determines which launcher, if any, is located at the given `FlxPoint` coordinates.
 		@param pt The world position to check at.
 		@return The launcher at that point, or `null` if there is none.
