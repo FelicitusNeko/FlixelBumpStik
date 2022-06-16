@@ -219,6 +219,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 		@param list The list of objects to retreve from.
 		@return The board object to which the sprite belongs, or `null` if none was found.
 	**/
+	@:generic
 	private function spriteTo<T:BoardObject>(spr:FlxSprite, list:FlxTypedGroup<T>):T
 	{
 		for (thing in list)
