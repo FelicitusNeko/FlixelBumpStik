@@ -7,10 +7,10 @@ import flixel.math.FlxRandom;
 class BumperGenerator
 {
 	/** An array to convert numbers into colors. **/
-	static final colorOpts:Array<Color> = [Blue, Green, Red, Purple, Yellow, White];
+	public static final colorOpts:Array<Color> = [Blue, Green, Red, Purple, Yellow, White];
 
 	/** An array to convert numbers into directions. **/
-	static final dirOpts:Array<Direction> = [Up, Right, Down, Left];
+	public static final dirOpts:Array<Direction> = [Up, Right, Down, Left];
 
 	/** The number of colors this generator was initialized with. **/
 	public var initColors(default, null):Int;
@@ -35,7 +35,8 @@ class BumperGenerator
 	**/
 	public function generate(?color:Color, ?direction:Direction)
 	{
-		return new Bumper(0, 0, color != null ? color : colorOpts[_rng.int(0, colors - 1)], direction != null ? direction : dirOpts[_rng.int(0, 3)]);
+		return new Bumper(0, 0, color != null ? color : _rng.getObject(colorOpts, null, 0, colors - 1),
+			direction != null ? direction : _rng.getObject(dirOpts));
 	}
 
 	/** This function is currently a stub that calls `generate()`. **/
