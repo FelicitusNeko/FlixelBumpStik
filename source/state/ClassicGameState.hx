@@ -1,6 +1,6 @@
 package state;
 
-import boardObject.Bumper;
+import hud.ClassicHUD;
 
 class ClassicGameState extends GameState
 {
@@ -19,6 +19,9 @@ class ClassicGameState extends GameState
 	/** The number of bumpers to clear to add a new color. **/
 	private var _nextColor:Int = 100;
 
+	/** A shortcut to cast `_hud` as `ClassicHUD`. **/
+	private var _hudClassic(get, never):ClassicHUD;
+
 	override function create()
 	{
 		_players.push({
@@ -28,7 +31,7 @@ class ClassicGameState extends GameState
 			board: new Board(0, 0),
 			nextBumper: _bg.weightedGenerate()
 		});
-		_hud = new StandardHUD();
+		_hud = new ClassicHUD(onPaintCanClick);
 
 		_player.board.onRequestGenerate = onRequestGenerate;
 		_player.board.onLaunchBumper = onLaunch;
@@ -36,6 +39,11 @@ class ClassicGameState extends GameState
 		_player.board.onClear = onClear;
 
 		super.create();
+	}
+
+	function get__hudClassic()
+	{
+		return cast(_hud, ClassicHUD);
 	}
 
 	function _addScore(addScore:Int)
@@ -48,12 +56,17 @@ class ClassicGameState extends GameState
 		_hud.score += modAddScore;
 		if (_player.score >= _paintCansNext)
 		{
-			_paintCans++;
+			_hudClassic.paintCans = ++_paintCans;
 			_paintCansNext += _paintCansIncrement;
 			_paintCansIncrement += 500;
 			trace("Awarding paint can; next at " + _paintCansNext);
 		}
 		return modAddScore;
+	}
+
+	function onPaintCanClick()
+	{
+		trace("Trying to use a Paint Can (have " + _paintCans + ")");
 	}
 
 	function onRequestGenerate()
@@ -65,7 +78,6 @@ class ClassicGameState extends GameState
 			_player.multStack[0] += .2;
 			trace("Adding new colour; now at " + _bg.colors);
 		}
-		trace(_player.board.bCount);
 		if (_player.board.bCount <= 0 && _jackpot > 0)
 		{
 			var mJackpot = _addScore(_jackpot);
