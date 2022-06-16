@@ -1,4 +1,5 @@
 /.vscode
 /export
 /bin
+/scraps
 *.code-workspace
