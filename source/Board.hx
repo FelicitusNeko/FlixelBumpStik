@@ -9,7 +9,9 @@ import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxPoint;
-import haxe.Timer;
+import lime.app.Event;
+
+typedef BumperCallback = Bumper->Void;
 
 class Board extends FlxTypedGroup<FlxBasic>
 {
@@ -57,12 +59,31 @@ class Board extends FlxTypedGroup<FlxBasic>
 	/** The current count of bumpers on the field. **/
 	public var bCount(get, never):Int;
 
-	public var onRequestGenerate:Void->Void = null;
-	public var onLaunchBumper:Void->Bumper = null;
-	public var onMatch:(Int, Int) -> Void = null;
-	public var onClear:Int->Void = null;
-	public var onGameOver:Void->Void = null;
+	/** Event that fires when the game requests that a next bumper be generated. **/
+	public var onRequestGenerate(default, null) = new Event<Void->Void>();
 
+	public var onLaunchBumper(default, null) = new Event<BumperCallback->Void>();
+
+	/**
+		Event that fires when a match occurs.
+		@param chain The chain step for this match.
+		@param combo The number of bumpers matched.
+	**/
+	public var onMatch(default, null) = new Event<(Int, Int) -> Void>();
+
+	/**
+		Event that fires when a bumper clears.
+		@param chain The chain step for this overall match.
+	**/
+	public var onClear(default, null) = new Event<Int->Void>();
+
+	/** Event that fires when the game is over. **/
+	public var onGameOver(default, null) = new Event<Void->Void>();
+
+	// TODO: figure out a better way to handle onLaunchBumper so that we can just make this a true event
+
+	/** Pseudo-event that is called when the next bumper is being launched. **/
+	// public var onLaunchBumper:Void->Bumper = null;
 	#if mobile
 	var _lastPosition = new FlxPoint(0, 0);
 	#end
@@ -352,8 +373,9 @@ class Board extends FlxTypedGroup<FlxBasic>
 
 		if (_fsm.justChanged) // If the state just changed to idle:
 		{
-			if (onRequestGenerate != null)
-				onRequestGenerate(); // Request that a new next bumper be generated
+			// if (onRequestGenerate != null)
+			// 	onRequestGenerate();
+			onRequestGenerate.dispatch(); // Request that a new next bumper be generated
 			curChain = 0; // Reset chain to zero
 		}
 
@@ -401,7 +423,15 @@ class Board extends FlxTypedGroup<FlxBasic>
 		if (justReleased && _selectedLauncher != null && _selectedLauncher.state == Selected)
 		{
 			// Get the next bumper from the game state (if there's no callback, just make a bumper)
-			var bumper = onLaunchBumper != null ? onLaunchBumper() : new Bumper(0, 0, Blue, Right);
+			var bumper:Bumper = null;
+			onLaunchBumper.dispatch(bumperIn ->
+			{
+				if (bumper == null)
+					bumper = bumperIn;
+			});
+			if (bumper == null)
+				bumper = new Bumper(0, 0, Blue, Right);
+
 			_bumpers.add(bumper); // Add the bumper to the board collection
 			_selectedLauncher.launchBumper(bumper); // Launch the bumper from the launcher
 			_launchers.forEach(launcher -> launcher.enabled = false); // Disable all the launchers
@@ -560,8 +590,9 @@ class Board extends FlxTypedGroup<FlxBasic>
 			_delay = .5;
 			// TODO: play sound
 			curChain++;
-			if (onMatch != null)
-				onMatch(curChain, clearCount);
+			// if (onMatch != null)
+			// 	onMatch(curChain, clearCount);
+			onMatch.dispatch(curChain, clearCount);
 			_fsm.activeState = fsmClearing;
 		}
 		else
@@ -578,8 +609,9 @@ class Board extends FlxTypedGroup<FlxBasic>
 			else
 			{
 				// TODO: Game over
-				if (onGameOver != null)
-					onGameOver();
+				// if (onGameOver != null)
+				// 	onGameOver();
+				onGameOver.dispatch();
 				_bumpers.forEach(bumper -> bumper.direction = GameOver);
 				_fsm.activeState = null;
 			}
@@ -598,8 +630,9 @@ class Board extends FlxTypedGroup<FlxBasic>
 					var bumper = bumperAt(x, y);
 					if (bumper != null && bumper.direction == Clearing)
 					{
-						if (onClear != null)
-							onClear(curChain);
+						// if (onClear != null)
+						// 	onClear(curChain);
+						onClear.dispatch(curChain);
 						bumper.kill();
 						_delay += .15;
 						return;

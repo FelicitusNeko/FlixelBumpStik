@@ -1,6 +1,7 @@
 package hud;
 
 import flixel.ui.FlxButton;
+import lime.app.Event;
 
 class ClassicHUD extends StandardHUD
 {
@@ -11,19 +12,16 @@ class ClassicHUD extends StandardHUD
 	public var paintCans(default, set):Int;
 
 	/** The function to call when the Paint Can button is clicked. **/
-	public var onPaintCanClick:Void->Void = null;
+	// public var onPaintCanClick:Void->Void = null;
+	public var onPaintCanClick(default, null) = new Event<Void->Void>();
 
-	public function new(?onPaintCanClick:Void->Void)
+	public function new()
 	{
 		super();
 
 		if (_rightSide)
 		{
-			_pcButton = new FlxButton(5, 5, "P:0", () ->
-			{
-				if (onPaintCanClick != null && paintCans > 0)
-					onPaintCanClick();
-			});
+			_pcButton = new FlxButton(5, 5, "P:0", onPaintCanClick.dispatch);
 			// _pcButton.loadGraphic(AssetPaths.button__png, true, 20, 20);
 			_pcButton.width = 40;
 			_pcButton.allowSwiping = false;
@@ -34,7 +32,6 @@ class ClassicHUD extends StandardHUD
 			trace(_pcButton);
 		}
 
-		this.onPaintCanClick = onPaintCanClick;
 		paintCans = 0;
 	}
 

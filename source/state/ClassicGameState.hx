@@ -1,5 +1,6 @@
 package state;
 
+import Board.BumperCallback;
 import hud.ClassicHUD;
 
 class ClassicGameState extends GameState
@@ -31,12 +32,16 @@ class ClassicGameState extends GameState
 			board: new Board(0, 0),
 			nextBumper: _bg.weightedGenerate()
 		});
-		_hud = new ClassicHUD(onPaintCanClick);
 
-		_player.board.onRequestGenerate = onRequestGenerate;
-		_player.board.onLaunchBumper = onLaunch;
-		_player.board.onMatch = onMatch;
-		_player.board.onClear = onClear;
+		_hud = new ClassicHUD();
+		_hudClassic.onPaintCanClick.add(onPaintCanClick);
+
+		var board = _player.board;
+		board.onRequestGenerate.add(onRequestGenerate);
+		board.onMatch.add(onMatch);
+		board.onClear.add(onClear);
+		// board.onLaunchBumper = onLaunch;
+		board.onLaunchBumper.add(onLaunch);
 
 		super.create();
 	}
@@ -66,7 +71,10 @@ class ClassicGameState extends GameState
 
 	function onPaintCanClick()
 	{
-		trace("Trying to use a Paint Can (have " + _paintCans + ")");
+		if (_paintCans > 0)
+		{
+			trace("Trying to use a Paint Can (have " + _paintCans + ")");
+		}
 	}
 
 	function onRequestGenerate()
@@ -88,12 +96,12 @@ class ClassicGameState extends GameState
 			_player.nextBumper = _hud.nextBumper = _bg.generate();
 	}
 
-	function onLaunch()
+	function onLaunch(cb:BumperCallback)
 	{
 		var retval = _hud.nextBumper != null ? _hud.nextBumper : _bg.generate();
 		_player.nextBumper = _hud.nextBumper = null;
 		_addScore(5);
-		return retval;
+		cb(retval);
 	}
 
 	function onMatch(chain:Int, combo:Int)
