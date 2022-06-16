@@ -61,6 +61,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 	public var onLaunchBumper:Void->Bumper = null;
 	public var onMatch:(Int, Int) -> Void = null;
 	public var onClear:Int->Void = null;
+	public var onGameOver:Void->Void = null;
 
 	#if mobile
 	var _lastPosition = new FlxPoint(0, 0);
@@ -448,6 +449,62 @@ class Board extends FlxTypedGroup<FlxBasic>
 				break;
 		if (!isSomethingMoving)
 		{
+			var dirOpts = BumperGenerator.dirOpts;
+			_bumpers.sort((order, lhs, rhs) ->
+			{
+				if (lhs == null)
+					order--;
+				else if (rhs == null)
+					order++;
+				else if (lhs.direction == rhs.direction)
+				{
+					var lhFirst = 0, lhSecond = 0, rhFirst = 0, rhSecond = 0;
+					switch (lhs.direction)
+					{
+						case Up:
+							lhFirst = lhs.boardX;
+							lhSecond = lhs.boardY;
+							rhFirst = rhs.boardX;
+							rhSecond = rhs.boardY;
+						case Down:
+							lhFirst = lhs.boardX;
+							lhSecond = bHeight - lhs.boardY;
+							rhFirst = rhs.boardX;
+							rhSecond = bHeight - rhs.boardY;
+						case Left:
+							lhFirst = lhs.boardY;
+							lhSecond = lhs.boardX;
+							rhFirst = rhs.boardY;
+							rhSecond = rhs.boardX;
+						case Right:
+							lhFirst = lhs.boardY;
+							lhSecond = bWidth - lhs.boardX;
+							rhFirst = rhs.boardY;
+							rhSecond = bWidth - rhs.boardX;
+						default:
+					}
+					if (lhFirst < rhFirst)
+						order--;
+					else if (lhFirst > rhFirst)
+						order++;
+					else if (lhSecond < rhSecond)
+						order--;
+					else if (lhSecond > rhSecond)
+						order++;
+					else
+						trace("Sort error: bumpers of same direction, boardX, and boardY. Are they in the same place?");
+				}
+				else
+				{
+					var lhDir = dirOpts.indexOf(lhs.direction),
+						rhDir = dirOpts.indexOf(rhs.direction);
+					if (lhDir > rhDir)
+						order--;
+					else
+						order++;
+				}
+				return order;
+			});
 			_fsm.activeState = fsmChecking;
 		}
 	}
@@ -520,6 +577,8 @@ class Board extends FlxTypedGroup<FlxBasic>
 			else
 			{
 				// TODO: Game over
+				if (onGameOver != null)
+					onGameOver();
 				_bumpers.forEach(bumper -> bumper.direction = GameOver);
 				_fsm.activeState = null;
 			}
