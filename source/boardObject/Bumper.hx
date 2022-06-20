@@ -1,12 +1,13 @@
 package boardObject;
 
+import components.Board;
 import flixel.FlxSprite;
 import flixel.util.FlxColor;
 
 /** The current color of the bumper, for matching purposes. **/
 enum abstract Color(FlxColor)
 {
-	var None = 0xff000000;
+	var None = FlxColor.GRAY;
 	var Blue = 0xff2244cc;
 	var Green = 0xff22cc44;
 	var Red = 0xffcc3333;
@@ -40,6 +41,9 @@ class Bumper extends BoardObject
 
 	/** The color of this bumper. **/
 	public var bColor(default, set):Color;
+
+	/** Whether this bumper is grayed out. **/
+	public var grayedOut(default, set) = false;
 
 	/** The facing direction of this bumper. **/
 	public var direction(default, set):Direction = None;
@@ -112,9 +116,16 @@ class Bumper extends BoardObject
 
 	function set_bColor(bColor:Color):Color
 	{
-		if (direction != Direction.GameOver)
+		if (direction != Direction.GameOver && !grayedOut)
 			base.color = arrow.color = cast(bColor, FlxColor);
 		return this.bColor = bColor;
+	}
+
+	function set_grayedOut(grayedOut:Bool):Bool
+	{
+		if (direction != Direction.GameOver)
+			base.color = arrow.color = grayedOut ? FlxColor.GRAY : cast(bColor, FlxColor);
+		return this.grayedOut = grayedOut;
 	}
 
 	function set_direction(direction:Direction):Direction
