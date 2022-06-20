@@ -1,6 +1,7 @@
 package components.classic;
 
-import Board.BumperCallback;
+import boardObject.Bumper.Color;
+import components.Board;
 import components.classic.ClassicHUD;
 
 class ClassicGameState extends GameState
@@ -23,32 +24,45 @@ class ClassicGameState extends GameState
 	/** A shortcut to cast `_hud` as `ClassicHUD`. **/
 	private var _hudClassic(get, never):ClassicHUD;
 
+	/** A shortcut to cast `_board` as `ClassicBoard`. **/
+	private var _boardClassic(get, never):ClassicBoard;
+
+	/** The current selected color during a Paint Can event. **/
+	private var _selectedColor:Color;
+
+	/** Whether the next bumper is selected during a Paint Can event. **/
+	private var _isNextSelected = false;
+
 	override function create()
 	{
 		_players.push({
 			score: 0,
 			block: 0,
 			multStack: [1],
-			board: new Board(0, 0),
+			board: new ClassicBoard(0, 0),
 			nextBumper: _bg.weightedGenerate()
 		});
 
 		_hud = new ClassicHUD();
 		_hudClassic.onPaintCanClick.add(onPaintCanClick);
 
-		var board = _player.board;
-		board.onRequestGenerate.add(onRequestGenerate);
-		board.onMatch.add(onMatch);
-		board.onClear.add(onClear);
-		// board.onLaunchBumper = onLaunch;
-		board.onLaunchBumper.add(onLaunch);
+		_boardClassic.onRequestGenerate.add(onRequestGenerate);
+		_boardClassic.onMatch.add(onMatch);
+		_boardClassic.onClear.add(onClear);
+		_boardClassic.onLaunchBumper.add(onLaunch);
+		_boardClassic.onBumperSelect.add(onBumperSelect);
 
 		super.create();
 	}
 
-	function get__hudClassic()
+	inline function get__hudClassic()
 	{
 		return cast(_hud, ClassicHUD);
+	}
+
+	inline function get__boardClassic()
+	{
+		return cast(_player.board, ClassicBoard);
 	}
 
 	function _addScore(addScore:Int)
@@ -115,5 +129,48 @@ class ClassicGameState extends GameState
 	{
 		_hud.block = ++_player.block;
 		_addScore(10 * Math.floor(Math.pow(2, chain - 1)));
+	}
+
+	inline function onBumperSelect(bumper:Bumper)
+	{
+		bumper.bColor = _selectedColor;
+		_selectedColor = None;
+		_isNextSelected = false;
+	}
+
+	override function update(elapsed:Float)
+	{
+		super.update(elapsed);
+
+		if (_selectedColor != None)
+		{
+			#if mobile
+			var touch = FlxG.touches.getFirst();
+			var justPressed = false,
+				justReleased = false,
+				position:FlxPoint = new FlxPoint(0, 0);
+
+			if (touch != null)
+			{
+				justPressed = touch.justPressed;
+				justReleased = touch.justReleased;
+				position = touch.getWorldPosition();
+			}
+			#else
+			var justPressed = FlxG.mouse.justPressed;
+			var justReleased = FlxG.mouse.justReleased;
+			var position = FlxG.mouse.getWorldPosition();
+			#end
+
+			if (justPressed)
+				_isNextSelected = _player.nextBumper.overlapsPoint(position);
+			if (justReleased && _isNextSelected && _player.nextBumper.overlapsPoint(position))
+			{
+				_player.nextBumper.bColor = _selectedColor;
+				_selectedColor = None;
+				_isNextSelected = false;
+				_boardClassic.endPaint();
+			}
+		}
 	}
 }
