@@ -16,10 +16,19 @@ class BumperGenerator
 	public var initColors(default, null):Int;
 
 	/** The number of colors currently in play. **/
-	public var colors:Int;
+	public var colors(default, set):Int;
+
+	/** The average number of each color generated. **/
+	public var average(get, never):Float;
+
+	/** The most of any one color generated. **/
+	public var max(get, never):Int;
 
 	/** The random generator for this class. **/
 	private var _rng = new FlxRandom();
+
+	/** The quantity of each color that has been generated **/
+	private var _drops:Map<Color, Int> = [];
 
 	public function new(initColors:Int)
 	{
@@ -27,27 +36,75 @@ class BumperGenerator
 		colors = initColors;
 	}
 
+	function set_colors(colors:Int):Int
+	{
+		var avg = Math.round(average);
+		if (colors == 0)
+			_drops.clear();
+		else
+		{
+			while (this.colors < colors)
+				_drops[colorOpts[this.colors++]] = avg;
+			while (this.colors > colors)
+				_drops.remove(colorOpts[--this.colors]);
+		}
+		return this.colors;
+	}
+
+	function get_average():Float
+	{
+		var total = 0;
+		for (_ => qty in _drops)
+			total += qty;
+		return total / colors;
+	}
+
+	function get_max():Int
+	{
+		var retval = 0;
+		for (_ => qty in _drops)
+			retval = Math.round(Math.max(qty, retval));
+		return retval;
+	}
+
 	/**
-			Generates a new bumper.
+		Generates a new bumper.
 		@param color Optional. Forces the bumper to be a specific color.
 		@param direction Optional. Forces the bumper to be facing a specific direction.
 		@return The generated bumper.
 	**/
 	public function generate(?color:Color, ?direction:Direction)
 	{
-		return new Bumper(0, 0, color != null ? color : _rng.getObject(colorOpts, null, 0, colors - 1),
-			direction != null ? direction : _rng.getObject(dirOpts));
+		if (color == null)
+			color = _rng.getObject(colorOpts, null, 0, colors - 1);
+		if (direction == null)
+			direction = _rng.getObject(dirOpts);
+
+		_drops[color]++;
+
+		return new Bumper(0, 0, color, direction);
 	}
 
-	/** This function is currently a stub that calls `generate()`. **/
+	/** 
+		Generates a new bumper, trying to keep each color balanced.
+		@return The generated bumper.
+	**/
 	public function weightedGenerate()
 	{
-		return generate();
+		var maxplus1 = max + 1;
+		var weights:Array<Float> = [];
+
+		for (_ => qty in _drops)
+			weights.push(maxplus1 - qty);
+
+		var color = _rng.getObject(colorOpts, weights, 0, colors - 1);
+		return generate(color);
 	}
 
 	/** Resets the generator to its initial setting. **/
 	public function reset()
 	{
+		colors = 0;
 		colors = initColors;
 	}
 }
