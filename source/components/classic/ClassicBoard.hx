@@ -1,6 +1,7 @@
 package components.classic;
 
 import boardObject.Bumper;
+import flixel.FlxG;
 import lime.app.Event;
 
 class ClassicBoard extends Board

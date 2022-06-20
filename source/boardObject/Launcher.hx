@@ -1,8 +1,8 @@
 package boardObject;
 
 import boardObject.Bumper.Direction;
+import components.Board;
 import flixel.FlxSprite;
-import flixel.math.FlxRect;
 import flixel.util.FlxColor;
 
 enum LState

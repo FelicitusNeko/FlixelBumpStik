@@ -1,5 +1,6 @@
 package boardObject;
 
+import components.Board;
 import flixel.FlxSprite;
 import flixel.group.FlxSpriteGroup;
 import flixel.math.FlxPoint;

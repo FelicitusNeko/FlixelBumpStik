@@ -1,8 +1,9 @@
 package components.classic;
 
-import boardObject.Bumper.Color;
+import boardObject.Bumper;
 import components.Board;
 import components.classic.ClassicHUD;
+import flixel.FlxG;
 
 class ClassicGameState extends GameState
 {
