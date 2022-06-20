@@ -1,7 +1,7 @@
-package state;
+package components.classic;
 
 import Board.BumperCallback;
-import hud.ClassicHUD;
+import components.classic.ClassicHUD;
 
 class ClassicGameState extends GameState
 {

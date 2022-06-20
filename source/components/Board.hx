@@ -1,4 +1,4 @@
-package;
+package components;
 
 import boardObject.BoardObject;
 import boardObject.BoardSpace;

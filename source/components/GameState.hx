@@ -1,9 +1,9 @@
-package state;
+package components;
 
 import boardObject.Bumper;
+import components.StandardHUD;
 import flixel.FlxG;
 import flixel.FlxState;
-import hud.StandardHUD;
 import openfl.system.System;
 
 /** Stats for each player. **/

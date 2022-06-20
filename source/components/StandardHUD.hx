@@ -1,4 +1,4 @@
-package hud;
+package components;
 
 import boardObject.Bumper;
 import flixel.FlxG;

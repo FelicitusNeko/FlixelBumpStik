@@ -1,4 +1,4 @@
-package hud;
+package components.classic;
 
 import flixel.ui.FlxButton;
 import lime.app.Event;
