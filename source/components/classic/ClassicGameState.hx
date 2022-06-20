@@ -86,6 +86,8 @@ class ClassicGameState extends GameState
 
 	function onPaintCanClick()
 	{
+		// TODO: don't hardcode bumper size
+		openSubState(new PaintCanSubstate(_boardClassic.center.subtract(32, 32)));
 		if (_paintCans > 0)
 		{
 			trace("Trying to use a Paint Can (have " + _paintCans + ")");
