@@ -62,6 +62,10 @@ class Board extends FlxTypedGroup<FlxBasic>
 	/** Event that fires when the game requests that a next bumper be generated. **/
 	public var onRequestGenerate(default, null) = new Event<Void->Void>();
 
+	/**
+		Event that fires when the next bumper is being launched.
+		@param callback Function for the receiver to call to send along a bumper.
+	**/
 	public var onLaunchBumper(default, null) = new Event<BumperCallback->Void>();
 
 	/**
@@ -80,11 +84,8 @@ class Board extends FlxTypedGroup<FlxBasic>
 	/** Event that fires when the game is over. **/
 	public var onGameOver(default, null) = new Event<Void->Void>();
 
-	// TODO: figure out a better way to handle onLaunchBumper so that we can just make this a true event
-
-	/** Pseudo-event that is called when the next bumper is being launched. **/
-	// public var onLaunchBumper:Void->Bumper = null;
 	#if mobile
+	/** Mobile only. The previous position of the active touch. Used mainly to determine if there has been movement. **/
 	var _lastPosition = new FlxPoint(0, 0);
 	#end
 
@@ -609,10 +610,8 @@ class Board extends FlxTypedGroup<FlxBasic>
 			else
 			{
 				// TODO: Game over
-				// if (onGameOver != null)
-				// 	onGameOver();
 				onGameOver.dispatch();
-				_bumpers.forEach(bumper -> bumper.direction = GameOver);
+				_bumpers.forEach(bumper -> bumper.gameOver());
 				_fsm.activeState = null;
 			}
 		}

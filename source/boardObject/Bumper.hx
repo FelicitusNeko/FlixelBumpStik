@@ -2,6 +2,8 @@ package boardObject;
 
 import components.Board;
 import flixel.FlxSprite;
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 
 /** The current color of the bumper, for matching purposes. **/
@@ -310,6 +312,16 @@ class Bumper extends BoardObject
 		return true;
 	}
 
+	public function gameOver()
+	{
+		direction = GameOver;
+		acceleration.y = height * 8;
+		velocity.x = width * 4 * (Math.random() - .5);
+		velocity.y = -(height * 4 * (Math.random() / 2)) - height * 4;
+		angularVelocity = 90 * (Math.random() - .5);
+		maxVelocity.set(9999, 9999);
+	}
+
 	override function update(elapsed:Float)
 	{
 		lfFrontX = frontX;
@@ -317,5 +329,26 @@ class Bumper extends BoardObject
 		super.update(elapsed);
 		if (justLaunched)
 			justLaunched = false;
+
+		if (alive && !isOnScreen())
+		{
+			alive = exists = false;
+			velocity.set(0, 0);
+			acceleration.set(0, 0);
+			angularAcceleration = angularVelocity = 0;
+		}
+	}
+
+	override function kill()
+	{
+		alive = false;
+		angularVelocity = Math.random() - .5 * 50;
+		FlxTween.tween(this, {alpha: 0, "scale.x": .75, "scale.y": .75}, .145, {
+			ease: FlxEase.circIn,
+			onComplete: (_) ->
+			{
+				exists = false;
+			}
+		});
 	}
 }
