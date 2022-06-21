@@ -48,7 +48,6 @@ class ClassicBoard extends Board
 		{
 			onBumperSelect.dispatch(_selectedBumper);
 			_selectedBumper = null;
-			_fsm.activeState = fsmChecking;
 		}
 	}
 }
