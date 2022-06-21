@@ -1,6 +1,9 @@
 package components.classic;
 
+import boardObject.Bumper;
 import flixel.ui.FlxButton;
+import flixel.ui.FlxSpriteButton;
+import flixel.util.FlxColor;
 import lime.app.Event;
 
 class ClassicHUD extends StandardHUD
@@ -11,9 +14,13 @@ class ClassicHUD extends StandardHUD
 	/** The current number of Paint Cans displayed on the HUD. **/
 	public var paintCans(default, set):Int;
 
-	/** The function to call when the Paint Can button is clicked. **/
-	// public var onPaintCanClick:Void->Void = null;
+	/** Event that fires when the Paint Can button is clicked. **/
 	public var onPaintCanClick(default, null) = new Event<Void->Void>();
+
+	/** Event that fires when the Next Bumper is clicked. **/
+	public var onNextBumperClick(default, null) = new Event<Bumper->Void>();
+
+	private var _nextButton:FlxSpriteButton = null;
 
 	public function new()
 	{
@@ -22,14 +29,10 @@ class ClassicHUD extends StandardHUD
 		if (_rightSide)
 		{
 			_pcButton = new FlxButton(5, 5, "P:0", onPaintCanClick.dispatch);
-			// _pcButton.loadGraphic(AssetPaths.button__png, true, 20, 20);
-			_pcButton.width = 40;
 			_pcButton.allowSwiping = false;
 			_pcButton.y = height - _pcButton.height - 5;
 			add(_pcButton);
 			_pcButton.scrollFactor.set(0, 0);
-
-			trace(_pcButton);
 		}
 
 		paintCans = 0;
@@ -42,5 +45,21 @@ class ClassicHUD extends StandardHUD
 		_pcButton.alive = paintCans > 0;
 
 		return this.paintCans = paintCans;
+	}
+
+	override function set_nextBumper(nextBumper:Bumper):Bumper
+	{
+		if (nextBumper != null && _nextButton == null)
+		{
+			_nextButton = new FlxSpriteButton(width - 5 - nextBumper.width, height - 5 - nextBumper.height, null, () ->
+			{
+				if (nextBumper != null)
+					onNextBumperClick.dispatch(nextBumper);
+			});
+			_nextButton.makeGraphic(Math.round(nextBumper.width), Math.round(nextBumper.height), FlxColor.fromRGBFloat(0, 0, 0, .2));
+			add(_nextButton);
+			_nextButton.scrollFactor.set(0, 0);
+		}
+		return super.set_nextBumper(nextBumper);
 	}
 }
