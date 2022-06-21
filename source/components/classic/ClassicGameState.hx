@@ -4,6 +4,7 @@ import boardObject.Bumper;
 import components.Board;
 import components.classic.ClassicHUD;
 import flixel.FlxG;
+import flixel.math.FlxPoint;
 
 class ClassicGameState extends GameState
 {
@@ -29,10 +30,7 @@ class ClassicGameState extends GameState
 	private var _boardClassic(get, never):ClassicBoard;
 
 	/** The current selected color during a Paint Can event. **/
-	private var _selectedColor:Color;
-
-	/** Whether the next bumper is selected during a Paint Can event. **/
-	private var _isNextSelected = false;
+	private var _selectedColor:Color = None;
 
 	override function create()
 	{
@@ -46,6 +44,7 @@ class ClassicGameState extends GameState
 
 		_hud = new ClassicHUD();
 		_hudClassic.onPaintCanClick.add(onPaintCanClick);
+		_hudClassic.onNextBumperClick.add(onBumperSelect);
 
 		_boardClassic.onRequestGenerate.add(onRequestGenerate);
 		_boardClassic.onMatch.add(onMatch);
@@ -86,11 +85,15 @@ class ClassicGameState extends GameState
 
 	function onPaintCanClick()
 	{
-		// TODO: don't hardcode bumper size
-		openSubState(new PaintCanSubstate(_boardClassic.center.subtract(32, 32)));
+		if (_selectedColor != None)
+			return;
+
 		if (_paintCans > 0)
 		{
-			trace("Trying to use a Paint Can (have " + _paintCans + ")");
+			var bumperSize = new FlxPoint(_hud.nextBumper.width, _hud.nextBumper.height).scale(.5);
+			var paintDialog = new PaintCanSubstate(_boardClassic.center.subtractPoint(bumperSize));
+			paintDialog.onDialogResult.add(onColorSelect);
+			openSubState(paintDialog);
 		}
 	}
 
@@ -134,46 +137,24 @@ class ClassicGameState extends GameState
 		_addScore(10 * Math.floor(Math.pow(2, chain - 1)));
 	}
 
-	inline function onBumperSelect(bumper:Bumper)
+	function onColorSelect(color:Color)
 	{
-		bumper.bColor = _selectedColor;
-		_selectedColor = None;
-		_isNextSelected = false;
+		if (color != None && _selectedColor == None)
+		{
+			_selectedColor = color;
+			_boardClassic.startPaint();
+			// TODO: interface to display selected colour and cancel paint job
+		}
 	}
 
-	override function update(elapsed:Float)
+	inline function onBumperSelect(bumper:Bumper)
 	{
-		super.update(elapsed);
-
 		if (_selectedColor != None)
 		{
-			#if mobile
-			var touch = FlxG.touches.getFirst();
-			var justPressed = false,
-				justReleased = false,
-				position:FlxPoint = new FlxPoint(0, 0);
-
-			if (touch != null)
-			{
-				justPressed = touch.justPressed;
-				justReleased = touch.justReleased;
-				position = touch.getWorldPosition();
-			}
-			#else
-			var justPressed = FlxG.mouse.justPressed;
-			var justReleased = FlxG.mouse.justReleased;
-			var position = FlxG.mouse.getWorldPosition();
-			#end
-
-			if (justPressed)
-				_isNextSelected = _player.nextBumper.overlapsPoint(position);
-			if (justReleased && _isNextSelected && _player.nextBumper.overlapsPoint(position))
-			{
-				_player.nextBumper.bColor = _selectedColor;
-				_selectedColor = None;
-				_isNextSelected = false;
-				_boardClassic.endPaint();
-			}
+			_hudClassic.paintCans = --_paintCans;
+			bumper.bColor = _selectedColor;
+			_selectedColor = None;
+			_boardClassic.endPaint();
 		}
 	}
 }
