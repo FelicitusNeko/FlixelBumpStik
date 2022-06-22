@@ -92,6 +92,8 @@ class Bumper extends BoardObject
 	/** Whether this bumper has just been launched. **/
 	public var justLaunched(default, null):Bool = false;
 
+	public var isUIElement:Bool = false;
+
 	public function new(x:Float, y:Float, color:Color, direction:Direction = Direction.None, launchDirection:Direction = Direction.None, owner:Board = null)
 	{
 		super(x, y, owner);
@@ -341,14 +343,19 @@ class Bumper extends BoardObject
 
 	override function kill()
 	{
-		alive = false;
-		angularVelocity = Math.random() - .5 * 50;
-		FlxTween.tween(this, {alpha: 0, "scale.x": .75, "scale.y": .75}, .145, {
-			ease: FlxEase.circIn,
-			onComplete: (_) ->
-			{
-				exists = false;
-			}
-		});
+		if (isUIElement)
+			return super.kill();
+		else
+		{
+			alive = false;
+			angularVelocity = Math.random() - .5 * 50;
+			FlxTween.tween(this, {alpha: 0, "scale.x": .75, "scale.y": .75}, .145, {
+				ease: FlxEase.circIn,
+				onComplete: (_) ->
+				{
+					exists = false;
+				}
+			});
+		}
 	}
 }
