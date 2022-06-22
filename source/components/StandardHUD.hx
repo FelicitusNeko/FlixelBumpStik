@@ -68,8 +68,7 @@ class StandardHUD extends FlxSpriteGroup
 			super(0, FlxG.height * .8);
 		}
 
-		for (sprite in group)
-			sprite.scrollFactor.set(0, 0);
+		scrollFactor.set(0, 0);
 
 		score = 0;
 		block = 0;
@@ -106,7 +105,6 @@ class StandardHUD extends FlxSpriteGroup
 		{
 			nextBumper.setPosition(width - nextBumper.width - 5, height - nextBumper.height - 5);
 			add(nextBumper);
-			nextBumper.scrollFactor.set(0, 0);
 		}
 		return this.nextBumper = nextBumper;
 	}
