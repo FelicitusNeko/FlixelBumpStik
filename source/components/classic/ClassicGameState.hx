@@ -5,6 +5,7 @@ import components.Board;
 import components.classic.ClassicHUD;
 import flixel.FlxG;
 import flixel.math.FlxPoint;
+import flixel.ui.FlxButton;
 
 class ClassicGameState extends GameState
 {
@@ -19,6 +20,10 @@ class ClassicGameState extends GameState
 
 	/** How much the score target for the next Paint Can will be incremented when it is hit. **/
 	private var _paintCansIncrement:Int = 1500;
+
+	private var _paintCanBumper:Bumper = null;
+
+	private var _paintCanCancelButton:FlxButton = null;
 
 	/** The number of bumpers to clear to add a new color. **/
 	private var _nextColor:Int = 100;
@@ -53,6 +58,13 @@ class ClassicGameState extends GameState
 		_boardClassic.onBumperSelect.add(onBumperSelect);
 
 		super.create();
+
+		// var test = new FlxButton(0, 0, "Test", () ->
+		// {
+		// 	_hudClassic.paintCans = ++_paintCans;
+		// });
+		// test.scrollFactor.set(0, 0);
+		// add(test);
 	}
 
 	inline function get__hudClassic()
@@ -73,13 +85,17 @@ class ClassicGameState extends GameState
 		_jackpot += addScore;
 		var modAddScore = GameState.addScore(_player, addScore);
 		_hud.score += modAddScore;
-		if (_player.score >= _paintCansNext)
+
+		var plusPaint = 0;
+		while (_player.score >= _paintCansNext)
 		{
-			_hudClassic.paintCans = ++_paintCans;
+			plusPaint++;
 			_paintCansNext += _paintCansIncrement;
 			_paintCansIncrement += 500;
 			trace("Awarding paint can; next at " + _paintCansNext);
 		}
+		_hudClassic.paintCans = _paintCans += plusPaint;
+
 		return modAddScore;
 	}
 
@@ -104,6 +120,7 @@ class ClassicGameState extends GameState
 			_bg.colors++;
 			_nextColor += 150;
 			_player.multStack[0] += .2;
+			openSubState(new NewColorSubstate(BumperGenerator.colorOpts[_bg.colors], _boardClassic.center));
 			trace("Adding new colour; now at " + _bg.colors);
 		}
 		if (_player.board.bCount <= 0 && _jackpot > 0)
@@ -111,6 +128,7 @@ class ClassicGameState extends GameState
 			var mJackpot = _addScore(_jackpot);
 			_jackpot = 0;
 			trace("Awarding jackpot of " + mJackpot);
+			openSubState(new AllClearSubstate(mJackpot, _boardClassic.center));
 		}
 		if (_player.nextBumper == null)
 			_player.nextBumper = _hud.nextBumper = _bg.generate();
@@ -144,15 +162,49 @@ class ClassicGameState extends GameState
 			_selectedColor = color;
 			_boardClassic.startPaint();
 			// TODO: interface to display selected colour and cancel paint job
+
+			if (_paintCanBumper == null)
+			{
+				_paintCanBumper = new Bumper(_boardClassic.center.x - ((_boardClassic.bWidth + 2) * _boardClassic.sWidth / 2),
+					_boardClassic.center.y + (_boardClassic.bHeight * _boardClassic.sHeight / 2), _selectedColor, Clearing);
+				_paintCanBumper.scale.set(.75, .75);
+				_paintCanBumper.isUIElement = true;
+				add(_paintCanBumper);
+			}
+			else
+			{
+				_paintCanBumper.bColor = _selectedColor;
+				_paintCanBumper.revive();
+			}
+			if (_paintCanCancelButton == null)
+			{
+				_paintCanCancelButton = new FlxButton(_boardClassic.center.x
+					+ (_boardClassic.bWidth * _boardClassic.sWidth / 2)
+					+ 20,
+					_boardClassic.center.y
+					+ (_boardClassic.bHeight * _boardClassic.sHeight / 2)
+					+ 20, "X", () -> onBumperSelect(null));
+				_paintCanCancelButton.loadGraphic(AssetPaths.button__png, true, 20, 20);
+				_paintCanCancelButton.scale.set(2, 2);
+				_paintCanCancelButton.scrollFactor.set(1, 1);
+				add(_paintCanCancelButton);
+			}
+			else
+				_paintCanCancelButton.revive();
 		}
 	}
 
-	inline function onBumperSelect(bumper:Bumper)
+	function onBumperSelect(bumper:Bumper)
 	{
 		if (_selectedColor != None)
 		{
-			_hudClassic.paintCans = --_paintCans;
-			bumper.bColor = _selectedColor;
+			if (bumper != null)
+			{
+				_hudClassic.paintCans = --_paintCans;
+				bumper.bColor = _selectedColor;
+			}
+			_paintCanBumper.kill();
+			_paintCanCancelButton.kill();
 			_selectedColor = None;
 			_boardClassic.endPaint();
 		}
