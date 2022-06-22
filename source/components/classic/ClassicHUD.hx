@@ -1,6 +1,9 @@
 package components.classic;
 
 import boardObject.Bumper;
+import flixel.text.FlxText;
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
 import flixel.ui.FlxButton;
 import flixel.ui.FlxSpriteButton;
 import flixel.util.FlxColor;
@@ -32,7 +35,6 @@ class ClassicHUD extends StandardHUD
 			_pcButton.allowSwiping = false;
 			_pcButton.y = height - _pcButton.height - 5;
 			add(_pcButton);
-			_pcButton.scrollFactor.set(0, 0);
 		}
 
 		paintCans = 0;
@@ -43,6 +45,18 @@ class ClassicHUD extends StandardHUD
 		var displayPaintCans = Math.round(Math.min(paintCans, 9));
 		_pcButton.text = "P:" + displayPaintCans;
 		_pcButton.alive = paintCans > 0;
+
+		var diff = paintCans - this.paintCans;
+		if (diff > 0)
+		{
+			trace("Displaying diff of " + diff);
+			var plustext = new FlxText(0, 0, 0, "+" + diff, 12);
+			plustext.color = FlxColor.YELLOW;
+			add(plustext);
+			plustext.setPosition(_pcButton.x + (_pcButton.width * Math.random()) - (plustext.width / 2), _pcButton.y);
+			FlxTween.tween(plustext, {alpha: 0, y: plustext.y - (plustext.height * 1.5)}, 1, {ease: FlxEase.circOut, onComplete: (_) -> plustext.kill()});
+			trace(plustext);
+		}
 
 		return this.paintCans = paintCans;
 	}
@@ -58,7 +72,6 @@ class ClassicHUD extends StandardHUD
 			});
 			_nextButton.makeGraphic(Math.round(nextBumper.width), Math.round(nextBumper.height), FlxColor.fromRGBFloat(0, 0, 0, .2));
 			add(_nextButton);
-			_nextButton.scrollFactor.set(0, 0);
 		}
 		return super.set_nextBumper(nextBumper);
 	}
