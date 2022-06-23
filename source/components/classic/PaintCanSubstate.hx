@@ -1,5 +1,6 @@
 package components.classic;
 
+import boardObject.BoardObject;
 import boardObject.Bumper;
 import flixel.FlxG;
 import flixel.FlxSubState;
@@ -64,25 +65,20 @@ class PaintCanSubstate extends FlxSubState
 		cancelText.y -= cancelText.height / 2;
 		add(cancelText);
 
+		for (bumper in _bumpers)
+			bumper.onClick.add(onClickBumper);
 		add(_bumpers);
 
 		onDialogResult.add(onDialogResultF);
 	}
 
-	override function update(elapsed:Float)
+	function onClickBumper(obj:BoardObject)
 	{
-		super.update(elapsed);
-
-		if (FlxG.mouse.justPressed)
-		{
-			var pos = FlxG.mouse.getWorldPosition();
-			for (bumper in _bumpers)
-				if (bumper.overlapsPoint(pos) && !bumper.grayedOut)
-				{
-					onDialogResult.dispatch(bumper.bColor);
-					return;
-				}
-		}
+		if (!Std.isOfType(obj, Bumper))
+			return;
+		var bumper = cast(obj, Bumper);
+		if (!bumper.grayedOut)
+			onDialogResult.dispatch(bumper.bColor);
 	}
 
 	function onDialogResultF(_:Color)
