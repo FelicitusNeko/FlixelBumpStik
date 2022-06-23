@@ -124,10 +124,9 @@ class ClassicGameState extends GameState
 		}
 		if (_player.block >= _nextColor && _bg.colors < 6)
 		{
-			_bg.colors++;
 			_nextColor += 150;
 			_player.multStack[0] += .2;
-			openSubState(new NewColorSubstate(BumperGenerator.colorOpts[_bg.colors], _boardClassic.center));
+			openSubState(new NewColorSubstate(BumperGenerator.colorOpts[_bg.colors++], _boardClassic.center));
 			trace("Adding new colour; now at " + _bg.colors);
 		}
 		if (_player.nextBumper == null)
