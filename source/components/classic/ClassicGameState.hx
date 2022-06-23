@@ -115,6 +115,13 @@ class ClassicGameState extends GameState
 
 	function onRequestGenerate()
 	{
+		if (_player.board.bCount <= 0 && _jackpot > 0)
+		{
+			var mJackpot = _addScore(_jackpot);
+			_jackpot = 0;
+			trace("Awarding jackpot of " + mJackpot);
+			openSubState(new AllClearSubstate(mJackpot, _boardClassic.center));
+		}
 		if (_player.block >= _nextColor && _bg.colors < 6)
 		{
 			_bg.colors++;
@@ -122,13 +129,6 @@ class ClassicGameState extends GameState
 			_player.multStack[0] += .2;
 			openSubState(new NewColorSubstate(BumperGenerator.colorOpts[_bg.colors], _boardClassic.center));
 			trace("Adding new colour; now at " + _bg.colors);
-		}
-		if (_player.board.bCount <= 0 && _jackpot > 0)
-		{
-			var mJackpot = _addScore(_jackpot);
-			_jackpot = 0;
-			trace("Awarding jackpot of " + mJackpot);
-			openSubState(new AllClearSubstate(mJackpot, _boardClassic.center));
 		}
 		if (_player.nextBumper == null)
 			_player.nextBumper = _hud.nextBumper = _bg.generate();
