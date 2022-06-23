@@ -23,7 +23,7 @@ class ClassicHUD extends StandardHUD
 	/** Event that fires when the Next Bumper is clicked. **/
 	public var onNextBumperClick(default, null) = new Event<Bumper->Void>();
 
-	private var _nextButton:FlxSpriteButton = null;
+	// private var _nextButton:FlxSpriteButton = null;
 
 	public function new()
 	{
@@ -63,16 +63,25 @@ class ClassicHUD extends StandardHUD
 
 	override function set_nextBumper(nextBumper:Bumper):Bumper
 	{
-		if (nextBumper != null && _nextButton == null)
+		function onNextClick(b)
 		{
-			_nextButton = new FlxSpriteButton(width - 5 - nextBumper.width, height - 5 - nextBumper.height, null, () ->
-			{
-				if (nextBumper != null)
-					onNextBumperClick.dispatch(nextBumper);
-			});
-			_nextButton.makeGraphic(Math.round(nextBumper.width), Math.round(nextBumper.height), FlxColor.fromRGBFloat(0, 0, 0, .2));
-			add(_nextButton);
+			onNextBumperClick.dispatch(cast(b, Bumper));
 		}
+
+		if (this.nextBumper != null)
+			this.nextBumper.onClick.remove(onNextClick);
+		if (nextBumper != null)
+			nextBumper.onClick.add(onNextClick);
+		// if (nextBumper != null && _nextButton == null)
+		// {
+		// 	_nextButton = new FlxSpriteButton(width - 5 - nextBumper.width, height - 5 - nextBumper.height, null, () ->
+		// 	{
+		// 		if (nextBumper != null)
+		// 			onNextBumperClick.dispatch(nextBumper);
+		// 	});
+		// 	_nextButton.makeGraphic(Math.round(nextBumper.width), Math.round(nextBumper.height), FlxColor.fromRGBFloat(0, 0, 0, .2));
+		// 	add(_nextButton);
+		// }
 		return super.set_nextBumper(nextBumper);
 	}
 }

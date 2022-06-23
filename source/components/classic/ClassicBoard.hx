@@ -1,5 +1,6 @@
 package components.classic;
 
+import boardObject.BoardObject;
 import boardObject.Bumper;
 import flixel.FlxG;
 import lime.app.Event;
@@ -43,11 +44,20 @@ class ClassicBoard extends Board
 		#end
 
 		if (justPressed)
-			_selectedBumper = bumperAtPoint(position);
-		if (justReleased && _selectedBumper != null && bumperAtPoint(position) == _selectedBumper)
+			_selectedBumper = atPoint(_bumpers, position);
+		if (justReleased && _selectedBumper != null && atPoint(_bumpers, position) == _selectedBumper)
 		{
 			onBumperSelect.dispatch(_selectedBumper);
 			_selectedBumper = null;
 		}
+	}
+
+	override function onClickBumper(obj:BoardObject)
+	{
+		if (!_fsm.is(fsmPaintSelect))
+			return;
+		if (!Std.isOfType(obj, Bumper))
+			return;
+		onBumperSelect.dispatch(cast(obj, Bumper));
 	}
 }

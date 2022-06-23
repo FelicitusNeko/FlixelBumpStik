@@ -132,6 +132,9 @@ class Board extends FlxTypedGroup<FlxBasic>
 
 		_fsm = new FSM(fsmIdle);
 
+		for (launcher in _launchers)
+			launcher.onClick.add(onClickLauncher);
+
 		// setupTest(10);
 
 		// trace((bWidth + 2) * sWidth, (bHeight + 2) * sHeight);
@@ -205,7 +208,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 				putBumperAt(0, 0, Red, Up);
 				putBumperAt(0, 1, Red, Up);
 				putBumperAt(0, 3, Red, Up);
-				var launcher = launcherAtPoint(new FlxPoint(origin.x, origin.y).add(sWidth * 2.5, sHeight * 5.5));
+				var launcher = atPoint(_launchers, new FlxPoint(origin.x, origin.y).add(sWidth * 2.5, sHeight * 5.5));
 				if (launcher != null)
 					launcher.launchBumper(new Bumper(0, 0, Blue, Up));
 				autoLaunch = false;
@@ -231,24 +234,66 @@ class Board extends FlxTypedGroup<FlxBasic>
 	public function putBumperAt(x:Int, y:Int, color:Color, dir:Direction = Direction.None)
 	{
 		var bumper = new Bumper(x * sWidth, y * sHeight, color, dir, None, this);
+		bumper.onClick.add(onClickBumper);
 		_bumpers.add(bumper);
 		return bumper;
 	}
 
 	/** 
 		Looks for a board object based on a given sprite.
-		@param bspr The sprite to look for.
 		@param list The list of objects to retreve from.
+		@param bspr The sprite to look for.
 		@return The board object to which the sprite belongs, or `null` if none was found.
 	**/
 	@:generic
-	private function spriteTo<T:BoardObject>(spr:FlxSprite, list:FlxTypedGroup<T>):T
+	private function spriteTo<T:BoardObject>(list:FlxTypedGroup<T>, spr:FlxSprite):T
 	{
-		for (thing in list)
-		{
-			if (thing.has(spr))
-				return thing;
-		}
+		for (object in list)
+			if (object.has(spr))
+				return object;
+		return null;
+	}
+
+	/**
+		Determines which board object is located at the given board X and Y grid spaces.
+		@param list The list of objects to retreve from.
+		@param x The X grid coordinate on the board.
+		@param y The Y grid coordinate on the board.
+		@param mustBeAlive Optional. Whether the returned object must be alive. Default `true`
+		@return The board object found at the given board grid coordinates, or `null` if there is none.
+	**/
+	@:generic
+	public function atGrid<T:BoardObject>(list:FlxTypedGroup<T>, x:Int, y:Int, mustBeAlive = true):T
+	{
+		for (object in list)
+			if (object.boardX == x && object.boardY == y && (!mustBeAlive || object.alive))
+				return object;
+		return null;
+	}
+
+	/**
+		Temporary function for launcher functionality.
+		@deprecated Currently only to be used for the `Launcher` class.
+	**/
+	public function bumperAt(x, y)
+	{
+		return atGrid(_bumpers, x, y);
+	}
+
+	/**
+		Determines which board object, if any, is located at the given `FlxPoint` coordinates.
+		@param list The list of objects to retreve from.
+		@param pt The world position to check at.
+		@param mustBeAlive Optional. Whether the returned object must be alive. Default `true`
+		@return The board object at that point, or `null` if there is none.
+	**/
+	@:generic
+	public function atPoint<T:BoardObject>(list:FlxTypedGroup<T>, pt:FlxPoint, mustBeAlive = true):T
+	{
+		for (object in list)
+			if (object.overlapsPoint(pt) && (!mustBeAlive || object.alive))
+				return object;
+
 		return null;
 	}
 
@@ -261,11 +306,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 	**/
 	public function bumpersAt(x:Int, y:Int, exclude:Bumper = null)
 	{
-		var boardSpace:BoardSpace = null;
-
-		for (space in _spaces)
-			if (space.boardX == x && space.boardY == y)
-				boardSpace = space;
+		var boardSpace:BoardSpace = atGrid(_spaces, x, y);
 		if (boardSpace == null)
 			return [];
 
@@ -279,71 +320,28 @@ class Board extends FlxTypedGroup<FlxBasic>
 	}
 
 	/**
-		Determines which bumper is located at the given board X and Y grid spaces.
-		Should only be used while the board is not in motion; may be unreliable otherwise.
-		@param x The X grid coordinate on the board.
-		@param y The Y grid coordinate on the board.
-		@return The bumper found at the given board grid coordinates, or `null` if there is none.
+		Updates all member objects and runs the state machine.
+		@param elapsed The number of seconds passed since the last frame.
 	**/
-	public function bumperAt(x:Int, y:Int):Bumper
-	{
-		for (bumper in _bumpers)
-		{
-			if (bumper.boardX == x && bumper.boardY == y && bumper.alive)
-				return bumper;
-		}
-		return null;
-	}
-
-	/**
-		Determines which bumper, if any, is located at the given `FlxPoint` coordinates.
-		@param pt The world position to check at.
-		@return The bumper at that point, or `null` if there is none.
-	**/
-	public function bumperAtPoint(pt:FlxPoint):Bumper
-	{
-		for (bumper in _bumpers)
-			if (bumper.overlapsPoint(pt))
-				return bumper;
-		return null;
-	}
-
-	/**
-		Determines which launcher, if any, is located at the given `FlxPoint` coordinates.
-		@param pt The world position to check at.
-		@return The launcher at that point, or `null` if there is none.
-	**/
-	public function launcherAtPoint(pt:FlxPoint):Launcher
-	{
-		for (launcher in _launchers)
-			if (launcher.overlapsPoint(pt))
-				return launcher;
-		return null;
-	}
-
-	/**
-		Determines which board space is located at the given board X and Y grid spaces.
-		@param x The X grid coordinate on the board.
-		@param y The Y grid coordinate on the board.
-		@return The space found at the given board grid coordinates, or `null` if there is none.
-	**/
-	public function spaceAt(x:Int, y:Int)
-	{
-		for (space in _spaces)
-			if (space.boardX == x && space.boardY == y)
-				return space;
-
-		return null;
-	}
-
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
 		_fsm.update(elapsed);
 	}
 
-	/** State machine call for idle state. **/
 	private function fsmIdle(elapsed:Float)
+	{
+		if (_fsm.justChanged) // If the state just changed to idle:
+		{
+			// if (onRequestGenerate != null)
+			// 	onRequestGenerate();
+			onRequestGenerate.dispatch(); // Request that a new next bumper be generated
+			curChain = 0; // Reset chain to zero
+		}
+	}
+
+	/** State machine call for idle state. **/
+	private function fsmIdleV1(elapsed:Float)
 	{
 		#if mobile
 		var touch = FlxG.touches.getFirst();
@@ -385,12 +383,12 @@ class Board extends FlxTypedGroup<FlxBasic>
 			if (pressed && _selectedLauncher != null) // If the mouse/touch is held and there is a selected bumper:
 			{
 				// If the mouse/touch is over the selected bumper, use Selected state; if not, use SelectedNotHovering
-				_selectedLauncher.state = _selectedLauncher == launcherAtPoint(position) ? Selected : SelectedNotHovering;
+				_selectedLauncher.state = _selectedLauncher == atPoint(_launchers, position) ? Selected : SelectedNotHovering;
 			}
 			#if (!mobile)
 			else // If the mouse is not held or there's no selected bumper:
 			{
-				var launcher = launcherAtPoint(position); // Determine if there's a bumper under the cursor
+				var launcher = atPoint(_launchers, position); // Determine if there's a bumper under the cursor
 				if (_selectedLauncher != launcher) // If what's under the cursor is not the selected launcher:
 				{
 					if (_selectedLauncher != null && _selectedLauncher.state != Blocked) // If there is a previously selected launcher and it's not Blocked:
@@ -406,7 +404,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 		#if mobile
 		if (justPressed) // When the user touches the screen:
 		{
-			var launcher = launcherAtPoint(position); // Determine if there's a launcher at the touch location
+			var launcher = atPoint(_launchers, position); // Determine if there's a launcher at the touch location
 			if (launcher != null && launcher.state != Blocked) // If there is a launcher and it's not blocked:
 			{
 				_selectedLauncher = launcher; // Make it the selected launcher
@@ -433,6 +431,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 			if (bumper == null)
 				bumper = new Bumper(0, 0, Blue, Right);
 
+			bumper.onClick.add(onClickBumper);
 			_bumpers.add(bumper); // Add the bumper to the board collection
 			_selectedLauncher.launchBumper(bumper); // Launch the bumper from the launcher
 			_launchers.forEach(launcher -> launcher.enabled = false); // Disable all the launchers
@@ -554,7 +553,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 					x--;
 				else
 					y--;
-				var bumper = bumperAt(x, y);
+				var bumper = atGrid(_bumpers, x, y);
 				if (bumper != null && bumper.markForClear())
 					clearCount++;
 			}
@@ -567,7 +566,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 				var streakColor:Color = None, streakLength:Int = 0;
 				for (x in 0...(horizontal ? bWidth : bHeight))
 				{
-					var bumper = horizontal ? bumperAt(x, y) : bumperAt(y, x);
+					var bumper = horizontal ? atGrid(_bumpers, x, y) : atGrid(_bumpers, y, x);
 					if (bumper != null && bumper.bColor == streakColor)
 						streakLength++;
 					else
@@ -591,8 +590,6 @@ class Board extends FlxTypedGroup<FlxBasic>
 			_delay = .5;
 			// TODO: play sound
 			curChain++;
-			// if (onMatch != null)
-			// 	onMatch(curChain, clearCount);
 			onMatch.dispatch(curChain, clearCount);
 			_fsm.activeState = fsmClearing;
 		}
@@ -626,11 +623,9 @@ class Board extends FlxTypedGroup<FlxBasic>
 			for (y in 0...bHeight)
 				for (x in 0...bWidth)
 				{
-					var bumper = bumperAt(x, y);
+					var bumper = atGrid(_bumpers, x, y);
 					if (bumper != null && bumper.direction == Clearing)
 					{
-						// if (onClear != null)
-						// 	onClear(curChain);
 						onClear.dispatch(curChain);
 						bumper.kill();
 						_delay += .15;
@@ -664,6 +659,34 @@ class Board extends FlxTypedGroup<FlxBasic>
 		}
 	}
 
+	/** 
+		Event handler for when launchers are clicked.
+		@param obj The launcher that was clicked.
+	**/
+	private function onClickLauncher(obj:BoardObject)
+	{
+		if (!Std.isOfType(obj, Launcher))
+			return;
+		var launcher = cast(obj, Launcher);
+		if (_fsm.is(fsmIdle) && launcher.state == Selected)
+		{
+			var bumper = new Bumper(0, 0, Blue, None);
+			onLaunchBumper.dispatch(b -> bumper = b);
+			bumper.onClick.add(onClickBumper);
+			launcher.launchBumper(bumper);
+			_bumpers.add(bumper);
+			for (launcher in _launchers)
+				launcher.enabled = false;
+			_fsm.activeState = fsmMoving;
+		}
+	}
+
+	/**
+		Event handler for when bumpers are clicked. Does nothing on its own.
+		@param obj The bumper that was clicked.
+	**/
+	private function onClickBumper(obj:BoardObject) {};
+
 	/**
 		This function checks for overlaps between bumpers.
 		@param lh One of the overlapping sprites.
@@ -674,7 +697,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 		if (!lh.alive || !rh.alive)
 			return;
 
-		var blh = spriteTo(lh, _bumpers), brh = spriteTo(rh, _bumpers);
+		var blh = spriteTo(_bumpers, lh), brh = spriteTo(_bumpers, rh);
 		if (blh == brh || blh == null || brh == null)
 			return;
 
@@ -701,7 +724,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 		if (!bspr.alive)
 			return;
 
-		var bumper = spriteTo(bspr, _bumpers), space = spriteTo(sspr, _spaces);
+		var bumper = spriteTo(_bumpers, bspr), space = spriteTo(_spaces, sspr);
 		if (bumper == null || space == null)
 			return;
 
@@ -728,8 +751,8 @@ class Board extends FlxTypedGroup<FlxBasic>
 		if (!bspr.alive || !lspr.alive)
 			return;
 
-		var bumper = spriteTo(bspr, _bumpers),
-			launcher = spriteTo(lspr, _launchers);
+		var bumper = spriteTo(_bumpers, bspr),
+			launcher = spriteTo(_launchers, lspr);
 		if (bumper == null || launcher == null)
 			return;
 

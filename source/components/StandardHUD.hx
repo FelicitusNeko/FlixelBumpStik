@@ -105,6 +105,8 @@ class StandardHUD extends FlxSpriteGroup
 		{
 			nextBumper.setPosition(width - nextBumper.width - 5, height - nextBumper.height - 5);
 			add(nextBumper);
+			// nextBumper.scrollFactor.set(0, 0);
+			// trace(nextBumper, nextBumper.scrollFactor);
 		}
 		return this.nextBumper = nextBumper;
 	}

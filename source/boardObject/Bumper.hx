@@ -59,9 +59,6 @@ class Bumper extends BoardObject
 	**/
 	public var activeDirection(get, never):Direction;
 
-	/** The sprite representing the base of this bumper. **/
-	public var base(default, null):FlxSprite;
-
 	/** The sprite representing the arrow or symbol of this bumper. **/
 	public var arrow(default, null):FlxSprite;
 
@@ -98,9 +95,7 @@ class Bumper extends BoardObject
 	{
 		super(x, y, owner);
 
-		base = new FlxSprite(0, 0);
 		base.loadGraphic(AssetPaths.BumperBase__png);
-		add(base);
 
 		arrow = new FlxSprite(0, 0);
 		arrow.loadGraphic(AssetPaths.BumperSymbols__png, true, cast(width, Int), cast(height, Int));

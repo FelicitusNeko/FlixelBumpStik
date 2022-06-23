@@ -4,6 +4,8 @@ import components.Board;
 import flixel.FlxSprite;
 import flixel.group.FlxSpriteGroup;
 import flixel.math.FlxPoint;
+import flixel.ui.FlxSpriteButton;
+import lime.app.Event;
 
 /** Any of a class of object that composes a Bumper Stickers board. **/
 abstract class BoardObject extends FlxSpriteGroup
@@ -13,6 +15,9 @@ abstract class BoardObject extends FlxSpriteGroup
 
 	/** The board's origin point, or (0,0) if there is no owner board. **/
 	public var bOrigin(get, never):FlxPoint;
+
+	/** The sprite button representing the base of this object. **/
+	public var base(default, null):FlxSpriteButton;
 
 	/** The adjusted X position accounting for the board's origin point. **/
 	public var adjustedX(get, set):Float;
@@ -26,10 +31,17 @@ abstract class BoardObject extends FlxSpriteGroup
 	/** The nearest Y position to the center of the bumper relative to the play field. **/
 	public var boardY(get, set):Int;
 
+	/** Event that fires when the object is clicked. **/
+	public var onClick(default, null) = new Event<BoardObject->Void>();
+
 	public function new(x:Float, y:Float, owner:Board = null)
 	{
 		super(x, y);
 		this.owner = owner;
+
+		base = new FlxSpriteButton(0, 0, null, onClickF);
+		base.allowSwiping = false;
+		add(base);
 	}
 
 	function set_owner(owner:Board):Board
@@ -113,5 +125,10 @@ abstract class BoardObject extends FlxSpriteGroup
 			if (spr == mspr)
 				return true;
 		return false;
+	}
+
+	private function onClickF()
+	{
+		onClick.dispatch(this);
 	}
 }

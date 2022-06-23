@@ -17,8 +17,7 @@ class BoardSpace extends BoardObject
 	public function new(x:Float, y:Float, owner:Board)
 	{
 		super(x, y, owner);
-		var base = new FlxSprite(0, 0);
+
 		base.makeGraphic(64, 64, FlxColor.GRAY);
-		add(base);
 	}
 }

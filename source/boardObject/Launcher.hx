@@ -2,6 +2,7 @@ package boardObject;
 
 import boardObject.Bumper.Direction;
 import components.Board;
+import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.util.FlxColor;
 
@@ -19,9 +20,6 @@ class Launcher extends BoardObject
 {
 	/** The facing (and launching) direction of this launcher. **/
 	public var direction(default, set):Direction;
-
-	/** The sprite representing the base of this launcher. **/
-	public var base(default, null):FlxSprite;
 
 	/** The sprite representing the arrow or symbol of this launcher. **/
 	public var arrow(default, null):FlxSprite;
@@ -45,9 +43,11 @@ class Launcher extends BoardObject
 	{
 		super(x, y, owner);
 
-		base = new FlxSprite(0, 0);
 		base.loadGraphic(AssetPaths.BumperBase__png);
-		add(base);
+		base.onOver.callback = onBaseOver;
+		base.onOut.callback = onBaseOut;
+		base.onDown.callback = onBaseDown;
+		base.onUp.callback = onBaseUp;
 
 		arrow = new FlxSprite(0, 0);
 		arrow.loadGraphic(AssetPaths.BumperSymbols__png, true, cast(width, Int), cast(height, Int));
@@ -121,10 +121,71 @@ class Launcher extends BoardObject
 	function set_enabled(enabled:Bool):Bool
 	{
 		if (enabled)
-			state = (owner != null && owner.bumperAt(forwardX, forwardY) != null) ? Blocked : Open;
+		{
+			#if mobile
+			var touch = FlxG.touches.getFirstTouch();
+			var pos = touch != null ? touch.getWorldPosition() : null;
+			#else
+			var pos = FlxG.mouse.getWorldPosition();
+			#end
+			var isOver = overlapsPoint(pos);
+
+			if (owner != null && owner.bumperAt(forwardX, forwardY) != null)
+				state = Blocked;
+			else if (isOver)
+				state = Hovering;
+			else
+				state = Open;
+		}
 		else
 			state = Blocked;
 		return this.enabled = enabled;
+	}
+
+	function onBaseDown()
+	{
+		if (state == Hovering)
+			state = Selected;
+	}
+
+	function onBaseUp()
+	{
+		if (state == Selected)
+			onClick.dispatch(this);
+	}
+
+	function onBaseOver()
+	{
+		if (state == Open)
+			state = Hovering;
+		else if (state == SelectedNotHovering)
+			state = Selected;
+	}
+
+	function onBaseOut()
+	{
+		if (state == Hovering)
+			state = Open;
+		else if (state == Selected)
+			state = SelectedNotHovering;
+	}
+
+	override function update(elapsed:Float)
+	{
+		super.update(elapsed);
+
+		if (state == SelectedNotHovering)
+		{
+			#if mobile
+			var touch = FlxG.touches.getFirstTouch();
+			if (touch != null && touch.justReleased)
+			#else
+			if (FlxG.mouse.justReleased)
+			#end
+			{
+				state = Open;
+			}
+		}
 	}
 
 	/**
