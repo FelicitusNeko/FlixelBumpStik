@@ -123,12 +123,12 @@ class Launcher extends BoardObject
 		if (enabled)
 		{
 			#if mobile
-			var touch = FlxG.touches.getFirstTouch();
+			var touch = FlxG.touches.getFirst();
 			var pos = touch != null ? touch.getWorldPosition() : null;
 			#else
 			var pos = FlxG.mouse.getWorldPosition();
 			#end
-			var isOver = overlapsPoint(pos);
+			var isOver = pos != null ? overlapsPoint(pos) : false;
 
 			if (owner != null && owner.bumperAt(forwardX, forwardY) != null)
 				state = Blocked;
@@ -144,8 +144,12 @@ class Launcher extends BoardObject
 
 	function onBaseDown()
 	{
+		#if mobile
+		if (state == Hovering || state == Open)
+		#else
 		if (state == Hovering)
-			state = Selected;
+		#end
+		state = Selected;
 	}
 
 	function onBaseUp()
@@ -177,7 +181,7 @@ class Launcher extends BoardObject
 		if (state == SelectedNotHovering)
 		{
 			#if mobile
-			var touch = FlxG.touches.getFirstTouch();
+			var touch = FlxG.touches.getFirst();
 			if (touch != null && touch.justReleased)
 			#else
 			if (FlxG.mouse.justReleased)

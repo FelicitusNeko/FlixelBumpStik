@@ -4,6 +4,9 @@ import boardObject.BoardObject;
 import boardObject.Bumper;
 import flixel.FlxG;
 import lime.app.Event;
+#if mobile
+import flixel.math.FlxPoint;
+#end
 
 class ClassicBoard extends Board
 {
