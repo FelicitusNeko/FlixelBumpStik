@@ -26,7 +26,7 @@ class PaintCanSubstate extends FlxSubState
 	{
 		this.center = center;
 		this.colors = colors;
-		super();
+		super(FlxColor.fromRGBFloat(0, 0, 0, .3));
 	}
 
 	override function create()
