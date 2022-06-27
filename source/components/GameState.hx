@@ -2,8 +2,10 @@ package components;
 
 import boardObject.Bumper;
 import components.StandardHUD;
+import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxState;
+import flixel.util.FlxColor;
 import openfl.system.System;
 
 /** Stats for each player. **/
@@ -60,14 +62,16 @@ abstract class GameState extends FlxState
 
 		_hud.nextBumper = _player.nextBumper;
 		add(_hud);
-		FlxG.camera.focusOn(_player.board.center.add(_hud.width / 2, 0));
-		// TODO: figure out how to make the HUD not be affected by zoom
-		// FlxG.camera.zoom = .9;
+
+		var hudCamera = new FlxCamera(0, 0, FlxG.width, FlxG.height);
+		hudCamera.bgColor = FlxColor.TRANSPARENT;
+		_hud.cameras = [hudCamera];
+		FlxG.cameras.add(hudCamera, false);
+		FlxG.camera.zoom = .9;
+		FlxG.camera.focusOn(_player.board.center.add(_hud.width * hudCamera.zoom / 2 / FlxG.camera.zoom, 0));
 
 		super.create();
 	}
-
-	function startup() {}
 
 	static function addScore(player:PlayerInstance, addScore:Int)
 	{
