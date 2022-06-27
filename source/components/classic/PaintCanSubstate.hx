@@ -37,7 +37,8 @@ class PaintCanSubstate extends FlxSubState
 		var vertices:Array<FlxPoint> = [];
 		var bumperHeight:Float = -1;
 
-		var hexbutton = new FlxSpriteButton(center.x + 70, center.y + 40, null, () -> onDialogResult.dispatch(None));
+		var hexbutton = new FlxSpriteButton(center.x - 40, center.y - 40, null, () -> onDialogResult.dispatch(None));
+		hexbutton.scrollFactor.set(1, 1);
 		hexbutton.makeGraphic(144, 144, FlxColor.TRANSPARENT);
 
 		for (i => color in BumperGenerator.colorOpts)
