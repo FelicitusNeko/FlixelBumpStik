@@ -5,6 +5,7 @@ import components.Board;
 import components.classic.ClassicHUD;
 import flixel.FlxG;
 import flixel.math.FlxPoint;
+import flixel.system.FlxAssets.FlxSoundAsset;
 import flixel.ui.FlxButton;
 
 class ClassicGameState extends GameState
@@ -56,6 +57,7 @@ class ClassicGameState extends GameState
 		_boardClassic.onClear.add(onClear);
 		_boardClassic.onLaunchBumper.add(onLaunch);
 		_boardClassic.onBumperSelect.add(onBumperSelect);
+		_boardClassic.onGameOver.add(() -> FlxG.sound.play(AssetPaths.gameover__wav));
 
 		super.create();
 
@@ -94,7 +96,11 @@ class ClassicGameState extends GameState
 			_paintCansIncrement += 500;
 			trace("Awarding paint can; next at " + _paintCansNext);
 		}
-		_hudClassic.paintCans = _paintCans += plusPaint;
+		if (plusPaint > 0)
+		{
+			FlxG.sound.play(AssetPaths.paintcan__wav);
+			_hudClassic.paintCans = _paintCans += plusPaint;
+		}
 
 		return modAddScore;
 	}
@@ -106,6 +112,7 @@ class ClassicGameState extends GameState
 
 		if (_paintCans > 0)
 		{
+			FlxG.sound.play(AssetPaths.mselect__wav);
 			var bumperSize = new FlxPoint(_hud.nextBumper.width, _hud.nextBumper.height).scale(.5);
 			var paintDialog = new PaintCanSubstate(_boardClassic.center.subtractPoint(bumperSize));
 			paintDialog.onDialogResult.add(onColorSelect);
@@ -117,6 +124,7 @@ class ClassicGameState extends GameState
 	{
 		if (_player.board.bCount <= 0 && _jackpot > 0)
 		{
+			FlxG.sound.play(AssetPaths.allclear__wav);
 			var mJackpot = _addScore(_jackpot);
 			_jackpot = 0;
 			trace("Awarding jackpot of " + mJackpot);
@@ -124,6 +132,7 @@ class ClassicGameState extends GameState
 		}
 		if (_player.block >= _nextColor && _bg.colors < 6)
 		{
+			FlxG.sound.play(AssetPaths.levelup__wav);
 			_nextColor += 150;
 			_player.multStack[0] += .2;
 			openSubState(new NewColorSubstate(BumperGenerator.colorOpts[_bg.colors++], _boardClassic.center));
@@ -135,6 +144,7 @@ class ClassicGameState extends GameState
 
 	function onLaunch(cb:BumperCallback)
 	{
+		FlxG.sound.play(AssetPaths.launch__wav);
 		var retval = _hud.nextBumper != null ? _hud.nextBumper : _bg.generate();
 		_player.nextBumper = _hud.nextBumper = null;
 		_addScore(5);
@@ -144,12 +154,19 @@ class ClassicGameState extends GameState
 	function onMatch(chain:Int, combo:Int)
 	{
 		var bonus = ((combo - 3) + (chain - 1)) * Math.floor(Math.pow(2, (chain - 1))) * 50;
+		if (chain > 1)
+			FlxG.sound.play(AssetPaths.chain__wav);
+		else if (combo > 3)
+			FlxG.sound.play(AssetPaths.combo__wav);
+		else
+			FlxG.sound.play(AssetPaths.match__wav);
 		// TODO: display bonus on HUD
 		_addScore(bonus);
 	}
 
 	function onClear(chain:Int)
 	{
+		FlxG.sound.play(AssetPaths.clear__wav);
 		_hud.block = ++_player.block;
 		_addScore(10 * Math.floor(Math.pow(2, chain - 1)));
 	}
@@ -158,6 +175,7 @@ class ClassicGameState extends GameState
 	{
 		if (color != None && _selectedColor == None)
 		{
+			FlxG.sound.play(AssetPaths.mselect__wav);
 			_selectedColor = color;
 			_boardClassic.startPaint();
 			// TODO: interface to display selected colour and cancel paint job
@@ -199,8 +217,13 @@ class ClassicGameState extends GameState
 		{
 			if (bumper != null)
 			{
+				FlxG.sound.play(AssetPaths.mselect__wav);
 				_hudClassic.paintCans = --_paintCans;
 				bumper.bColor = _selectedColor;
+			}
+			else
+			{
+				FlxG.sound.play(AssetPaths.mback__wav);
 			}
 			_paintCanBumper.kill();
 			_paintCanCancelButton.kill();
