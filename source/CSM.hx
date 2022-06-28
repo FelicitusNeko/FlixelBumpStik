@@ -13,6 +13,9 @@ class CSM
 	/** Whether this state machine has just received a change command during the current frame. **/
 	private var _changedThisFrame = true;
 
+	/** The list of global chain triggers for this state machine. **/
+	private var _globalChainList:Map<String, String> = [];
+
 	/** The list of chain triggers for this state machine. **/
 	private var _chainList:Map<String, Map<String, String>> = [];
 
@@ -20,6 +23,8 @@ class CSM
 	{
 		addState("initial", initialState);
 		currentState = "initial";
+		addState = _stateList.set;
+		removeGlobal = _globalChainList.remove;
 	}
 
 	function set_currentState(currentState)
@@ -28,10 +33,10 @@ class CSM
 		return this.currentState = currentState;
 	}
 
-	public function addState(name:String, func:Float->Void)
-	{
-		return _stateList.set(name, func);
-	}
+	// public function addState(name:String, func:Float->Void)
+	// {
+	// 	return _stateList.set(name, func);
+	// }
 
 	/** Calls the update function in this state machine, if any. **/
 	public function update(elapsed:Float)
@@ -42,13 +47,25 @@ class CSM
 		_changedThisFrame = false;
 	}
 
+	public var addState(default, null):(String, Float->Void) -> Void;
+
 	public function set(from:String, trigger:String, to:String)
 	{
-		var fromStr = Std.string(from);
-		if (_chainList.exists(fromStr))
-			return _chainList[fromStr].set(trigger, to);
+		if (!_stateList.exists(to))
+			return false;
+		if (_chainList.exists(from))
+			_chainList[from].set(trigger, to);
 		else
-			return _chainList.set(fromStr, [trigger => to]);
+			_chainList.set(from, [trigger => to]);
+		return true;
+	}
+
+	public function setGlobal(trigger:String, to:String)
+	{
+		if (!_stateList.exists(to))
+			return false;
+		_globalChainList.set(trigger, to);
+		return true;
 	}
 
 	public function remove(from:Float->Void, ?trigger:String)
@@ -62,27 +79,36 @@ class CSM
 			return false;
 	}
 
+	public var removeGlobal(default, null):String->Void;
+
 	public function clear()
 	{
+		var initial = _stateList["initial"];
+		_stateList.clear();
+		_stateList.set("initial", initial);
+		_globalChainList.clear();
 		return _chainList.clear();
 	}
 
 	public function chain(trigger:String)
 	{
-		if (!_chainList.exists(currentState))
-		{
-			trace("No trigger for " + currentState);
-			return false;
-		}
-		else if (!_chainList[currentState].exists(trigger))
-		{
-			trace("Trigger " + trigger + " not defined for " + currentState);
-			return false;
-		}
-		else
+		if (_chainList.exists(currentState) && _chainList[currentState].exists(trigger))
 		{
 			currentState = _chainList[currentState][trigger];
 			return true;
+		}
+		else if (_globalChainList.exists(trigger))
+		{
+			currentState = _globalChainList[trigger];
+			return true;
+		}
+		else
+		{
+			if (_chainList.exists(currentState))
+				trace("Trigger " + trigger + " not defined for " + currentState);
+			else
+				trace("No trigger for " + currentState);
+			return false;
 		}
 	}
 
