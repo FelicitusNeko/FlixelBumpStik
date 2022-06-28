@@ -27,6 +27,9 @@ class StandardHUD extends FlxSpriteGroup
 	/** The current count of cleared bumpers displayed on the HUD. **/
 	public var block(default, set):Int;
 
+	/** Write-only. Assign to both add score and display as a bonus value. **/
+	public var bonus(never, set):Int;
+
 	/** The current next bumper displayed on the HUD. **/
 	public var nextBumper(default, set):Bumper = null;
 
@@ -94,6 +97,12 @@ class StandardHUD extends FlxSpriteGroup
 		return this.block = block;
 	}
 
+	function set_bonus(bonus:Int):Int
+	{
+		// TODO: display bonus on HUD
+		return score += bonus;
+	}
+
 	function set_nextBumper(nextBumper:Bumper):Bumper
 	{
 		if (this.nextBumper != null)
@@ -105,9 +114,18 @@ class StandardHUD extends FlxSpriteGroup
 		{
 			nextBumper.setPosition(width - nextBumper.width - 5, height - nextBumper.height - 5);
 			add(nextBumper);
-			// nextBumper.scrollFactor.set(0, 0);
-			// trace(nextBumper, nextBumper.scrollFactor);
 		}
 		return this.nextBumper = nextBumper;
+	}
+
+	function resetHUD()
+	{
+		if (nextBumper != null)
+		{
+			remove(nextBumper);
+			nextBumper = null;
+		}
+		score = 0;
+		block = 0;
 	}
 }

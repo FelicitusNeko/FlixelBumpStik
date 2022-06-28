@@ -11,20 +11,11 @@ import openfl.system.System;
 /** Stats for each player. **/
 typedef PlayerInstance =
 {
-	/** The player's current score. **/
-	var score:Int;
-
-	/** The player's current count of bumpers sticked (cleared). **/
-	var block:Int;
-
-	/** The player's current score multiplier stack. **/
-	var multStack:Array<Float>;
-
 	/** The board to be used for this player. **/
 	var board:Board;
 
-	/** The next bumper to be put into play. **/
-	var nextBumper:Bumper;
+	/** The player's current score multiplier stack. **/
+	var multStack:Array<Float>;
 }
 
 abstract class GameState extends FlxState
@@ -46,11 +37,8 @@ abstract class GameState extends FlxState
 		if (_players.length == 0)
 		{
 			_players.push({
-				score: 0,
-				block: 0,
-				multStack: [1],
 				board: new Board(0, 0),
-				nextBumper: _bg.generate()
+				multStack: [1]
 			});
 		}
 
@@ -60,7 +48,7 @@ abstract class GameState extends FlxState
 		if (_hud == null)
 			_hud = new StandardHUD();
 
-		_hud.nextBumper = _player.nextBumper;
+		_hud.nextBumper = _bg.weightedGenerate();
 		add(_hud);
 
 		var hudCamera = new FlxCamera(0, 0, FlxG.width, FlxG.height);
@@ -72,16 +60,17 @@ abstract class GameState extends FlxState
 		super.create();
 	}
 
-	static function addScore(player:PlayerInstance, addScore:Int)
+	function addScore(addScore:Int, multStack:Array<Float> = null)
 	{
 		if (addScore == 0)
 			return 0;
+		if (multStack == null)
+			return addScore;
 
 		var mult:Float = 1;
-		for (factor in player.multStack)
+		for (factor in multStack)
 			mult *= factor;
 		var retval = Math.floor(addScore * mult);
-		player.score += retval;
 		return retval;
 	}
 
