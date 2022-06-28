@@ -29,13 +29,14 @@ class ClassicBoard extends Board
 	{
 		for (launcher in _launchers)
 			launcher.enabled = false;
-		// _csm.activeState = smPaintSelect;
 		_csm.chain("paint");
 	}
 
 	inline public function endPaint(cancel = false)
 	{
-		// _csm.activeState = smChecking;
+		if (cancel)
+			for (launcher in _launchers)
+				launcher.enabled = true;
 		_csm.chain(cancel ? "cancel" : "painted");
 	}
 
