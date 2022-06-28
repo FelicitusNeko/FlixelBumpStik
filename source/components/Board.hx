@@ -148,8 +148,6 @@ class Board extends FlxTypedGroup<FlxBasic>
 			launcher.onClick.add(onClickLauncher);
 
 		// setupTest(10);
-
-		// trace((bWidth + 2) * sWidth, (bHeight + 2) * sHeight);
 	}
 
 	function get_center()
@@ -232,7 +230,6 @@ class Board extends FlxTypedGroup<FlxBasic>
 					bumper.startMoving(bumper.direction);
 			});
 
-		// _csm.activeState = smMoving;
 		_csm.chain("launch");
 	}
 
@@ -342,116 +339,13 @@ class Board extends FlxTypedGroup<FlxBasic>
 		_csm.update(elapsed);
 	}
 
+	/** State machine call for idle state. **/
 	private function smIdle(elapsed:Float)
 	{
 		if (_csm.justChanged) // If the state just changed to idle:
 		{
-			// if (onRequestGenerate != null)
-			// 	onRequestGenerate();
 			onRequestGenerate.dispatch(); // Request that a new next bumper be generated
 			curChain = 0; // Reset chain to zero
-		}
-	}
-
-	/** State machine call for idle state. **/
-	private function smIdleV1(elapsed:Float)
-	{
-		#if mobile
-		var touch = FlxG.touches.getFirst();
-		var justMoved = false,
-			justPressed = false,
-			justReleased = false,
-			pressed = false,
-			position:FlxPoint = new FlxPoint(0, 0);
-
-		if (touch != null)
-		{
-			justPressed = touch.justPressed;
-			justReleased = touch.justReleased;
-			pressed = touch.pressed;
-			position = touch.getWorldPosition();
-			justMoved = position.equals(_lastPosition);
-			_lastPosition = position;
-		}
-		else
-			_lastPosition = new FlxPoint(0, 0);
-		#else
-		var justMoved = FlxG.mouse.justMoved;
-		var justPressed = FlxG.mouse.justPressed;
-		var justReleased = FlxG.mouse.justReleased;
-		var pressed = FlxG.mouse.pressed;
-		var position = FlxG.mouse.getWorldPosition();
-		#end
-
-		if (_csm.justChanged) // If the state just changed to idle:
-		{
-			// if (onRequestGenerate != null)
-			// 	onRequestGenerate();
-			onRequestGenerate.dispatch(); // Request that a new next bumper be generated
-			curChain = 0; // Reset chain to zero
-		}
-
-		if (justMoved || _csm.justChanged) // If the mouse/touch just moved, or the state just changed:
-		{
-			if (pressed && _selectedLauncher != null) // If the mouse/touch is held and there is a selected bumper:
-			{
-				// If the mouse/touch is over the selected bumper, use Selected state; if not, use SelectedNotHovering
-				_selectedLauncher.state = _selectedLauncher == atPoint(_launchers, position) ? Selected : SelectedNotHovering;
-			}
-			#if (!mobile)
-			else // If the mouse is not held or there's no selected bumper:
-			{
-				var launcher = atPoint(_launchers, position); // Determine if there's a bumper under the cursor
-				if (_selectedLauncher != launcher) // If what's under the cursor is not the selected launcher:
-				{
-					if (_selectedLauncher != null && _selectedLauncher.state != Blocked) // If there is a previously selected launcher and it's not Blocked:
-						_selectedLauncher.state = Open; // Set its state to Open
-					_selectedLauncher = launcher; // Assign what's under the bumper as the selected launcher
-					if (_selectedLauncher != null && _selectedLauncher.state != Blocked) // If there is a newly selected launcher and it's not Blocked:
-						_selectedLauncher.state = Hovering; // Set its state to Hovering
-				}
-			}
-			#end
-		}
-
-		#if mobile
-		if (justPressed) // When the user touches the screen:
-		{
-			var launcher = atPoint(_launchers, position); // Determine if there's a launcher at the touch location
-			if (launcher != null && launcher.state != Blocked) // If there is a launcher and it's not blocked:
-			{
-				_selectedLauncher = launcher; // Make it the selected launcher
-				_selectedLauncher.state = Selected; // Set its state to Selected
-			}
-		}
-		#else
-		// If the mouse was just clicked on a launcher that's in Hovering state:
-		if (justPressed && _selectedLauncher != null && _selectedLauncher.state == Hovering)
-		{
-			_selectedLauncher.state = Selected; // Set its state to Selected
-		}
-		#end
-		// If the mouse/touch was just released from a launcher that's in Selected state:
-		if (justReleased && _selectedLauncher != null && _selectedLauncher.state == Selected)
-		{
-			// Get the next bumper from the game state (if there's no callback, just make a bumper)
-			var bumper:Bumper = null;
-			onLaunchBumper.dispatch(bumperIn ->
-			{
-				if (bumper == null)
-					bumper = bumperIn;
-			});
-			if (bumper == null)
-				bumper = new Bumper(0, 0, Blue, Right);
-
-			bumper.onClick.add(onClickBumper);
-			_bumpers.add(bumper); // Add the bumper to the board collection
-			_selectedLauncher.launchBumper(bumper); // Launch the bumper from the launcher
-			_launchers.forEach(launcher -> launcher.enabled = false); // Disable all the launchers
-			// _csm.activeState = smMoving; // Set the board state to Moving
-			_csm.chain("launch");
-
-			_selectedLauncher = null; // Clear the launcher selection
 		}
 	}
 
@@ -460,7 +354,6 @@ class Board extends FlxTypedGroup<FlxBasic>
 	{
 		FlxG.overlap(_bumpers, _bumpers, bumperBump);
 		FlxG.overlap(_bumpers, _spaces, bumperToSpace);
-		// FlxG.overlap(_bumpers, _launchers, bumperToLauncher);
 
 		_bumpers.forEachAlive(bumper ->
 		{
@@ -550,7 +443,6 @@ class Board extends FlxTypedGroup<FlxBasic>
 				}
 				return order;
 			});
-			// _csm.activeState = smChecking;
 			_csm.chain("stopped");
 		}
 	}
@@ -558,7 +450,6 @@ class Board extends FlxTypedGroup<FlxBasic>
 	/** Checks for Bumper Stickers, and marks bumpers to be cleared if any have been formed. **/
 	private function smChecking(elapsed:Float)
 	{
-		// _csm.activeState = null;
 		var clearCount:Int = 0;
 		function clear(x:Int, y:Int, count:Int, horizontal:Bool)
 		{
@@ -603,10 +494,8 @@ class Board extends FlxTypedGroup<FlxBasic>
 		if (clearCount > 0)
 		{
 			_delay = .5;
-			// TODO: play sound
 			curChain++;
 			onMatch.dispatch(curChain, clearCount);
-			// _csm.activeState = smClearing;
 			_csm.chain("match");
 		}
 		else
@@ -619,14 +508,12 @@ class Board extends FlxTypedGroup<FlxBasic>
 					launchersAvailable++;
 			});
 			if (launchersAvailable > 0)
-				// _csm.activeState = smIdle;
 				_csm.chain("nomatch");
 			else
 			{
-				// TODO: Game over
+				// NOTE: Game over
 				onGameOver.dispatch();
 				_bumpers.forEach(bumper -> bumper.gameOver());
-				// _csm.activeState = null;
 				_csm.chain("gameover");
 			}
 		}
@@ -665,15 +552,13 @@ class Board extends FlxTypedGroup<FlxBasic>
 				space.reservedFor = null;
 			if (_bumpers.length == 0)
 			{
-				// TODO: All Clear
+				// NOTE: All Clear
 				_launchers.forEach(launcher -> launcher.enabled = true);
-				// _csm.activeState = smIdle;
 				_csm.chain("allclear");
 			}
 			else
 			{
 				FlxG.overlap(_bumpers, _spaces, bumperToSpace);
-				// _csm.activeState = smMoving;
 				_csm.chain("cleared");
 			}
 		}
@@ -703,7 +588,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 	}
 
 	/**
-		Event handler for when bumpers are clicked. Does nothing on its own.
+		Event handler for when bumpers are clicked. Does nothing on its own; rather, it is meant to be overridden.
 		@param obj The bumper that was clicked.
 	**/
 	private function onClickBumper(obj:BoardObject) {};
@@ -760,24 +645,5 @@ class Board extends FlxTypedGroup<FlxBasic>
 		}
 		else if (space.reservedFor == bumper)
 			space.reservedFor = null;
-	}
-
-	/**
-		This function checks for overlaps between a bumper and a launcher.
-		@param bspr The bumper's overlapping sprite.
-		@param lspr The launcher's overlapping sprite.
-	**/
-	private function bumperToLauncher(bspr:FlxSprite, lspr:FlxSprite)
-	{
-		if (!bspr.alive || !lspr.alive)
-			return;
-
-		var bumper = spriteTo(_bumpers, bspr),
-			launcher = spriteTo(_launchers, lspr);
-		if (bumper == null || launcher == null)
-			return;
-
-		if (launcher.launching != bumper)
-			bumper.snapToPos();
 	}
 }
