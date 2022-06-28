@@ -27,10 +27,10 @@ class CSM
 	**/
 	public function new(initialState:Float->Void = null)
 	{
-		addState("initial", initialState);
 		currentState = "initial";
 		addState = _stateList.set;
 		removeGlobal = _globalChainList.remove;
+		addState("initial", initialState);
 	}
 
 	function set_currentState(currentState)
