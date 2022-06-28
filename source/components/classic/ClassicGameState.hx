@@ -228,7 +228,7 @@ class ClassicGameState extends GameState
 			_paintCanBumper.kill();
 			_paintCanCancelButton.kill();
 			_selectedColor = None;
-			_boardClassic.endPaint();
+			_boardClassic.endPaint(_selectedColor == None);
 		}
 	}
 }
