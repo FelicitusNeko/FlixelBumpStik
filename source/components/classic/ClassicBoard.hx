@@ -14,19 +14,34 @@ class ClassicBoard extends Board
 
 	private var _selectedBumper:Bumper = null;
 
+	public function new(x:Float, y:Float)
+	{
+		super(x, y);
+
+		_csm.addState("painting", smPaintSelect);
+
+		_csm.set("initial", "paint", "painting");
+		_csm.set("painting", "cancel", "initial");
+		_csm.set("painting", "painted", "checking");
+	}
+
 	public function startPaint()
 	{
 		for (launcher in _launchers)
 			launcher.enabled = false;
-		_fsm.activeState = fsmPaintSelect;
+		// _csm.activeState = smPaintSelect;
+		_csm.chain("paint");
 	}
 
-	inline public function endPaint()
+	inline public function endPaint(cancel = false)
 	{
-		_fsm.activeState = fsmChecking;
+		// _csm.activeState = smChecking;
+		_csm.chain(cancel ? "cancel" : "painted");
 	}
 
-	private function fsmPaintSelect(elapsed:Float)
+	private function smPaintSelect(elapsed:Float) {}
+
+	private function smPaintSelectV1(elapsed:Float)
 	{
 		#if mobile
 		var touch = FlxG.touches.getFirst();
@@ -57,10 +72,7 @@ class ClassicBoard extends Board
 
 	override function onClickBumper(obj:BoardObject)
 	{
-		if (!_fsm.is(fsmPaintSelect))
-			return;
-		if (!Std.isOfType(obj, Bumper))
-			return;
-		onBumperSelect.dispatch(cast(obj, Bumper));
+		if (_csm.is("painting") && Std.isOfType(obj, Bumper))
+			onBumperSelect.dispatch(cast(obj, Bumper));
 	}
 }

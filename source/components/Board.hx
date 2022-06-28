@@ -48,7 +48,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 	private var _delay:Float = 0;
 
 	/** The state machine for this board. **/
-	private var _fsm:FSM;
+	private var _csm:CSM;
 
 	/** The currently selected launcher. **/
 	private var _selectedLauncher:Launcher = null;
@@ -130,7 +130,19 @@ class Board extends FlxTypedGroup<FlxBasic>
 		add(_bumpers);
 		add(_launchers);
 
-		_fsm = new FSM(fsmIdle);
+		_csm = new CSM(smIdle);
+		_csm.addState("moving", smMoving);
+		_csm.addState("checking", smChecking);
+		_csm.addState("clearing", smClearing);
+		_csm.addState("gameover", null);
+
+		_csm.set("initial", "launch", "moving");
+		_csm.set("moving", "stopped", "checking");
+		_csm.set("checking", "match", "clearing");
+		_csm.set("checking", "nomatch", "initial");
+		_csm.set("checking", "gameover", "gameover");
+		_csm.set("clearing", "cleared", "moving");
+		_csm.set("clearing", "allclear", "initial");
 
 		for (launcher in _launchers)
 			launcher.onClick.add(onClickLauncher);
@@ -220,7 +232,8 @@ class Board extends FlxTypedGroup<FlxBasic>
 					bumper.startMoving(bumper.direction);
 			});
 
-		_fsm.activeState = fsmMoving;
+		// _csm.activeState = smMoving;
+		_csm.chain("launch");
 	}
 
 	/**
@@ -326,12 +339,12 @@ class Board extends FlxTypedGroup<FlxBasic>
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
-		_fsm.update(elapsed);
+		_csm.update(elapsed);
 	}
 
-	private function fsmIdle(elapsed:Float)
+	private function smIdle(elapsed:Float)
 	{
-		if (_fsm.justChanged) // If the state just changed to idle:
+		if (_csm.justChanged) // If the state just changed to idle:
 		{
 			// if (onRequestGenerate != null)
 			// 	onRequestGenerate();
@@ -341,7 +354,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 	}
 
 	/** State machine call for idle state. **/
-	private function fsmIdleV1(elapsed:Float)
+	private function smIdleV1(elapsed:Float)
 	{
 		#if mobile
 		var touch = FlxG.touches.getFirst();
@@ -370,7 +383,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 		var position = FlxG.mouse.getWorldPosition();
 		#end
 
-		if (_fsm.justChanged) // If the state just changed to idle:
+		if (_csm.justChanged) // If the state just changed to idle:
 		{
 			// if (onRequestGenerate != null)
 			// 	onRequestGenerate();
@@ -378,7 +391,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 			curChain = 0; // Reset chain to zero
 		}
 
-		if (justMoved || _fsm.justChanged) // If the mouse/touch just moved, or the state just changed:
+		if (justMoved || _csm.justChanged) // If the mouse/touch just moved, or the state just changed:
 		{
 			if (pressed && _selectedLauncher != null) // If the mouse/touch is held and there is a selected bumper:
 			{
@@ -435,14 +448,15 @@ class Board extends FlxTypedGroup<FlxBasic>
 			_bumpers.add(bumper); // Add the bumper to the board collection
 			_selectedLauncher.launchBumper(bumper); // Launch the bumper from the launcher
 			_launchers.forEach(launcher -> launcher.enabled = false); // Disable all the launchers
-			_fsm.activeState = fsmMoving; // Set the board state to Moving
+			// _csm.activeState = smMoving; // Set the board state to Moving
+			_csm.chain("launch");
 
 			_selectedLauncher = null; // Clear the launcher selection
 		}
 	}
 
 	/** State machine call for moving state. **/
-	private function fsmMoving(elapsed:Float)
+	private function smMoving(elapsed:Float)
 	{
 		FlxG.overlap(_bumpers, _bumpers, bumperBump);
 		FlxG.overlap(_bumpers, _spaces, bumperToSpace);
@@ -536,14 +550,15 @@ class Board extends FlxTypedGroup<FlxBasic>
 				}
 				return order;
 			});
-			_fsm.activeState = fsmChecking;
+			// _csm.activeState = smChecking;
+			_csm.chain("stopped");
 		}
 	}
 
 	/** Checks for Bumper Stickers, and marks bumpers to be cleared if any have been formed. **/
-	private function fsmChecking(elapsed:Float)
+	private function smChecking(elapsed:Float)
 	{
-		_fsm.activeState = null;
+		// _csm.activeState = null;
 		var clearCount:Int = 0;
 		function clear(x:Int, y:Int, count:Int, horizontal:Bool)
 		{
@@ -591,7 +606,8 @@ class Board extends FlxTypedGroup<FlxBasic>
 			// TODO: play sound
 			curChain++;
 			onMatch.dispatch(curChain, clearCount);
-			_fsm.activeState = fsmClearing;
+			// _csm.activeState = smClearing;
+			_csm.chain("match");
 		}
 		else
 		{
@@ -603,19 +619,21 @@ class Board extends FlxTypedGroup<FlxBasic>
 					launchersAvailable++;
 			});
 			if (launchersAvailable > 0)
-				_fsm.activeState = fsmIdle;
+				// _csm.activeState = smIdle;
+				_csm.chain("nomatch");
 			else
 			{
 				// TODO: Game over
 				onGameOver.dispatch();
 				_bumpers.forEach(bumper -> bumper.gameOver());
-				_fsm.activeState = null;
+				// _csm.activeState = null;
+				_csm.chain("gameover");
 			}
 		}
 	}
 
 	/** State machine call for clearing state. **/
-	private function fsmClearing(elapsed:Float)
+	private function smClearing(elapsed:Float)
 	{
 		_delay -= elapsed;
 		if (_delay <= 0)
@@ -649,12 +667,14 @@ class Board extends FlxTypedGroup<FlxBasic>
 			{
 				// TODO: All Clear
 				_launchers.forEach(launcher -> launcher.enabled = true);
-				_fsm.activeState = fsmIdle;
+				// _csm.activeState = smIdle;
+				_csm.chain("allclear");
 			}
 			else
 			{
 				FlxG.overlap(_bumpers, _spaces, bumperToSpace);
-				_fsm.activeState = fsmMoving;
+				// _csm.activeState = smMoving;
+				_csm.chain("cleared");
 			}
 		}
 	}
@@ -668,7 +688,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 		if (!Std.isOfType(obj, Launcher))
 			return;
 		var launcher = cast(obj, Launcher);
-		if (_fsm.is(fsmIdle) && launcher.state == Selected)
+		if (_csm.is("initial") && launcher.state == Selected)
 		{
 			var bumper = new Bumper(0, 0, Blue, None);
 			onLaunchBumper.dispatch(b -> bumper = b);
@@ -677,7 +697,8 @@ class Board extends FlxTypedGroup<FlxBasic>
 			_bumpers.add(bumper);
 			for (launcher in _launchers)
 				launcher.enabled = false;
-			_fsm.activeState = fsmMoving;
+			// _csm.activeState = smMoving;
+			_csm.chain("launch");
 		}
 	}
 
