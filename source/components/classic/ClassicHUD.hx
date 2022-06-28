@@ -49,13 +49,13 @@ class ClassicHUD extends StandardHUD
 		var diff = paintCans - this.paintCans;
 		if (diff > 0)
 		{
-			trace("Displaying diff of " + diff);
+			// trace("Displaying diff of " + diff);
 			var plustext = new FlxText(0, 0, 0, "+" + diff, 12);
 			plustext.color = FlxColor.YELLOW;
 			add(plustext);
 			plustext.setPosition(_pcButton.x + (_pcButton.width * Math.random()) - (plustext.width / 2), _pcButton.y);
 			FlxTween.tween(plustext, {alpha: 0, y: plustext.y - (plustext.height * 1.5)}, 1, {ease: FlxEase.circOut, onComplete: (_) -> plustext.kill()});
-			trace(plustext);
+			// trace(plustext);
 		}
 
 		return this.paintCans = paintCans;
