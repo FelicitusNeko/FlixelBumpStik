@@ -67,7 +67,6 @@ abstract class GameState extends FlxState
 		hudCamera.bgColor = FlxColor.TRANSPARENT;
 		_hud.cameras = [hudCamera];
 		FlxG.cameras.add(hudCamera, false);
-		FlxG.camera.zoom = .9;
 		FlxG.camera.focusOn(_player.board.center.add(_hud.width * hudCamera.zoom / 2 / FlxG.camera.zoom, 0));
 
 		super.create();
