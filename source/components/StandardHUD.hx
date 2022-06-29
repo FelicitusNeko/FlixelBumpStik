@@ -35,6 +35,7 @@ class StandardHUD extends FlxSpriteGroup
 
 	public function new()
 	{
+		super(0, 0);
 		var diginum = FlxBitmapFont.fromAngelCode(AssetPaths.Diginum__png, AssetPaths.Diginum__xml);
 		_rightSide = FlxG.width > FlxG.height;
 
@@ -55,7 +56,7 @@ class StandardHUD extends FlxSpriteGroup
 		{
 			var quarterWidth = Math.round(FlxG.width / 4);
 
-			super(quarterWidth * 3, 0);
+			// super(quarterWidth * 3, 0);
 			add(new FlxSprite().makeGraphic(quarterWidth, FlxG.height, FlxColor.fromRGBFloat(.1, .1, .8, .5)));
 
 			_scoreDisplay.setPosition(quarterWidth - 20, _scoreDisplay.lineHeight);
@@ -68,7 +69,7 @@ class StandardHUD extends FlxSpriteGroup
 		}
 		else
 		{
-			super(0, FlxG.height * .8);
+			// super(0, FlxG.height * .8);
 		}
 
 		scrollFactor.set(0, 0);
