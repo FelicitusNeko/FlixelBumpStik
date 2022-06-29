@@ -5,6 +5,7 @@ import components.StandardHUD;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxState;
+import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import openfl.system.System;
 
@@ -47,20 +48,42 @@ abstract class GameState extends FlxState
 
 		if (_hud == null)
 			_hud = new StandardHUD();
-
-		_hud.nextBumper = _bg.weightedGenerate();
 		add(_hud);
 
-		var hudCamera = new FlxCamera(0, 0, FlxG.width, FlxG.height);
+		// _hud.nextBumper = _bg.weightedGenerate();
+
+		var hudCamera:FlxCamera;
+		var wWidth:Float = FlxG.width, wHeight:Float = FlxG.height;
+		if (FlxG.width > FlxG.height)
+		{
+			wWidth *= .75;
+			hudCamera = new FlxCamera(Math.round(wWidth), 0, Math.round(FlxG.width / 4), FlxG.height);
+		}
+		else
+		{
+			wHeight *= .8;
+			hudCamera = new FlxCamera(0, Math.round(wHeight), FlxG.width, Math.round(FlxG.height / 5));
+		}
+
 		hudCamera.bgColor = FlxColor.TRANSPARENT;
 		_hud.cameras = [hudCamera];
 		FlxG.cameras.add(hudCamera, false);
+		hudCamera.antialiasing = true;
+
+		// BUG: if zoom is too high, Next Bumper disappears
+		FlxG.camera.zoom = Math.min(wWidth / _player.board.tWidth, wHeight / _player.board.tHeight) * (14 / 15);
+		FlxG.camera.antialiasing = true;
+		// FlxTween.tween(FlxG.camera, {zoom: 5}, 5, {onComplete: (_) -> FlxTween.tween(FlxG.camera, {zoom: 1}, 5)});
+		// FlxTween.tween(hudCamera, {zoom: 5}, 5, {onComplete: (_) -> FlxTween.tween(hudCamera, {zoom: 1}, 5)});
+
+		trace("Going with a zoom of " + FlxG.camera.zoom);
+
 		FlxG.camera.focusOn(_player.board.center.add(_hud.width * hudCamera.zoom / 2 / FlxG.camera.zoom, 0));
 
 		super.create();
 	}
 
-	function addScore(addScore:Int, multStack:Array<Float> = null)
+	function addScore(addScore:Int, ?multStack:Array<Float>)
 	{
 		if (addScore == 0)
 			return 0;
