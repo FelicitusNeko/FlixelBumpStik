@@ -32,6 +32,12 @@ class Board extends FlxTypedGroup<FlxBasic>
 	/** The height of each space on the board, in pixels. **/
 	public var sHeight(default, null):Float = 64;
 
+	/** The total width of the board, in pixels. **/
+	public var tWidth(get, never):Float;
+
+	/** The total height of the board, in pixels. **/
+	public var tHeight(get, never):Float;
+
 	/** The center point of this board. **/
 	public var center(get, never):FlxPoint;
 
@@ -150,12 +156,22 @@ class Board extends FlxTypedGroup<FlxBasic>
 		// setupTest(10);
 	}
 
-	function get_center()
+	inline function get_tWidth()
+	{
+		return (bWidth + 2) * sWidth;
+	}
+
+	inline function get_tHeight()
+	{
+		return (bHeight + 2) * sHeight;
+	}
+
+	inline function get_center()
 	{
 		return new FlxPoint(bWidth * sWidth / 2, bHeight * sHeight / 2).addPoint(origin);
 	}
 
-	function get_bCount()
+	inline function get_bCount()
 	{
 		return _bumpers.countLiving();
 	}
