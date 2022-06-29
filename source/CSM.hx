@@ -10,7 +10,7 @@ class CSM
 	public var justChanged(default, null) = true;
 
 	/** Whether this state machine has just received a change command during the current frame. **/
-	private var _changedThisFrame = true;
+	private var _changedThisFrame = false;
 
 	/** The list of defined states for this machine. **/
 	private var _stateList:Map<String, Float->Void> = [];
@@ -27,9 +27,11 @@ class CSM
 	**/
 	public function new(initialState:Float->Void = null)
 	{
-		currentState = "initial";
 		addState = _stateList.set;
 		removeGlobal = _globalChainList.remove;
+
+		currentState = "initial";
+		_changedThisFrame = false;
 		addState("initial", initialState);
 	}
 
