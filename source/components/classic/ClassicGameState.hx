@@ -53,7 +53,7 @@ class ClassicGameState extends GameState
 
 		// var test = new FlxButton(0, 0, "Test", () ->
 		// {
-		// 	_hudClassic.paintCans = ++_paintCans;
+		// 	_hudClassic.paintCans++;
 		// });
 		// test.scrollFactor.set(0, 0);
 		// add(test);
@@ -69,31 +69,15 @@ class ClassicGameState extends GameState
 		return cast(_player.board, ClassicBoard);
 	}
 
-	override function addScore(add:Int, multStack:Array<Float> = null):Int
+	override function addScore(add:Int, ?multStack:Array<Float>):Int
 	{
-		if (add == 0)
-			return 0;
-
 		_jackpot += add;
-		var modAdd = super.addScore(add, multStack == null ? _player.multStack : [1]);
-
-		return modAdd;
-	}
-
-	function onPaintCanClick()
-	{
-		if (_selectedColor == None)
-		{
-			FlxG.sound.play(AssetPaths.mselect__wav);
-			var bumperSize = new FlxPoint(_hud.nextBumper.width, _hud.nextBumper.height).scale(.5);
-			var paintDialog = new PaintCanSubstate(_boardClassic.center.subtractPoint(bumperSize));
-			paintDialog.onDialogResult.add(onColorSelect);
-			openSubState(paintDialog);
-		}
+		return super.addScore(add, multStack);
 	}
 
 	function onRequestGenerate()
 	{
+		trace("onRequestGenerate()");
 		if (_player.board.bCount <= 0 && _jackpot > 0)
 		{
 			FlxG.sound.play(AssetPaths.allclear__wav);
@@ -112,16 +96,17 @@ class ClassicGameState extends GameState
 			trace("Adding new colour; now at " + _bg.colors);
 		}
 		if (_hud.nextBumper == null)
-			_hud.nextBumper = _bg.generate();
+			_hud.nextBumper = _bg.weightedGenerate();
 	}
 
 	function onLaunch(cb:BumperCallback)
 	{
 		FlxG.sound.play(AssetPaths.launch__wav);
-		var retval = _hud.nextBumper != null ? _hud.nextBumper : _bg.generate();
+		var retval = _hud.nextBumper != null ? _hud.nextBumper : _bg.weightedGenerate();
 		_hud.nextBumper = null;
 		_hud.score += addScore(5);
-		cb(retval);
+		// HACK: for in case next bumper disappears (launching a broken bumper softlocks game)
+		cb(new Bumper(0, 0, retval.bColor, retval.direction));
 	}
 
 	function onMatch(chain:Int, combo:Int)
@@ -133,7 +118,6 @@ class ClassicGameState extends GameState
 			FlxG.sound.play(AssetPaths.combo__wav);
 		else
 			FlxG.sound.play(AssetPaths.match__wav);
-		// TODO: display bonus on HUD
 		_hud.bonus = addScore(bonus);
 	}
 
@@ -144,9 +128,24 @@ class ClassicGameState extends GameState
 		_hud.score += addScore(10 * Math.floor(Math.pow(2, chain - 1)));
 	}
 
+	function onPaintCanClick()
+	{
+		if (_selectedColor == None)
+		{
+			FlxG.sound.play(AssetPaths.mselect__wav);
+			var bumperSize = new FlxPoint(_hud.nextBumper.width, _hud.nextBumper.height).scale(.5);
+			var paintDialog = new PaintCanSubstate(_boardClassic.center.subtractPoint(bumperSize));
+			paintDialog.onDialogResult.add(onColorSelect);
+			openSubState(paintDialog);
+		}
+	}
+
 	function onColorSelect(color:Color)
 	{
-		if (color != None && _selectedColor == None)
+		if (_selectedColor != None)
+			return;
+
+		if (color != None)
 		{
 			FlxG.sound.play(AssetPaths.mselect__wav);
 			_selectedColor = color;
@@ -181,6 +180,8 @@ class ClassicGameState extends GameState
 			else
 				_paintCanCancelButton.revive();
 		}
+		else
+			FlxG.sound.play(AssetPaths.mback__wav);
 	}
 
 	function onBumperSelect(bumper:Bumper)
@@ -194,9 +195,7 @@ class ClassicGameState extends GameState
 				bumper.bColor = _selectedColor;
 			}
 			else
-			{
 				FlxG.sound.play(AssetPaths.mback__wav);
-			}
 			_paintCanBumper.kill();
 			_paintCanCancelButton.kill();
 			_selectedColor = None;
