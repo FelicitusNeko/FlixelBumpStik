@@ -1,6 +1,5 @@
 package components.classic;
 
-import boardObject.Bumper.Color;
 import boardObject.Bumper;
 import flixel.FlxSprite;
 import flixel.FlxSubState;
