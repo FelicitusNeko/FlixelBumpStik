@@ -105,8 +105,7 @@ class ClassicGameState extends GameState
 		var retval = _hud.nextBumper != null ? _hud.nextBumper : _bg.weightedGenerate();
 		_hud.nextBumper = null;
 		_hud.score += addScore(5);
-		// HACK: for in case next bumper disappears (launching a broken bumper softlocks game)
-		cb(new Bumper(0, 0, retval.bColor, retval.direction));
+		cb(retval);
 	}
 
 	function onMatch(chain:Int, combo:Int)

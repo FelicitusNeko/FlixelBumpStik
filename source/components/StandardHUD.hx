@@ -109,12 +109,15 @@ class StandardHUD extends FlxSpriteGroup
 		if (this.nextBumper != null)
 		{
 			remove(this.nextBumper);
+			this.nextBumper.isUIElement = false;
 			this.nextBumper.scrollFactor.set(1, 1);
 		}
 		if (nextBumper != null)
 		{
+			nextBumper.isUIElement = true;
 			nextBumper.setPosition(width - nextBumper.width - 5, height - nextBumper.height - 5);
 			add(nextBumper);
+			nextBumper.revive();
 		}
 		return this.nextBumper = nextBumper;
 	}

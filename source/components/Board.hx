@@ -90,11 +90,6 @@ class Board extends FlxTypedGroup<FlxBasic>
 	/** Event that fires when the game is over. **/
 	public var onGameOver(default, null) = new Event<Void->Void>();
 
-	#if mobile
-	/** Mobile only. The previous position of the active touch. Used mainly to determine if there has been movement. **/
-	var _lastPosition = new FlxPoint(0, 0);
-	#end
-
 	public function new(x:Float = 0, y:Float = 0)
 	{
 		super();
@@ -594,6 +589,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 			var bumper = new Bumper(0, 0, Blue, None);
 			onLaunchBumper.dispatch(b -> bumper = b);
 			bumper.onClick.add(onClickBumper);
+			bumper.revive(); // just in case
 			launcher.launchBumper(bumper);
 			_bumpers.add(bumper);
 			for (launcher in _launchers)

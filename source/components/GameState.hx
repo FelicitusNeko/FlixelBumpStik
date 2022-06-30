@@ -70,7 +70,6 @@ abstract class GameState extends FlxState
 		FlxG.cameras.add(hudCamera, false);
 		hudCamera.antialiasing = true;
 
-		// BUG: if zoom is too high, Next Bumper disappears
 		FlxG.camera.zoom = Math.min(wWidth / _player.board.tWidth, wHeight / _player.board.tHeight) * (14 / 15);
 		FlxG.camera.antialiasing = true;
 		// FlxTween.tween(FlxG.camera, {zoom: 5}, 5, {onComplete: (_) -> FlxTween.tween(FlxG.camera, {zoom: 1}, 5)});

@@ -304,7 +304,6 @@ class Bumper extends BoardObject
 	{
 		if (direction == Clearing)
 			return false;
-		// TODO: clear animation
 		direction = Clearing;
 		return true;
 	}
@@ -321,19 +320,24 @@ class Bumper extends BoardObject
 
 	override function update(elapsed:Float)
 	{
-		lfFrontX = frontX;
-		lfFrontY = frontY;
-		super.update(elapsed);
-		if (justLaunched)
-			justLaunched = false;
-
-		if (alive && !isOnScreen())
+		if (!isUIElement)
 		{
-			alive = exists = false;
-			velocity.set(0, 0);
-			acceleration.set(0, 0);
-			angularAcceleration = angularVelocity = 0;
+			lfFrontX = frontX;
+			lfFrontY = frontY;
+			super.update(elapsed);
+			if (justLaunched)
+				justLaunched = false;
+
+			if (alive && !isOnScreen())
+			{
+				alive = exists = false;
+				velocity.set(0, 0);
+				acceleration.set(0, 0);
+				angularAcceleration = angularVelocity = 0;
+			}
 		}
+		else
+			super.update(elapsed);
 	}
 
 	override function kill()
