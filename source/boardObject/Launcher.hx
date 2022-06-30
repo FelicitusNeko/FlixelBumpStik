@@ -59,7 +59,6 @@ class Launcher extends BoardObject
 
 	function set_direction(direction:Direction):Direction
 	{
-		// TODO: change sprite based on direction
 		switch (direction)
 		{
 			case Right:
