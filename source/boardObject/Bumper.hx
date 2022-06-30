@@ -10,9 +10,9 @@ import flixel.util.FlxColor;
 enum abstract Color(FlxColor)
 {
 	var None = FlxColor.GRAY;
-	var Blue = 0xff2244cc;
-	var Green = 0xff22cc44;
-	var Red = 0xffcc3333;
+	var Blue = 0xff2365e0;
+	var Green = 0xff1dec62;
+	var Red = 0xffe04f4f;
 	var Purple = 0xffa45ced;
 	var Yellow = 0xfffffb23;
 	var White = 0xffdddddd;
