@@ -44,7 +44,7 @@ class BumperGenerator
 		else
 		{
 			while (this.colors < colors)
-				_drops[colorOpts[this.colors++]] = avg;
+				_drops.set(colorOpts[this.colors++], avg);
 			while (this.colors > colors)
 				_drops.remove(colorOpts[--this.colors]);
 		}
@@ -53,6 +53,8 @@ class BumperGenerator
 
 	function get_average():Float
 	{
+		if (colors == 0)
+			return 0;
 		var total = 0;
 		for (_ => qty in _drops)
 			total += qty;
