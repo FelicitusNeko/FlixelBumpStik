@@ -133,7 +133,7 @@ class ClassicGameState extends GameState
 		{
 			FlxG.sound.play(AssetPaths.mselect__wav);
 			var bumperSize = new FlxPoint(_hud.nextBumper.width, _hud.nextBumper.height).scale(.5);
-			var paintDialog = new PaintCanSubstate(_boardClassic.center.subtractPoint(bumperSize));
+			var paintDialog = new PaintCanSubstate(_boardClassic.center.subtractPoint(bumperSize), _bg.colors);
 			paintDialog.onDialogResult.add(onColorSelect);
 			openSubState(paintDialog);
 		}
@@ -197,8 +197,8 @@ class ClassicGameState extends GameState
 				FlxG.sound.play(AssetPaths.mback__wav);
 			_paintCanBumper.kill();
 			_paintCanCancelButton.kill();
-			_selectedColor = None;
 			_boardClassic.endPaint(_selectedColor == None);
+			_selectedColor = None;
 		}
 	}
 }
