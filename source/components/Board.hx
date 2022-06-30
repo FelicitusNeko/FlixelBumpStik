@@ -508,6 +508,37 @@ class Board extends FlxTypedGroup<FlxBasic>
 			curChain++;
 			onMatch.dispatch(curChain, clearCount);
 			_csm.chain("match");
+
+			if (curChain > 1 || clearCount > 3)
+			{
+				var firstClearBumper:Bumper = null;
+				for (y in 0...bHeight)
+				{
+					for (x in 0...bWidth)
+					{
+						var bumper = atGrid(_bumpers, x, y, false);
+						if (bumper != null && bumper.direction == Clearing)
+						{
+							firstClearBumper = bumper;
+							break;
+						}
+					}
+					if (firstClearBumper != null)
+						break;
+				}
+				if (firstClearBumper != null)
+				{
+					var putx = firstClearBumper.x - (firstClearBumper.width / 3);
+					if (clearCount > 3)
+					{
+						var comboMarker = new BonusMarker(putx, firstClearBumper.y, clearCount);
+						add(comboMarker);
+						putx += comboMarker.height * 1.6;
+					}
+					if (curChain > 1)
+						add(new BonusMarker(putx, firstClearBumper.y, curChain, true));
+				}
+			}
 		}
 		else
 		{
