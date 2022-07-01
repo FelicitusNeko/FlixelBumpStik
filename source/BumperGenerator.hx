@@ -16,7 +16,7 @@ class BumperGenerator
 	public var initColors(default, null):Int;
 
 	/** The number of colors currently in play. **/
-	public var colors(default, set):Int;
+	public var colors(default, set):Int = 0;
 
 	/** The average number of each color generated. **/
 	public var average(get, never):Float;
@@ -53,7 +53,7 @@ class BumperGenerator
 
 	function get_average():Float
 	{
-		if (colors == 0 || colors == null)
+		if (colors == 0)
 			return 0;
 		var total = 0;
 		for (_ => qty in _drops)
