@@ -20,7 +20,7 @@ class ClassicHUD extends StandardHUD
 	private var _paintCansIncrement:Int = 1500;
 
 	/** The current number of available Paint Cans. **/
-	public var paintCans(default, set):Int;
+	public var paintCans(default, set):Int = 0;
 
 	/** Event that fires when one or more Paint Cans are earned. **/
 	public var onPaintCanGet(default, null) = new Event<Int->Void>();
@@ -37,7 +37,11 @@ class ClassicHUD extends StandardHUD
 
 		if (_rightSide)
 		{
-			_pcButton = new FlxButton(5, 5, "P:0", onPaintCanClick.dispatch);
+			_pcButton = new FlxButton(5, 5, "P:0", () ->
+			{
+				if (paintCans > 0)
+					onPaintCanClick.dispatch();
+			});
 			_pcButton.allowSwiping = false;
 			_pcButton.y = height - _pcButton.height - 5;
 			add(_pcButton);
