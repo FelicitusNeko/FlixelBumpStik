@@ -56,16 +56,17 @@ class StandardHUD extends FlxSpriteGroup
 
 		if (_rightSide)
 		{
-			var quarterWidth = Math.round(FlxG.width / 4);
+			// TODO: work on getting the size right for different aspect ratios
+			var quarterWidth = Math.round(FlxG.width / 4),
+				widthRatio = 180 / quarterWidth;
 
-			// super(quarterWidth * 3, 0);
-			add(new FlxSprite().makeGraphic(quarterWidth, FlxG.height, FlxColor.fromRGBFloat(.1, .1, .8, .5)));
+			add(new FlxSprite().makeGraphic(180, Math.ceil(FlxG.height * widthRatio), FlxColor.fromRGBFloat(.1, .1, .8, .5)));
 
-			_scoreDisplay.setPosition(quarterWidth - 20, _scoreDisplay.lineHeight);
+			_scoreDisplay.setPosition(width - 20, _scoreDisplay.lineHeight);
 			_scoreDisplay.width = width * (1 / _scoreDisplay.scale.x);
 			add(_scoreDisplay);
 
-			_blockDisplay.setPosition(quarterWidth - 20, _blockDisplay.lineHeight * 2);
+			_blockDisplay.setPosition(width - 20, _blockDisplay.lineHeight * 2);
 			_blockDisplay.width = width * (1 / _blockDisplay.scale.x);
 			add(_blockDisplay);
 		}

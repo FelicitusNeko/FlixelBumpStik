@@ -1,11 +1,10 @@
 package components;
 
-import boardObject.Bumper;
 import components.StandardHUD;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxState;
-import flixel.tweens.FlxTween;
+import flixel.math.FlxPoint;
 import flixel.util.FlxColor;
 import openfl.system.System;
 
@@ -50,34 +49,32 @@ abstract class GameState extends FlxState
 			_hud = new StandardHUD();
 		add(_hud);
 
-		// _hud.nextBumper = _bg.weightedGenerate();
-
+		var mainCamera = FlxG.camera;
 		var hudCamera:FlxCamera;
-		var wWidth:Float = FlxG.width, wHeight:Float = FlxG.height;
+
+		mainCamera.antialiasing = true;
+
 		if (FlxG.width > FlxG.height)
 		{
-			wWidth *= .75;
-			hudCamera = new FlxCamera(Math.round(wWidth), 0, Math.round(FlxG.width / 4), FlxG.height);
+			hudCamera = new FlxCamera(Math.round(FlxG.width * .75), 0, Math.round(FlxG.width / 4), FlxG.height);
+			mainCamera.zoom = Math.min((FlxG.width - hudCamera.width) / _player.board.tWidth, FlxG.height / _player.board.tHeight) * (14 / 15);
+			mainCamera.focusOn(_player.board.center.add(hudCamera.width / 2 / FlxG.camera.zoom, 0));
 		}
 		else
 		{
-			wHeight *= .8;
-			hudCamera = new FlxCamera(0, Math.round(wHeight), FlxG.width, Math.round(FlxG.height / 5));
+			hudCamera = new FlxCamera(0, Math.round(FlxG.height * .8), FlxG.width, Math.round(FlxG.height / 5));
+			mainCamera.zoom = Math.min(FlxG.width / _player.board.tWidth, (FlxG.height - hudCamera.height) / _player.board.tHeight) * (14 / 15);
+			mainCamera.focusOn(_player.board.center.add(hudCamera.width / 2 / FlxG.camera.zoom, 0));
 		}
 
-		hudCamera.bgColor = FlxColor.TRANSPARENT;
-		_hud.cameras = [hudCamera];
 		FlxG.cameras.add(hudCamera, false);
+		_hud.cameras = [hudCamera];
+		hudCamera.update(0);
+		hudCamera.bgColor = FlxColor.TRANSPARENT;
+		// hudCamera.zoom = hudCamera.width / _hud.width;
 		hudCamera.antialiasing = true;
-
-		FlxG.camera.zoom = Math.min(wWidth / _player.board.tWidth, wHeight / _player.board.tHeight) * (14 / 15);
-		FlxG.camera.antialiasing = true;
-		// FlxTween.tween(FlxG.camera, {zoom: 5}, 5, {onComplete: (_) -> FlxTween.tween(FlxG.camera, {zoom: 1}, 5)});
-		// FlxTween.tween(hudCamera, {zoom: 5}, 5, {onComplete: (_) -> FlxTween.tween(hudCamera, {zoom: 1}, 5)});
-
-		trace("Going with a zoom of " + FlxG.camera.zoom);
-
-		FlxG.camera.focusOn(_player.board.center.add(_hud.width * hudCamera.zoom / 2 / FlxG.camera.zoom, 0));
+		hudCamera.focusOn(new FlxPoint(_hud.width / 2, _hud.height / 2));
+		trace(mainCamera.targetOffset, hudCamera.targetOffset);
 
 		super.create();
 	}
