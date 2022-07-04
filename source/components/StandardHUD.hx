@@ -10,6 +10,8 @@ import flixel.text.FlxBitmapText;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 
+using StringTools;
+
 class StandardHUD extends FlxSpriteGroup
 {
 	/** The diginum respresentation of the current score. **/
@@ -80,9 +82,7 @@ class StandardHUD extends FlxSpriteGroup
 
 	function set_score(score:Int):Int
 	{
-		var output = Std.string(Math.min(score, 99999));
-		while (output.length < 5)
-			output = "z" + output;
+		var output = Std.string(Math.min(score, 99999)).lpad("z", 5);
 		_scoreDisplay.text = output;
 
 		return this.score = score;
@@ -90,9 +90,7 @@ class StandardHUD extends FlxSpriteGroup
 
 	function set_block(block:Int):Int
 	{
-		var output = Std.string(Math.min(block, 99999));
-		while (output.length < 5)
-			output = "z" + output;
+		var output = Std.string(Math.min(block, 99999)).lpad("z", 5);
 		_blockDisplay.text = output;
 
 		return this.block = block;
