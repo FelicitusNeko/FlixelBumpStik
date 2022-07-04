@@ -53,9 +53,11 @@ class ClassicGameState extends GameState
 
 		// var test = new FlxButton(0, 0, "Test", () ->
 		// {
-		// 	_hudClassic.paintCans++;
+		// 	// _hudClassic.paintCans++;
+		// 	var combo = new BonusMarker(_boardClassic.center.x, _boardClassic.center.y, 5);
+		// 	add(combo);
+		// 	add(new BonusMarker(_boardClassic.center.x + combo.height * 1.6, _boardClassic.center.y, 2, true));
 		// });
-		// test.scrollFactor.set(0, 0);
 		// add(test);
 	}
 
@@ -83,17 +85,25 @@ class ClassicGameState extends GameState
 			FlxG.sound.play(AssetPaths.allclear__wav);
 			var mJackpot = addScore(_jackpot);
 			_jackpot = 0;
-			trace("Awarding jackpot of " + mJackpot);
-			openSubState(new AllClearSubstate(mJackpot, _boardClassic.center));
 			_hud.bonus = mJackpot;
+			trace("Awarding jackpot of " + mJackpot);
+
+			var allClearSub = new AllClearSubstate(mJackpot, _boardClassic.center);
+			allClearSub.closeCallback = onRequestGenerate;
+			openSubState(allClearSub);
+			return;
 		}
 		if (_hud.block >= _nextColor && _bg.colors < 6)
 		{
 			FlxG.sound.play(AssetPaths.levelup__wav);
 			_nextColor += 150;
 			_player.multStack[0] += .2;
-			openSubState(new NewColorSubstate(BumperGenerator.colorOpts[_bg.colors++], _boardClassic.center));
 			trace("Adding new colour; now at " + _bg.colors);
+
+			var newColorSub = new NewColorSubstate(BumperGenerator.colorOpts[_bg.colors++], _boardClassic.center);
+			newColorSub.closeCallback = onRequestGenerate;
+			openSubState(newColorSub);
+			return;
 		}
 		if (_hud.nextBumper == null)
 			_hud.nextBumper = _bg.weightedGenerate();
