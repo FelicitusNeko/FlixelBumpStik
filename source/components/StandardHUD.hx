@@ -14,20 +14,20 @@ using StringTools;
 
 class StandardHUD extends FlxSpriteGroup
 {
-	/** The diginum respresentation of the current score. **/
-	var _scoreDisplay:FlxBitmapText;
+	/** The counter for the current score. **/
+	var _scoreCounter:HUDCounter;
 
-	/** The diginum respresentation of the current clear count. **/
-	var _blockDisplay:FlxBitmapText;
+	/** The counter for the current clear count. **/
+	var _blockCounter:HUDCounter;
 
 	/** Whether the HUD is displayed on the right side (`true`) or bottom (`false`). **/
 	var _rightSide = true;
 
 	/** The current score displayed on the HUD. **/
-	public var score(default, set):Int;
+	public var score(get, set):Int;
 
 	/** The current count of cleared bumpers displayed on the HUD. **/
-	public var block(default, set):Int;
+	public var block(get, set):Int;
 
 	/** Write-only. Assign to both add score and display as a bonus value. **/
 	public var bonus(never, set):Int;
@@ -38,21 +38,7 @@ class StandardHUD extends FlxSpriteGroup
 	public function new()
 	{
 		super(0, 0);
-		var diginum = FlxBitmapFont.fromAngelCode(AssetPaths.Diginum__png, AssetPaths.Diginum__xml);
 		_rightSide = FlxG.width > FlxG.height;
-
-		_scoreDisplay = new FlxBitmapText(diginum);
-		_blockDisplay = new FlxBitmapText(diginum);
-
-		for (display in [_scoreDisplay, _blockDisplay])
-		{
-			display.autoSize = false;
-			display.setBorderStyle(FlxTextBorderStyle.SHADOW);
-			display.alignment = FlxTextAlign.RIGHT;
-			display.scale = new FlxPoint(.6, .6);
-		}
-		_scoreDisplay.color = FlxColor.GREEN;
-		_blockDisplay.color = FlxColor.RED;
 
 		if (_rightSide)
 		{
@@ -62,39 +48,38 @@ class StandardHUD extends FlxSpriteGroup
 
 			add(new FlxSprite().makeGraphic(180, Math.ceil(FlxG.height * widthRatio), FlxColor.fromRGBFloat(.1, .1, .8, .5)));
 
-			_scoreDisplay.setPosition(width - 20, _scoreDisplay.lineHeight);
-			_scoreDisplay.width = width * (1 / _scoreDisplay.scale.x);
-			add(_scoreDisplay);
+			_scoreCounter = new HUDCounter(25, 40, "SCORE");
+			_scoreCounter.counterColor = FlxColor.GREEN;
+			add(_scoreCounter);
 
-			_blockDisplay.setPosition(width - 20, _blockDisplay.lineHeight * 2);
-			_blockDisplay.width = width * (1 / _blockDisplay.scale.x);
-			add(_blockDisplay);
+			_blockCounter = new HUDCounter(25, 40 + _scoreCounter.height, "BLOCK");
+			_blockCounter.counterColor = FlxColor.RED;
+			add(_blockCounter);
 		}
 		else
 		{
 			// super(0, FlxG.height * .8);
 		}
+	}
 
-		scrollFactor.set(0, 0);
-
-		score = 0;
-		block = 0;
+	function get_score()
+	{
+		return _scoreCounter.value;
 	}
 
 	function set_score(score:Int):Int
 	{
-		var output = Std.string(Math.min(score, 99999)).lpad("z", 5);
-		_scoreDisplay.text = output;
+		return _scoreCounter.value = score;
+	}
 
-		return this.score = score;
+	function get_block()
+	{
+		return _blockCounter.value;
 	}
 
 	function set_block(block:Int):Int
 	{
-		var output = Std.string(Math.min(block, 99999)).lpad("z", 5);
-		_blockDisplay.text = output;
-
-		return this.block = block;
+		return _blockCounter.value = block;
 	}
 
 	function set_bonus(bonus:Int):Int
@@ -109,7 +94,6 @@ class StandardHUD extends FlxSpriteGroup
 		{
 			remove(this.nextBumper);
 			this.nextBumper.isUIElement = false;
-			this.nextBumper.scrollFactor.set(1, 1);
 		}
 		if (nextBumper != null)
 		{
