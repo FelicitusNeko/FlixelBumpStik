@@ -71,19 +71,21 @@ class ClassicGameState extends GameState
 		return cast(_player.board, ClassicBoard);
 	}
 
+	/** Calculates score to be added. **/
 	override function addScore(add:Int, ?multStack:Array<Float>):Int
 	{
 		_jackpot += add;
 		return super.addScore(add, multStack);
 	}
 
+	/** Called when the board requests a bumper to be generated. Usually when it goes into Idle state. **/
 	function onRequestGenerate()
 	{
 		trace("onRequestGenerate()");
 		if (_player.board.bCount <= 0 && _jackpot > 0)
 		{
 			FlxG.sound.play(AssetPaths.allclear__wav);
-			var mJackpot = addScore(_jackpot);
+			var mJackpot = addScore(_jackpot, _player.multStack);
 			_jackpot = 0;
 			_hud.bonus = mJackpot;
 			trace("Awarding jackpot of " + mJackpot);
@@ -109,15 +111,17 @@ class ClassicGameState extends GameState
 			_hud.nextBumper = _bg.weightedGenerate();
 	}
 
+	/** Called when the board is asking for a bumper to launch. **/
 	function onLaunch(cb:BumperCallback)
 	{
 		FlxG.sound.play(AssetPaths.launch__wav);
 		var retval = _hud.nextBumper != null ? _hud.nextBumper : _bg.weightedGenerate();
 		_hud.nextBumper = null;
-		_hud.score += addScore(5);
+		_hud.score += addScore(5, _player.multStack);
 		cb(retval);
 	}
 
+	/** Called when a match is formed. **/
 	function onMatch(chain:Int, combo:Int)
 	{
 		var bonus = ((combo - 3) + (chain - 1)) * Math.floor(Math.pow(2, (chain - 1))) * 50;
@@ -127,16 +131,18 @@ class ClassicGameState extends GameState
 			FlxG.sound.play(AssetPaths.combo__wav);
 		else
 			FlxG.sound.play(AssetPaths.match__wav);
-		_hud.bonus = addScore(bonus);
+		_hud.bonus = addScore(bonus, _player.multStack);
 	}
 
+	/** Called when a bumper is cleared. **/
 	function onClear(chain:Int)
 	{
 		FlxG.sound.play(AssetPaths.clear__wav);
 		_hud.block++;
-		_hud.score += addScore(10 * Math.floor(Math.pow(2, chain - 1)));
+		_hud.score += addScore(10 * Math.floor(Math.pow(2, chain - 1)), _player.multStack);
 	}
 
+	/** Called when the Paint Can button is clicked. **/
 	function onPaintCanClick()
 	{
 		if (_selectedColor == None)
@@ -149,6 +155,7 @@ class ClassicGameState extends GameState
 		}
 	}
 
+	/** Called when a color is selected, or the color dialog is cancelled. **/
 	function onColorSelect(color:Color)
 	{
 		if (_selectedColor != None)
@@ -193,6 +200,7 @@ class ClassicGameState extends GameState
 			FlxG.sound.play(AssetPaths.mback__wav);
 	}
 
+	/** Called when a bumper is selected, or the bumper selection is cancelled. **/
 	function onBumperSelect(bumper:Bumper)
 	{
 		if (_selectedColor != None)
