@@ -71,7 +71,7 @@ abstract class GameState extends FlxState
 		_hud.cameras = [hudCamera];
 		hudCamera.update(0);
 		hudCamera.bgColor = FlxColor.TRANSPARENT;
-		// hudCamera.zoom = hudCamera.width / _hud.width;
+		hudCamera.zoom = hudCamera.width / _hud.width;
 		hudCamera.antialiasing = true;
 		hudCamera.focusOn(new FlxPoint(_hud.width / 2, _hud.height / 2));
 		trace(mainCamera.targetOffset, hudCamera.targetOffset);
