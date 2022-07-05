@@ -1,5 +1,6 @@
 package components;
 
+import flixel.FlxSprite;
 import flixel.graphics.frames.FlxBitmapFont;
 import flixel.group.FlxSpriteGroup;
 import flixel.math.FlxPoint;
@@ -23,14 +24,22 @@ class HUDCounter extends FlxSpriteGroup
 	{
 		super(x, y);
 
+		var labelText = new FlxText(0, 0, 0, label, 16);
+
 		_counterText = new FlxBitmapText(FlxBitmapFont.fromAngelCode(AssetPaths.Diginum__png, AssetPaths.Diginum__xml));
 		_counterText.autoSize = false;
 		_counterText.setBorderStyle(FlxTextBorderStyle.SHADOW);
 		_counterText.scale = new FlxPoint(.6, .6);
-		add(_counterText);
 
 		this.label = label;
 		this.value = value;
+
+		var bg = new FlxSprite(0, labelText.height);
+		bg.makeGraphic(136, 44, FlxColor.BLACK);
+
+		add(bg);
+		add(labelText);
+		add(_counterText);
 	}
 
 	function set_value(value:Int)
