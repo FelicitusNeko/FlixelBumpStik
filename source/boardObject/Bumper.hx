@@ -100,6 +100,7 @@ class Bumper extends BoardObject
 		arrow = new FlxSprite(0, 0);
 		arrow.loadGraphic(AssetPaths.BumperSymbols__png, true, cast(width, Int), cast(height, Int));
 		arrow.alive = false;
+		// arrow.blend = Math.random() >= .5 ? "multiply" : "add";
 		add(arrow);
 
 		this.bColor = color;
@@ -111,6 +112,8 @@ class Bumper extends BoardObject
 
 		maxVelocity.x = width * 8;
 		maxVelocity.y = height * 8;
+
+		newFinally();
 	}
 
 	function set_bColor(bColor:Color):Color

@@ -44,6 +44,12 @@ abstract class BoardObject extends FlxSpriteGroup
 		add(base);
 	}
 
+	function newFinally()
+	{
+		setSize(width - .0002, height - .0002);
+		offset.set(.0001, .0001);
+	}
+
 	function set_owner(owner:Board):Board
 	{
 		// if (this.owner == owner)

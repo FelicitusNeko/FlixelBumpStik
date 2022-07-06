@@ -19,5 +19,6 @@ class BoardSpace extends BoardObject
 		super(x, y, owner);
 
 		base.makeGraphic(64, 64, FlxColor.GRAY);
+		newFinally();
 	}
 }
