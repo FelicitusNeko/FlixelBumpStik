@@ -90,7 +90,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 	/** Event that fires when the game is over. **/
 	public var onGameOver(default, null) = new Event<Void->Void>();
 
-	public function new(x:Float = 0, y:Float = 0)
+	public function new(x:Float = 0, y:Float = 0, bWidth = 5, bHeight = 5)
 	{
 		super();
 		origin = new FlxPoint(x, y);
@@ -147,6 +147,9 @@ class Board extends FlxTypedGroup<FlxBasic>
 
 		for (launcher in _launchers)
 			launcher.onClick.add(onClickLauncher);
+
+		this.bWidth = bWidth;
+		this.bHeight = bHeight;
 
 		// setupTest(10);
 	}

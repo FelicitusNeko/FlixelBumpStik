@@ -10,9 +10,9 @@ class ClassicBoard extends Board
 
 	private var _selectedBumper:Bumper = null;
 
-	public function new(x:Float, y:Float)
+	public function new(x:Float, y:Float, bWidth = 5, bHeight = 5)
 	{
-		super(x, y);
+		super(x, y, bWidth, bHeight);
 
 		_csm.addState("painting", null);
 
