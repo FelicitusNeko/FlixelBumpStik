@@ -32,15 +32,19 @@ class ClassicGameState extends GameState
 
 	override function create()
 	{
-		_players.push({
-			board: new ClassicBoard(0, 0),
-			multStack: [1]
-		});
+		if (_players.length == 0)
+			_players.push({
+				board: new ClassicBoard(0, 0),
+				multStack: [1]
+			});
 
-		_hud = new ClassicHUD();
-		_hudClassic.onPaintCanGet.add((_) -> FlxG.sound.play(AssetPaths.paintcan__wav));
-		_hudClassic.onPaintCanClick.add(onPaintCanClick);
-		_hudClassic.onNextBumperClick.add(onBumperSelect);
+		if (_hud == null)
+		{
+			_hud = new ClassicHUD();
+			_hudClassic.onPaintCanGet.add((_) -> FlxG.sound.play(AssetPaths.paintcan__wav));
+			_hudClassic.onPaintCanClick.add(onPaintCanClick);
+			_hudClassic.onNextBumperClick.add(onBumperSelect);
+		}
 
 		_boardClassic.onRequestGenerate.add(onRequestGenerate);
 		_boardClassic.onMatch.add(onMatch);
