@@ -2,12 +2,16 @@ package;
 
 import boardObject.Bumper;
 import flixel.math.FlxRandom;
+import flixel.util.FlxColor;
 
 /** Generates bumpers for play use. **/
 class BumperGenerator
 {
+	/** The default array to convert numbers into colors. **/
+	public static final defaultColorOpts:Array<FlxColor> = [Color.Blue, Color.Green, Color.Red, Color.Purple, Color.Yellow, Color.White];
+
 	/** An array to convert numbers into colors. **/
-	public static final colorOpts:Array<Color> = [Blue, Green, Red, Purple, Yellow, White];
+	public var colorOpts:Array<FlxColor> = [];
 
 	/** An array to convert numbers into directions. **/
 	public static final dirOpts:Array<Direction> = [Up, Right, Down, Left];
@@ -30,10 +34,11 @@ class BumperGenerator
 	/** The quantity of each color that has been generated **/
 	private var _drops:Map<Color, Int> = [];
 
-	public function new(initColors:Int)
+	public function new(initColors:Int, ?initOpts:Array<FlxColor>)
 	{
 		this.initColors = initColors;
 		colors = initColors;
+		colorOpts = initOpts != null ? initOpts.copy() : defaultColorOpts.copy();
 	}
 
 	function set_colors(colors:Int):Int
@@ -67,6 +72,15 @@ class BumperGenerator
 		for (_ => qty in _drops)
 			retval = Math.round(Math.max(qty, retval));
 		return retval;
+	}
+
+	/** Shuffles the list of colors to use. This will also reset generation statistics. **/
+	public function shuffleColors()
+	{
+		var _colors = colors;
+		colors = 0;
+		_rng.shuffle(colorOpts);
+		colors = _colors;
 	}
 
 	/**

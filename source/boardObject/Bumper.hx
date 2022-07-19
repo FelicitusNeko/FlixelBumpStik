@@ -7,15 +7,40 @@ import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 
 /** The current color of the bumper, for matching purposes. **/
-enum abstract Color(FlxColor)
+@:enum
+abstract Color(FlxColor) from FlxColor to FlxColor
 {
-	var None = FlxColor.GRAY;
-	var Blue = 0xff2365e0;
-	var Green = 0xff1dec62;
-	var Red = 0xffe04f4f;
-	var Purple = 0xffa45ced;
-	var Yellow = 0xfffffb23;
-	var White = 0xffdddddd;
+	public static inline var None = FlxColor.GRAY;
+	public static inline var Blue = 0xff2365e0;
+	public static inline var Green = 0xff1dec62;
+	public static inline var Red = 0xffe04f4f;
+	public static inline var Purple = 0xffa45ced;
+	public static inline var Yellow = 0xfffffb23;
+	public static inline var White = 0xffdddddd;
+
+	@:to
+	public inline function toString()
+	{
+		switch (this)
+		{
+			case None:
+				return "None";
+			case Blue:
+				return "Blue";
+			case Green:
+				return "Green";
+			case Red:
+				return "Red";
+			case Purple:
+				return "Purple";
+			case Yellow:
+				return "Yellow";
+			case White:
+				return "White";
+			default:
+				return this.toHexString();
+		}
+	}
 }
 
 /** The current direction or state of the bumper, for mechanical purposes. **/
@@ -42,7 +67,7 @@ class Bumper extends BoardObject
 	static final ACCELFACTOR:Float = 8;
 
 	/** The color of this bumper. **/
-	public var bColor(default, set):Color;
+	public var bColor(default, set):FlxColor;
 
 	/** Whether this bumper is grayed out. **/
 	public var grayedOut(default, set) = false;
@@ -91,7 +116,9 @@ class Bumper extends BoardObject
 
 	public var isUIElement:Bool = false;
 
-	public function new(x:Float, y:Float, color:Color, direction:Direction = Direction.None, launchDirection:Direction = Direction.None, owner:Board = null)
+	private var _flairList:Map<String, FlxSprite> = [];
+
+	public function new(x:Float, y:Float, color:FlxColor, direction:Direction = Direction.None, launchDirection:Direction = Direction.None, owner:Board = null)
 	{
 		super(x, y, owner);
 
@@ -116,10 +143,10 @@ class Bumper extends BoardObject
 		newFinally();
 	}
 
-	function set_bColor(bColor:Color):Color
+	function set_bColor(bColor:FlxColor):FlxColor
 	{
 		if (direction != Direction.GameOver && !grayedOut)
-			base.color = arrow.color = cast(bColor, FlxColor);
+			base.color = arrow.color = bColor;
 		return this.bColor = bColor;
 	}
 
@@ -319,6 +346,23 @@ class Bumper extends BoardObject
 		velocity.y = -(height * 4 * (Math.random() / 2)) - height * 4;
 		angularVelocity = 90 * (Math.random() - .5);
 		maxVelocity.set(9999, 9999);
+	}
+
+	public function addFlair(name:String, sprite:FlxSprite)
+	{
+		insert(group.length - 1, sprite);
+		_flairList.set(name, sprite);
+	}
+
+	public function removeFlair(name:String)
+	{
+		remove(_flairList[name]);
+		_flairList.remove(name);
+	}
+
+	public function hasFlair(name:String)
+	{
+		return _flairList.exists(name);
 	}
 
 	override function update(elapsed:Float)
