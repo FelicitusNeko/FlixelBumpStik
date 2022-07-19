@@ -6,6 +6,7 @@ import components.classic.ClassicHUD;
 import flixel.FlxG;
 import flixel.math.FlxPoint;
 import flixel.ui.FlxButton;
+import flixel.util.FlxColor;
 
 class ClassicGameState extends GameState
 {
@@ -28,7 +29,7 @@ class ClassicGameState extends GameState
 	private var _boardClassic(get, never):ClassicBoard;
 
 	/** The current selected color during a Paint Can event. **/
-	private var _selectedColor:Color = None;
+	private var _selectedColor:Null<FlxColor> = null;
 
 	override function create()
 	{
@@ -106,7 +107,7 @@ class ClassicGameState extends GameState
 			_player.multStack[0] += .2;
 			trace("Adding new colour; now at " + _bg.colors);
 
-			var newColorSub = new NewColorSubstate(BumperGenerator.colorOpts[_bg.colors++], _boardClassic.center);
+			var newColorSub = new NewColorSubstate(BumperGenerator.defaultColorOpts[_bg.colors++], _boardClassic.center);
 			newColorSub.closeCallback = onRequestGenerate;
 			openSubState(newColorSub);
 			return;
@@ -149,7 +150,7 @@ class ClassicGameState extends GameState
 	/** Called when the Paint Can button is clicked. **/
 	function onPaintCanClick()
 	{
-		if (_selectedColor == None)
+		if (_selectedColor == null)
 		{
 			FlxG.sound.play(AssetPaths.mselect__wav);
 			var bumperSize = new FlxPoint(_hud.nextBumper.width, _hud.nextBumper.height).scale(.5);
@@ -160,12 +161,12 @@ class ClassicGameState extends GameState
 	}
 
 	/** Called when a color is selected, or the color dialog is cancelled. **/
-	function onColorSelect(color:Color)
+	function onColorSelect(?color:FlxColor)
 	{
-		if (_selectedColor != None)
+		if (_selectedColor != null)
 			return;
 
-		if (color != None)
+		if (color != null)
 		{
 			FlxG.sound.play(AssetPaths.mselect__wav);
 			_selectedColor = color;
@@ -207,7 +208,7 @@ class ClassicGameState extends GameState
 	/** Called when a bumper is selected, or the bumper selection is cancelled. **/
 	function onBumperSelect(bumper:Bumper)
 	{
-		if (_selectedColor != None)
+		if (_selectedColor != null)
 		{
 			if (bumper != null)
 			{
@@ -219,8 +220,8 @@ class ClassicGameState extends GameState
 				FlxG.sound.play(AssetPaths.mback__wav);
 			_paintCanBumper.kill();
 			_paintCanCancelButton.kill();
-			_boardClassic.endPaint(_selectedColor == None);
-			_selectedColor = None;
+			_boardClassic.endPaint(_selectedColor == null);
+			_selectedColor = null;
 		}
 	}
 }
