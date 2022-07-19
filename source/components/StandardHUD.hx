@@ -105,7 +105,7 @@ class StandardHUD extends FlxSpriteGroup
 		return this.nextBumper = nextBumper;
 	}
 
-	function resetHUD()
+	public function resetHUD()
 	{
 		if (nextBumper != null)
 		{
