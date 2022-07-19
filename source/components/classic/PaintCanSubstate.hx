@@ -20,12 +20,16 @@ class PaintCanSubstate extends FlxSubState
 
 	public var center(default, null):FlxPoint;
 
-	public var onDialogResult(default, null) = new Event<Color->Void>();
+	public var onDialogResult(default, null) = new Event<Null<FlxColor>->Void>();
 
-	public function new(center:FlxPoint, colors = 3)
+	private var _colorSet:Array<FlxColor>;
+
+	public function new(center:FlxPoint, colors = 3, ?bg:BumperGenerator)
 	{
 		this.center = center;
 		this.colors = colors;
+		_colorSet = bg != null ? bg.colorOpts : BumperGenerator.defaultColorOpts;
+
 		super(FlxColor.fromRGBFloat(0, 0, 0, .3));
 	}
 
@@ -37,11 +41,11 @@ class PaintCanSubstate extends FlxSubState
 		var vertices:Array<FlxPoint> = [];
 		var bumperHeight:Float = -1;
 
-		var hexbutton = new FlxSpriteButton(center.x - 40, center.y - 40, null, () -> onDialogResult.dispatch(None));
+		var hexbutton = new FlxSpriteButton(center.x - 40, center.y - 40, null, () -> onDialogResult.dispatch(null));
 		hexbutton.scrollFactor.set(1, 1);
 		hexbutton.makeGraphic(144, 144, FlxColor.TRANSPARENT);
 
-		for (i => color in BumperGenerator.colorOpts)
+		for (i => color in BumperGenerator.defaultColorOpts)
 		{
 			var bumper = new Bumper(center.x, center.y, color, i < colors ? Up : None);
 			if (bumperHeight < 0)
