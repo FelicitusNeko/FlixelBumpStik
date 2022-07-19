@@ -9,6 +9,7 @@ import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxPoint;
+import flixel.util.FlxColor;
 import lime.app.Event;
 
 typedef BumperCallback = Bumper->Void;
@@ -208,33 +209,33 @@ class Board extends FlxTypedGroup<FlxBasic>
 				putBumperAt(1, 0, Color.Blue, Direction.Down);
 				putBumperAt(2, 4, Color.Red, Direction.Up);
 			case 7: // Match test #1 - vertical ✔️
-				putBumperAt(4, 0, Green, None);
-				putBumperAt(4, 1, Blue, None);
-				putBumperAt(0, 2, Blue, Right);
-				putBumperAt(4, 3, Blue, None);
-				putBumperAt(4, 4, Red, None);
+				putBumperAt(4, 0, Color.Green, None);
+				putBumperAt(4, 1, Color.Blue, None);
+				putBumperAt(0, 2, Color.Blue, Right);
+				putBumperAt(4, 3, Color.Blue, None);
+				putBumperAt(4, 4, Color.Red, None);
 			case 8: // Match test #2 - horizontal ✔️
-				putBumperAt(0, 4, Green, None);
-				putBumperAt(1, 4, Blue, None);
-				putBumperAt(2, 0, Blue, Down);
-				putBumperAt(3, 4, Blue, None);
-				putBumperAt(4, 4, Red, None);
+				putBumperAt(0, 4, Color.Green, None);
+				putBumperAt(1, 4, Color.Blue, None);
+				putBumperAt(2, 0, Color.Blue, Down);
+				putBumperAt(3, 4, Color.Blue, None);
+				putBumperAt(4, 4, Color.Red, None);
 			case 9: // Corner collision ✔️
-				putBumperAt(2, 4, Blue, Right);
-				putBumperAt(4, 4, Blue, Right);
-				putBumperAt(2, 0, Green, Down);
+				putBumperAt(2, 4, Color.Blue, Right);
+				putBumperAt(4, 4, Color.Blue, Right);
+				putBumperAt(2, 0, Color.Green, Down);
 			case 10: // Chain scoring (×3)
-				putBumperAt(2, 2, Blue, Down);
-				putBumperAt(2, 3, Blue, Up);
-				putBumperAt(0, 2, Green, Left);
-				putBumperAt(1, 2, Green, Left);
-				putBumperAt(3, 2, Green, Left);
-				putBumperAt(0, 0, Red, Up);
-				putBumperAt(0, 1, Red, Up);
-				putBumperAt(0, 3, Red, Up);
+				putBumperAt(2, 2, Color.Blue, Down);
+				putBumperAt(2, 3, Color.Blue, Up);
+				putBumperAt(0, 2, Color.Green, Left);
+				putBumperAt(1, 2, Color.Green, Left);
+				putBumperAt(3, 2, Color.Green, Left);
+				putBumperAt(0, 0, Color.Red, Up);
+				putBumperAt(0, 1, Color.Red, Up);
+				putBumperAt(0, 3, Color.Red, Up);
 				var launcher = atPoint(_launchers, new FlxPoint(origin.x, origin.y).add(sWidth * 2.5, sHeight * 5.5));
 				if (launcher != null)
-					launcher.launchBumper(new Bumper(0, 0, Blue, Up));
+					launcher.launchBumper(new Bumper(0, 0, Color.Blue, Up));
 				autoLaunch = false;
 		}
 		if (autoLaunch)
@@ -255,7 +256,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 		@param dir Optional. The direction of the bumper. Defaults to `Direction.None`.
 		@return The new bumper.
 	**/
-	public function putBumperAt(x:Int, y:Int, color:Color, dir:Direction = Direction.None)
+	public function putBumperAt(x:Int, y:Int, color:FlxColor, dir:Direction = Direction.None)
 	{
 		var bumper = new Bumper(x * sWidth, y * sHeight, color, dir, None, this);
 		bumper.onClick.add(onClickBumper);
@@ -483,7 +484,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 		{
 			for (y in 0...(horizontal ? bHeight : bWidth))
 			{
-				var streakColor:Color = None, streakLength:Int = 0;
+				var streakColor:Null<FlxColor> = null, streakLength:Int = 0;
 				for (x in 0...(horizontal ? bWidth : bHeight))
 				{
 					var bumper = horizontal ? atGrid(_bumpers, x, y) : atGrid(_bumpers, y, x);
@@ -493,8 +494,8 @@ class Board extends FlxTypedGroup<FlxBasic>
 					{
 						if (streakLength >= 3)
 							horizontal ? clear(x, y, streakLength, horizontal) : clear(y, x, streakLength, horizontal);
-						streakColor = bumper != null ? bumper.bColor : None;
-						streakLength = streakColor == None ? 0 : 1;
+						streakColor = bumper != null ? bumper.bColor : null;
+						streakLength = streakColor == null ? 0 : 1;
 					}
 				}
 				if (streakLength >= 3)
@@ -620,7 +621,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 		var launcher = cast(obj, Launcher);
 		if (_csm.is("initial") && launcher.state == Selected)
 		{
-			var bumper = new Bumper(0, 0, Blue, None);
+			var bumper = new Bumper(0, 0, Color.Blue, None);
 			onLaunchBumper.dispatch(b -> bumper = b);
 			bumper.onClick.add(onClickBumper);
 			bumper.revive(); // just in case
