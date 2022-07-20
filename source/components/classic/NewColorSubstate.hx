@@ -16,7 +16,7 @@ class NewColorSubstate extends FlxSubState
 
 	private var _delay = 2.0;
 
-	public function new(color:Color, center:FlxPoint)
+	public function new(color:FlxColor, center:FlxPoint)
 	{
 		super();
 		_bumper = new Bumper(0, 0, color, Up);
