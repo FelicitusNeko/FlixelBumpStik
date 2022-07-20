@@ -107,7 +107,7 @@ class ClassicGameState extends GameState
 			_player.multStack[0] += .2;
 			trace("Adding new colour; now at " + _bg.colors);
 
-			var newColorSub = new NewColorSubstate(BumperGenerator.defaultColorOpts[_bg.colors++], _boardClassic.center);
+			var newColorSub = new NewColorSubstate(_bg.colorOpts[_bg.colors++], _boardClassic.center);
 			newColorSub.closeCallback = onRequestGenerate;
 			openSubState(newColorSub);
 			return;
