@@ -136,18 +136,6 @@ class APGameState extends ClassicGameState
 
 	public function new(host:String, port:Int, slotName:String, ?password:String)
 	{
-		_ap = new Client("asdf", "Bumper Stickers", "ws://" + host + ":" + port);
-
-		_ap._hOnSlotRefused = onSlotRefused;
-		_ap._hOnItemsReceived = onItemsReceived;
-
-		_ap.ConnectSlot(slotName, password, 0x7);
-
-		super();
-	}
-
-	override function create()
-	{
 		_bg = new BumperGenerator(2, [
 			APColor.Red,
 			APColor.Green,
@@ -158,6 +146,21 @@ class APGameState extends ClassicGameState
 		]);
 		_bg.shuffleColors();
 
+		_ap = new Client("asdf", "Bumper Stickers", "ws://" + host + ":" + port);
+
+		_ap._hOnSlotRefused = onSlotRefused;
+		_ap._hOnItemsReceived = onItemsReceived;
+
+		_ap._hOnRoomInfo = () ->
+		{
+			_ap.ConnectSlot(slotName, password, 0x7, ["AP", "Testing"], {major: 0, minor: 3, build: 3});
+		}
+
+		super();
+	}
+
+	override function create()
+	{
 		if (_players.length == 0)
 			_players.push({
 				board: new APBoard(0, 0, _curWidth, _curHeight),
@@ -171,6 +174,7 @@ class APGameState extends ClassicGameState
 	{
 		_hud.resetHUD();
 		_bg.reset();
+		_jackpot = 0;
 		remove(_player.board);
 
 		_bg.shuffleColors();
@@ -178,7 +182,7 @@ class APGameState extends ClassicGameState
 		_hudClassic.paintCans = _startPaintCans;
 
 		_player.board = new APBoard(0, 0, _curWidth, _curHeight);
-		_player.multStack[0] = 1;
+		_player.multStack[0] = _startColors == 2 ? 1 : 1.2;
 
 		// TODO: maybe make a function to prepare the board for use so we don't have to reuse this code
 		var mainCamera = FlxG.camera;
