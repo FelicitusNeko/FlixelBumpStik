@@ -17,7 +17,7 @@ class MenuState extends FlxState
 
 	override public function create()
 	{
-		titleText = new FlxText(20, 0, 0, "Bumper\nStickers", 22);
+		titleText = new FlxText(20, 0, 0, "Bumper Stickers", 22);
 		titleText.alignment = CENTER;
 		titleText.screenCenter(X);
 		add(titleText);
@@ -28,7 +28,7 @@ class MenuState extends FlxState
 		playButton.y = FlxG.height - playButton.height - 10;
 		add(playButton);
 
-		apButton = new FlxButton(0, 0, "Archipelago Mode", clickAP);
+		apButton = new FlxButton(0, 0, "Archipelago", clickAP);
 		apButton.x = (FlxG.width / 2) + 10;
 		apButton.y = FlxG.height - apButton.height - 10;
 		add(apButton);
