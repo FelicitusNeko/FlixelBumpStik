@@ -32,20 +32,23 @@ class BumperGenerator
 	private var _rng = new FlxRandom();
 
 	/** The quantity of each color that has been generated **/
-	private var _drops:Map<Color, Int> = [];
+	private var _drops:Map<FlxColor, Int> = [];
 
 	public function new(initColors:Int, ?initOpts:Array<FlxColor>)
 	{
-		this.initColors = initColors;
-		colors = initColors;
 		colorOpts = initOpts != null ? initOpts.copy() : defaultColorOpts.copy();
+		colors = this.initColors = initColors;
 	}
 
 	function set_colors(colors:Int):Int
 	{
+		trace("colors = " + colors);
 		if (colors == 0)
+		{
+			this.colors = 0;
 			_drops.clear();
-		else
+		}
+		else if (colors != this.colors)
 		{
 			var avg = Math.round(average);
 			while (this.colors < colors)
@@ -89,7 +92,7 @@ class BumperGenerator
 		@param direction Optional. Forces the bumper to be facing a specific direction.
 		@return The generated bumper.
 	**/
-	public function generate(?color:Color, ?direction:Direction)
+	public function generate(?color:FlxColor, ?direction:Direction)
 	{
 		if (color == null)
 			color = _rng.getObject(colorOpts, null, 0, colors - 1);
@@ -107,11 +110,12 @@ class BumperGenerator
 	**/
 	public function weightedGenerate()
 	{
+		trace(_drops);
 		var maxplus1 = max + 1;
 		var weights:Array<Float> = [];
 
-		for (_ => qty in _drops)
-			weights.push(maxplus1 - qty);
+		for (i in 0...colors)
+			weights.push(maxplus1 - _drops[colorOpts[i]]);
 
 		var color = _rng.getObject(colorOpts, weights, 0, colors - 1);
 		return generate(color);
