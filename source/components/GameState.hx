@@ -30,7 +30,14 @@ abstract class GameState extends FlxState
 	private var _player(get, never):PlayerInstance;
 
 	/** The bumper generator for this game. **/
-	private var _bg = new BumperGenerator(3);
+	private var _bg:BumperGenerator;
+
+	public function new()
+	{
+		if (_bg == null)
+			_bg = new BumperGenerator(3);
+		super();
+	}
 
 	override function create()
 	{
