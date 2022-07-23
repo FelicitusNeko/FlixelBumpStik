@@ -42,7 +42,6 @@ class BumperGenerator
 
 	function set_colors(colors:Int):Int
 	{
-		trace("colors = " + colors);
 		if (colors == 0)
 		{
 			this.colors = 0;
@@ -110,7 +109,6 @@ class BumperGenerator
 	**/
 	public function weightedGenerate()
 	{
-		trace(_drops);
 		var maxplus1 = max + 1;
 		var weights:Array<Float> = [];
 
