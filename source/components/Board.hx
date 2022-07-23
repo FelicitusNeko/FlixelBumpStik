@@ -86,10 +86,10 @@ class Board extends FlxTypedGroup<FlxBasic>
 		Event that fires when a bumper clears.
 		@param chain The chain step for this overall match.
 	**/
-	public var onClear(default, null) = new Event<Int->Void>();
+	public var onClear(default, null) = new Event<(Int, Bumper) -> Void>();
 
 	/** Event that fires when the game is over. **/
-	public var onGameOver(default, null) = new Event<Void->Void>();
+	public var onGameOver(default, null) = new Event<Bool->Void>();
 
 	public function new(x:Float = 0, y:Float = 0, bWidth = 5, bHeight = 5)
 	{
@@ -136,15 +136,17 @@ class Board extends FlxTypedGroup<FlxBasic>
 		_csm.addState("moving", smMoving);
 		_csm.addState("checking", smChecking);
 		_csm.addState("clearing", smClearing);
+		_csm.addState("gameoverwait", smGameOverWait);
 		_csm.addState("gameover", null);
 
 		_csm.set("initial", "launch", "moving");
 		_csm.set("moving", "stopped", "checking");
 		_csm.set("checking", "match", "clearing");
 		_csm.set("checking", "nomatch", "initial");
-		_csm.set("checking", "gameover", "gameover");
+		_csm.set("checking", "gameover", "gameoverwait");
 		_csm.set("clearing", "cleared", "moving");
 		_csm.set("clearing", "allclear", "initial");
+		_csm.set("gameoverwait", "goanimdone", "gameover");
 
 		for (launcher in _launchers)
 			launcher.onClick.add(onClickLauncher);
@@ -558,7 +560,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 			else
 			{
 				// NOTE: Game over
-				onGameOver.dispatch();
+				onGameOver.dispatch(false);
 				_bumpers.forEach(bumper -> bumper.gameOver());
 				_csm.chain("gameover");
 			}
@@ -577,7 +579,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 					var bumper = atGrid(_bumpers, x, y);
 					if (bumper != null && bumper.direction == Clearing)
 					{
-						onClear.dispatch(curChain);
+						onClear.dispatch(curChain, bumper);
 						bumper.kill();
 						_delay += .15;
 						return;
@@ -607,6 +609,15 @@ class Board extends FlxTypedGroup<FlxBasic>
 				FlxG.overlap(_bumpers, _spaces, bumperToSpace);
 				_csm.chain("cleared");
 			}
+		}
+	}
+
+	private function smGameOverWait(_:Float)
+	{
+		if (_bumpers.countLiving() <= 0)
+		{
+			onGameOver.dispatch(true);
+			_csm.chain("goanimdone");
 		}
 	}
 
