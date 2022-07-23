@@ -122,6 +122,13 @@ abstract APItem(Int) from Int to Int
 	}
 }
 
+typedef DeploymentSchedule =
+{
+	var toDeploy:Int;
+	var toClear:Int;
+	var sinceLast:Int;
+}
+
 class APGameState extends ClassicGameState
 {
 	private var _curWidth = 3;
@@ -129,7 +136,8 @@ class APGameState extends ClassicGameState
 	private var _startColors = 2;
 	private var _endColors = 3;
 	private var _startPaintCans = 0;
-	private var _hazardBumpers = 0;
+
+	private var _schedule:Map<String, DeploymentSchedule> = [];
 
 	private var _completedChecks:Set<APLocation>;
 	private var _ap:Client;
@@ -146,15 +154,22 @@ class APGameState extends ClassicGameState
 		]);
 		_bg.shuffleColors();
 
-		_ap = new Client("asdf", "Bumper Stickers", "ws://" + host + ":" + port);
+		// _ap = new Client("asdf", "Bumper Stickers", "ws://" + host + ":" + port);
 
-		_ap._hOnSlotRefused = onSlotRefused;
-		_ap._hOnItemsReceived = onItemsReceived;
+		// _ap._hOnSlotRefused = onSlotRefused;
+		// _ap._hOnItemsReceived = onItemsReceived;
 
-		_ap._hOnRoomInfo = () ->
-		{
-			_ap.ConnectSlot(slotName, password, 0x7, ["AP", "Testing"], {major: 0, minor: 3, build: 3});
-		}
+		// _ap._hOnRoomInfo = () ->
+		// {
+		// 	_ap.ConnectSlot(slotName, password, 0x7, ["AP", "Testing"], {major: 0, minor: 3, build: 3});
+		// }
+
+		_nextColor = 75;
+		_nextColorEvery = 75;
+
+		_schedule.set("booster", {toDeploy: 0, toClear: 0, sinceLast: 0});
+		_schedule.set("hazard", {toDeploy: 0, toClear: 0, sinceLast: 0});
+		_schedule.set("treasure", {toDeploy: 0, toClear: 0, sinceLast: 0});
 
 		super();
 	}
@@ -168,6 +183,8 @@ class APGameState extends ClassicGameState
 			});
 
 		super.create();
+
+		_hudClassic.paintCansIncrementStep = 0;
 	}
 
 	function restartGame()
@@ -182,31 +199,9 @@ class APGameState extends ClassicGameState
 		_hudClassic.paintCans = _startPaintCans;
 
 		_player.board = new APBoard(0, 0, _curWidth, _curHeight);
-		_player.multStack[0] = _startColors == 2 ? 1 : 1.2;
+		_player.multStack[0] = _startColors == 2 ? .8 : 1;
 
-		// TODO: maybe make a function to prepare the board for use so we don't have to reuse this code
-		var mainCamera = FlxG.camera;
-		var hudCamera = FlxG.cameras.list[1];
-
-		if (FlxG.width > FlxG.height)
-		{
-			mainCamera.zoom = Math.min((FlxG.width - hudCamera.width) / _player.board.tWidth, FlxG.height / _player.board.tHeight) * (14 / 15);
-			mainCamera.focusOn(_player.board.center.add(hudCamera.width / 2 / FlxG.camera.zoom, 0));
-		}
-		else
-		{
-			mainCamera.zoom = Math.min(FlxG.width / _player.board.tWidth, (FlxG.height - hudCamera.height) / _player.board.tHeight) * (14 / 15);
-			mainCamera.focusOn(_player.board.center.add(hudCamera.width / 2 / FlxG.camera.zoom, 0));
-		}
-
-		_boardClassic.onRequestGenerate.add(onRequestGenerate);
-		_boardClassic.onMatch.add(onMatch);
-		_boardClassic.onClear.add(onClear);
-		_boardClassic.onLaunchBumper.add(onLaunch);
-		_boardClassic.onBumperSelect.add(onBumperSelect);
-		_boardClassic.onGameOver.add(() -> FlxG.sound.play(AssetPaths.gameover__wav));
-
-		add(_player.board);
+		prepareBoard();
 	}
 
 	private function onItemsReceived(items:Array<NetworkItem>)
@@ -228,15 +223,39 @@ class APGameState extends ClassicGameState
 					_startPaintCans++;
 					_hudClassic.paintCans++;
 				case BonusBooster:
-					_player.multStack[1] += .2;
+					_schedule["booster"].toDeploy++;
+					_schedule["booster"].toClear++;
 				case HazardBumper:
-					// TODO: implement
-					_hazardBumpers++;
+					_schedule["hazard"].toDeploy++;
+					_schedule["hazard"].toClear++;
 				case TreasureBumper:
-				// TODO: implement
+					_schedule["treasure"].toDeploy++;
+					_schedule["treasure"].toClear++;
 				default:
 			}
 		}
+	}
+
+	override function onRequestGenerate()
+	{
+		var prevBumper = _hud.nextBumper;
+		super.onRequestGenerate();
+		if (_hud.nextBumper != null && _hud.nextBumper != prevBumper)
+		{
+			var newBumper = _hud.nextBumper;
+			for (key => schedule in _schedule)
+			{
+				schedule.sinceLast++;
+			}
+		}
+	}
+
+	override function onGameOver(animDone:Bool)
+	{
+		if (animDone)
+			restartGame();
+		else
+			super.onGameOver(animDone);
 	}
 
 	private function onSlotRefused(errors:Array<String>)
@@ -247,6 +266,6 @@ class APGameState extends ClassicGameState
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
-		_ap.poll();
+		// _ap.poll();
 	}
 }
