@@ -62,17 +62,9 @@ abstract class GameState extends FlxState
 		mainCamera.antialiasing = true;
 
 		if (FlxG.width > FlxG.height)
-		{
 			hudCamera = new FlxCamera(Math.round(FlxG.width * .75), 0, Math.round(FlxG.width / 4), FlxG.height);
-			mainCamera.zoom = Math.min((FlxG.width - hudCamera.width) / _player.board.tWidth, FlxG.height / _player.board.tHeight) * (14 / 15);
-			mainCamera.focusOn(_player.board.center.add(hudCamera.width / 2 / FlxG.camera.zoom, 0));
-		}
 		else
-		{
 			hudCamera = new FlxCamera(0, Math.round(FlxG.height * .8), FlxG.width, Math.round(FlxG.height / 5));
-			mainCamera.zoom = Math.min(FlxG.width / _player.board.tWidth, (FlxG.height - hudCamera.height) / _player.board.tHeight) * (14 / 15);
-			mainCamera.focusOn(_player.board.center.add(hudCamera.width / 2 / FlxG.camera.zoom, 0));
-		}
 
 		FlxG.cameras.add(hudCamera, false);
 		_hud.cameras = [hudCamera];
@@ -81,9 +73,27 @@ abstract class GameState extends FlxState
 		hudCamera.zoom = hudCamera.width / _hud.width;
 		hudCamera.antialiasing = true;
 		hudCamera.focusOn(new FlxPoint(_hud.width / 2, _hud.height / 2));
-		trace(mainCamera.targetOffset, hudCamera.targetOffset);
 
 		super.create();
+	}
+
+	function prepareBoard()
+	{
+		var mainCamera = FlxG.camera;
+		var hudCamera = FlxG.cameras.list[1];
+
+		add(_player.board);
+
+		if (FlxG.width > FlxG.height)
+		{
+			mainCamera.zoom = Math.min((FlxG.width - hudCamera.width) / _player.board.tWidth, FlxG.height / _player.board.tHeight) * (14 / 15);
+			mainCamera.focusOn(_player.board.center.add(hudCamera.width / 2 / FlxG.camera.zoom, 0));
+		}
+		else
+		{
+			mainCamera.zoom = Math.min(FlxG.width / _player.board.tWidth, (FlxG.height - hudCamera.height) / _player.board.tHeight) * (14 / 15);
+			mainCamera.focusOn(_player.board.center.add(hudCamera.width / 2 / FlxG.camera.zoom, 0));
+		}
 	}
 
 	function addScore(addScore:Int, ?multStack:Array<Float>)

@@ -22,6 +22,9 @@ class ClassicGameState extends GameState
 	/** The number of bumpers to clear to add a new color. **/
 	private var _nextColor:Int = 100;
 
+	/** The number of bumpers to clear to add a new color. **/
+	private var _nextColorEvery:Int = 150;
+
 	/** A shortcut to cast `_hud` as `ClassicHUD`. **/
 	private var _hudClassic(get, never):ClassicHUD;
 
@@ -47,14 +50,9 @@ class ClassicGameState extends GameState
 			_hudClassic.onNextBumperClick.add(onBumperSelect);
 		}
 
-		_boardClassic.onRequestGenerate.add(onRequestGenerate);
-		_boardClassic.onMatch.add(onMatch);
-		_boardClassic.onClear.add(onClear);
-		_boardClassic.onLaunchBumper.add(onLaunch);
-		_boardClassic.onBumperSelect.add(onBumperSelect);
-		_boardClassic.onGameOver.add(() -> FlxG.sound.play(AssetPaths.gameover__wav));
-
 		super.create();
+
+		prepareBoard();
 
 		// var test = new FlxButton(0, 0, "Test", () ->
 		// {
@@ -64,6 +62,19 @@ class ClassicGameState extends GameState
 		// 	add(new BonusMarker(_boardClassic.center.x + combo.height * 1.6, _boardClassic.center.y, 2, true));
 		// });
 		// add(test);
+	}
+
+	override function prepareBoard()
+	{
+		super.prepareBoard();
+
+		var board = _boardClassic;
+		board.onRequestGenerate.add(onRequestGenerate);
+		board.onMatch.add(onMatch);
+		board.onClear.add(onClear);
+		board.onLaunchBumper.add(onLaunch);
+		board.onBumperSelect.add(onBumperSelect);
+		board.onGameOver.add(onGameOver);
 	}
 
 	inline function get__hudClassic()
@@ -86,7 +97,6 @@ class ClassicGameState extends GameState
 	/** Called when the board requests a bumper to be generated. Usually when it goes into Idle state. **/
 	function onRequestGenerate()
 	{
-		trace("onRequestGenerate()");
 		if (_player.board.bCount <= 0 && _jackpot > 0)
 		{
 			FlxG.sound.play(AssetPaths.allclear__wav);
@@ -103,7 +113,7 @@ class ClassicGameState extends GameState
 		if (_hud.block >= _nextColor && _bg.colors < 6)
 		{
 			FlxG.sound.play(AssetPaths.levelup__wav);
-			_nextColor += 150;
+			_nextColor += _nextColorEvery;
 			_player.multStack[0] += .2;
 			trace("Adding new colour; now at " + _bg.colors);
 
@@ -140,7 +150,7 @@ class ClassicGameState extends GameState
 	}
 
 	/** Called when a bumper is cleared. **/
-	function onClear(chain:Int)
+	function onClear(chain:Int, _:Bumper)
 	{
 		FlxG.sound.play(AssetPaths.clear__wav);
 		_hud.block++;
@@ -223,5 +233,11 @@ class ClassicGameState extends GameState
 			_boardClassic.endPaint(_selectedColor == null);
 			_selectedColor = null;
 		}
+	}
+
+	function onGameOver(animDone:Bool)
+	{
+		if (!animDone)
+			FlxG.sound.play(AssetPaths.gameover__wav);
 	}
 }
