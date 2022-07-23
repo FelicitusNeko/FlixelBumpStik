@@ -114,9 +114,14 @@ class Bumper extends BoardObject
 	/** Whether this bumper has just been launched. **/
 	public var justLaunched(default, null):Bool = false;
 
+	/** Whether this bumper is a UI element. **/
 	public var isUIElement:Bool = false;
 
+	/** The list of active flairs on this bumper. **/
 	private var _flairList:Map<String, FlxSprite> = [];
+
+	/** The current count of flairs on this bumper. **/
+	public var flairCount(get, never):Int;
 
 	public function new(x:Float, y:Float, color:FlxColor, direction:Direction = Direction.None, launchDirection:Direction = Direction.None, owner:Board = null)
 	{
@@ -276,6 +281,14 @@ class Bumper extends BoardObject
 		return lfFrontX != frontX || lfFrontY != frontY;
 	}
 
+	inline function get_flairCount()
+	{
+		var retval = 0;
+		for (_ in _flairList)
+			retval++;
+		return retval;
+	}
+
 	/**
 		Starts this bumper moving in its set direction, if any.
 		@param launched Optional. If provided, the bumper will be launched in a temporary direction,
@@ -338,6 +351,7 @@ class Bumper extends BoardObject
 		return true;
 	}
 
+	/** Marks the bumper as Game Over, and flings it off the board. It will be killed once it leaves the screen. **/
 	public function gameOver()
 	{
 		direction = GameOver;
@@ -348,19 +362,35 @@ class Bumper extends BoardObject
 		maxVelocity.set(9999, 9999);
 	}
 
+	/**
+		Adds a flair to this bumper.
+		@param name The name of the flair to add.
+		@param sprite The sprite of the flair to add. Should generally be the same size as the bumper.
+	**/
 	public function addFlair(name:String, sprite:FlxSprite)
 	{
 		insert(group.length - 1, sprite);
 		_flairList.set(name, sprite);
 	}
 
+	/**
+		Removes a flair from this bumper.
+		@param name The name of the flair to remove.
+		@return Whether the operation succeeded. If `false`, most likely that flair did not exist.
+	**/
 	public function removeFlair(name:String)
 	{
-		remove(_flairList[name]);
-		_flairList.remove(name);
+		if (_flairList.exists(name))
+			remove(_flairList[name]);
+		return _flairList.remove(name);
 	}
 
-	public function hasFlair(name:String)
+	/**
+		Checks whether a given flair exists on this bumper.
+		@param name The name of the flair to check for.
+		@return Whether that flair is present.
+	**/
+	public inline function hasFlair(name:String)
 	{
 		return _flairList.exists(name);
 	}
@@ -387,18 +417,25 @@ class Bumper extends BoardObject
 			super.update(elapsed);
 	}
 
+	/** Fades the bumper out of existence. **/
 	override function kill()
 	{
 		if (isUIElement)
 			return super.kill();
 		else
 		{
+			group.forEachAlive(sprite ->
+			{
+				sprite.alive = false;
+			});
 			alive = false;
 			angularVelocity = Math.random() - .5 * 50;
 			FlxTween.tween(this, {alpha: 0, "scale.x": .75, "scale.y": .75}, .145, {
 				ease: FlxEase.circIn,
 				onComplete: (_) ->
 				{
+					for (sprite in group)
+						sprite.exists = false;
 					exists = false;
 				}
 			});
