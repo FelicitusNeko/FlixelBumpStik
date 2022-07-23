@@ -22,6 +22,12 @@ class ClassicHUD extends StandardHUD
 	/** The current number of available Paint Cans. **/
 	public var paintCans(default, set):Int = 0;
 
+	/** The starting score threshold for Paint Cans. **/
+	public var paintCanStartThreshold = 1000;
+
+	/** How much higher the next score target for the next Paint Can will be incremented by when it is hit. **/
+	public var paintCansIncrementStep:Int = 500;
+
 	/** Event that fires when one or more Paint Cans are earned. **/
 	public var onPaintCanGet(default, null) = new Event<Int->Void>();
 
@@ -59,7 +65,7 @@ class ClassicHUD extends StandardHUD
 		{
 			plusPaint++;
 			_paintCansNext += _paintCansIncrement;
-			_paintCansIncrement += 500;
+			_paintCansIncrement += paintCansIncrementStep;
 			trace("Awarding paint can; next at " + _paintCansNext);
 		}
 		if (plusPaint > 0)
@@ -106,11 +112,11 @@ class ClassicHUD extends StandardHUD
 		return super.set_nextBumper(nextBumper);
 	}
 
-	override function resetHUD()
+	public override function resetHUD()
 	{
 		super.resetHUD();
 		paintCans = 0;
-		_paintCansNext = 1000;
-		_paintCansIncrement = 1500;
+		_paintCansNext = paintCanStartThreshold;
+		_paintCansIncrement = paintCanStartThreshold + paintCansIncrementStep;
 	}
 }
