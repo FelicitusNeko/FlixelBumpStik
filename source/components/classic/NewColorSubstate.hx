@@ -6,7 +6,8 @@ import flixel.FlxSubState;
 import flixel.math.FlxPoint;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
-import flixel.util.FlxSpriteUtil;
+
+using flixel.util.FlxSpriteUtil;
 
 class NewColorSubstate extends FlxSubState
 {
@@ -27,7 +28,7 @@ class NewColorSubstate extends FlxSubState
 	{
 		var backdrop = new FlxSprite(_center.x - 75, _center.y - 40);
 		backdrop.makeGraphic(150, 80, FlxColor.TRANSPARENT);
-		FlxSpriteUtil.drawRoundRect(backdrop, 0, 0, backdrop.width, backdrop.height, 20, 20, FlxColor.BLACK, {color: FlxColor.WHITE, thickness: 3});
+		backdrop.drawRoundRect(0, 0, backdrop.width, backdrop.height, 20, 20, FlxColor.BLACK, {color: FlxColor.WHITE, thickness: 3});
 		add(backdrop);
 
 		var text = new FlxText(backdrop.x, backdrop.y, backdrop.width, "New Color", 30);

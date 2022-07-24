@@ -2,15 +2,15 @@ package components.classic;
 
 import boardObject.BoardObject;
 import boardObject.Bumper;
-import flixel.FlxG;
 import flixel.FlxSubState;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxPoint;
 import flixel.text.FlxText;
 import flixel.ui.FlxSpriteButton;
 import flixel.util.FlxColor;
-import flixel.util.FlxSpriteUtil;
 import lime.app.Event;
+
+using flixel.util.FlxSpriteUtil;
 
 class PaintCanSubstate extends FlxSubState
 {
@@ -62,7 +62,7 @@ class PaintCanSubstate extends FlxSubState
 		for (vertex in vertices)
 			vertex.scale(bumperHeight).add(hexbutton.width / 2, hexbutton.height / 2);
 
-		FlxSpriteUtil.drawPolygon(hexbutton, vertices, FlxColor.BLACK, {thickness: 3, color: FlxColor.RED}, {smoothing: true});
+		hexbutton.drawPolygon(vertices, FlxColor.BLACK, {thickness: 3, color: FlxColor.RED}, {smoothing: true});
 		add(hexbutton);
 
 		var cancelText = new FlxText(center.x + (bumperHeight / 2) - 36, center.y + (bumperHeight / 2), 72, "Cancel", 16);

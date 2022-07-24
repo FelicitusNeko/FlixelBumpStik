@@ -7,7 +7,8 @@ import flixel.math.FlxPoint;
 import flixel.text.FlxBitmapText;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
-import flixel.util.FlxSpriteUtil;
+
+using flixel.util.FlxSpriteUtil;
 
 class AllClearSubstate extends FlxSubState
 {
@@ -28,7 +29,7 @@ class AllClearSubstate extends FlxSubState
 	{
 		var backdrop = new FlxSprite(_center.x - 100, _center.y - 40);
 		backdrop.makeGraphic(200, 80, FlxColor.TRANSPARENT);
-		FlxSpriteUtil.drawRoundRect(backdrop, 0, 0, backdrop.width, backdrop.height, 20, 20, FlxColor.BLACK, {color: FlxColor.WHITE, thickness: 3});
+		backdrop.drawRoundRect(0, 0, backdrop.width, backdrop.height, 20, 20, FlxColor.BLACK, {color: FlxColor.WHITE, thickness: 3});
 		add(backdrop);
 
 		var text = new FlxText(backdrop.x, backdrop.y, backdrop.width, "All Clear", 30);

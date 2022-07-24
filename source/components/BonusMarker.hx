@@ -7,7 +7,8 @@ import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
-import flixel.util.FlxSpriteUtil;
+
+using flixel.util.FlxSpriteUtil;
 
 class BonusMarker extends FlxSpriteGroup
 {
@@ -24,7 +25,7 @@ class BonusMarker extends FlxSpriteGroup
 
 		var base = new FlxSprite(1, 1);
 		base.makeGraphic(Math.round(text.width + (text.height * 2)), Math.round(text.height), FlxColor.TRANSPARENT);
-		FlxSpriteUtil.drawPolygon(base, [
+		base.drawPolygon([
 			new FlxPoint(0, base.height),
 			new FlxPoint(text.height, 0),
 			new FlxPoint(base.width, 0),
