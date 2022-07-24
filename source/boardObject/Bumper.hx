@@ -67,7 +67,7 @@ class Bumper extends BoardObject
 	static final ACCELFACTOR:Float = 8;
 
 	/** The color of this bumper. **/
-	public var bColor(default, set):FlxColor;
+	public var bColor(default, set):Null<FlxColor>;
 
 	/** Whether this bumper is grayed out. **/
 	public var grayedOut(default, set) = false;
@@ -123,7 +123,8 @@ class Bumper extends BoardObject
 	/** The current count of flairs on this bumper. **/
 	public var flairCount(get, never):Int;
 
-	public function new(x:Float, y:Float, color:FlxColor, direction:Direction = Direction.None, launchDirection:Direction = Direction.None, owner:Board = null)
+	public function new(x:Float, y:Float, color:Null<FlxColor>, direction:Direction = Direction.None, launchDirection:Direction = Direction.None,
+			owner:Board = null)
 	{
 		super(x, y, owner);
 
@@ -148,10 +149,10 @@ class Bumper extends BoardObject
 		newFinally();
 	}
 
-	function set_bColor(bColor:FlxColor):FlxColor
+	function set_bColor(bColor:Null<FlxColor>):Null<FlxColor>
 	{
 		if (direction != Direction.GameOver && !grayedOut)
-			base.color = arrow.color = bColor;
+			base.color = arrow.color = bColor == null ? FlxColor.GRAY : bColor;
 		return this.bColor = bColor;
 	}
 
