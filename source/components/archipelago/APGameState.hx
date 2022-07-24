@@ -142,7 +142,7 @@ class APGameState extends ClassicGameState
 	private var _completedChecks:Set<APLocation>;
 	private var _ap:Client;
 
-	public function new(host:String, port:Int, slotName:String, ?password:String)
+	public function new(ap:Client)
 	{
 		_bg = new BumperGenerator(2, [
 			APColor.Red,
@@ -154,15 +154,8 @@ class APGameState extends ClassicGameState
 		]);
 		_bg.shuffleColors();
 
-		// _ap = new Client("asdf", "Bumper Stickers", "ws://" + host + ":" + port);
-
-		// _ap._hOnSlotRefused = onSlotRefused;
-		// _ap._hOnItemsReceived = onItemsReceived;
-
-		// _ap._hOnRoomInfo = () ->
-		// {
-		// 	_ap.ConnectSlot(slotName, password, 0x7, ["AP", "Testing"], {major: 0, minor: 3, build: 3});
-		// }
+		_ap = ap;
+		_ap._hOnItemsReceived = onItemsReceived;
 
 		_nextColor = 75;
 		_nextColorEvery = 75;
@@ -201,6 +194,12 @@ class APGameState extends ClassicGameState
 		_player.board = new APBoard(0, 0, _curWidth, _curHeight);
 		_player.multStack[0] = _startColors == 2 ? .8 : 1;
 
+		for (schedule in _schedule)
+		{
+			schedule.toDeploy = schedule.toClear;
+			schedule.sinceLast = 0;
+		}
+
 		prepareBoard();
 	}
 
@@ -208,7 +207,7 @@ class APGameState extends ClassicGameState
 	{
 		for (item in items)
 		{
-			trace("Item received: " + item);
+			trace("Item received: " + _ap.get_item_name(item.item));
 			switch (cast(item.item, APItem))
 			{
 				case BoardWidth:
