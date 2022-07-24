@@ -59,47 +59,49 @@ class APEntryState extends FlxState
 
 	function onPlay()
 	{
-		if (!~/^\d+$/.match(_portInput.text))
-		{
-			openSubState(new APErrorSubState("Port must be numeric."));
-			return;
-		}
 		var port = Std.parseInt(_portInput.text);
-		if (port <= 0 || port > 65535)
-		{
+		if (_hostInput.text == "")
+			openSubState(new APErrorSubState("Host name cannot be empty. (That's the address of the server you're connecting to.)"));
+		else if (_portInput.text == "")
+			openSubState(new APErrorSubState("Port number cannot be empty. (That's the 4-5 digits at the end of the server address, often 38281.)"));
+		else if (!~/^\d+$/.match(_portInput.text))
+			openSubState(new APErrorSubState("Port must be numeric."));
+		else if (port <= 0 || port > 65535)
 			openSubState(new APErrorSubState("Port should be a number from 1 to 65535 (most likely 38281)."));
-			return;
-		}
-
-		var connectSubState = new APConnectingSubState();
-		openSubState(connectSubState);
-
-		var ap = new Client("BumpStik", "Bumper Stickers", "ws://" + _hostInput.text + ":" + _portInput.text);
-
-		ap._hOnRoomInfo = () -> ap.ConnectSlot(_slotInput.text, _pwInput.text.length > 0 ? _pwInput.text : null, 0x7, ["AP", "Testing"],
-			{major: 0, minor: 3, build: 3});
-
-		ap._hOnSlotRefused = (errors:Array<String>) ->
+		else if (_slotInput.text == "")
+			openSubState(new APErrorSubState("Slot name cannot be empty. (That's your name on your YAML configuration file.)"));
+		else
 		{
-			var error = "An unknown error occurred: ";
-			switch (errors[0])
+			var connectSubState = new APConnectingSubState();
+			openSubState(connectSubState);
+
+			var ap = new Client("BumpStik", "Bumper Stickers", "ws://" + _hostInput.text + ":" + _portInput.text);
+
+			ap._hOnRoomInfo = () -> ap.ConnectSlot(_slotInput.text, _pwInput.text.length > 0 ? _pwInput.text : null, 0x7, ["AP", "Testing"],
+				{major: 0, minor: 3, build: 3});
+
+			ap._hOnSlotRefused = (errors:Array<String>) ->
 			{
-				case "InvalidSlot": error = "No player \"" + _slotInput.text + "\" is listed for this server instance.";
-				case "InvalidGame": error = "Player \"" + _slotInput.text + "\" is not listed as a Bumper Stickers slot.";
-				case "IncompatibleVersion": error = "The server is expecting a newer version of the game. Please ensure you're running the latest version.";
-				case "InvalidPassword": error = "The password supplied is incorrect.";
-				case "InvalidItemsHandling": error = "Please report a bug stating that an \"InvalidItemsHandling\" error was received.";
-				default: error += errors[0];
+				var error = "An unknown error occurred: ";
+				switch (errors[0])
+				{
+					case "InvalidSlot": error = "No player \"" + _slotInput.text + "\" is listed for this server instance.";
+					case "InvalidGame": error = "Player \"" + _slotInput.text + "\" is not listed as a Bumper Stickers slot.";
+					case "IncompatibleVersion": error = "The server is expecting a newer version of the game. Please ensure you're running the latest version.";
+					case "InvalidPassword": error = "The password supplied is incorrect.";
+					case "InvalidItemsHandling": error = "Please report a bug stating that an \"InvalidItemsHandling\" error was received.";
+					default: error += errors[0];
+				}
+				openSubState(new APErrorSubState(error));
 			}
-			openSubState(new APErrorSubState(error));
-		}
 
-		ap._hOnSocketDisconnected = () -> openSubState(new APErrorSubState("The server closed the connection."));
+			ap._hOnSocketDisconnected = () -> openSubState(new APErrorSubState("The server closed the connection."));
 
-		ap._hOnSlotConnected = (slotData:Dynamic) ->
-		{
-			ap._hOnSocketDisconnected = null;
-			FlxG.switchState(new APGameState(ap, slotData));
+			ap._hOnSlotConnected = (slotData:Dynamic) ->
+			{
+				ap._hOnSocketDisconnected = null;
+				FlxG.switchState(new APGameState(ap, slotData));
+			}
 		}
 	}
 
