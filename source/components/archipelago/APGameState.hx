@@ -4,6 +4,7 @@ import ap.Client;
 import ap.PacketTypes.NetworkItem;
 import components.classic.ClassicGameState;
 import flixel.FlxG;
+import flixel.math.FlxRandom;
 import flixel.util.FlxColor;
 import helder.Set;
 
@@ -142,6 +143,8 @@ class APGameState extends ClassicGameState
 	private var _completedChecks:Set<APLocation>;
 	private var _ap:Client;
 
+	private var _rng = new FlxRandom();
+
 	public function new(ap:Client, slotData:Dynamic)
 	{
 		_bg = new BumperGenerator(2, [
@@ -239,12 +242,29 @@ class APGameState extends ClassicGameState
 	{
 		var prevBumper = _hud.nextBumper;
 		super.onRequestGenerate();
-		if (_hud.nextBumper != null && _hud.nextBumper != prevBumper)
+		var newBumper = _hud.nextBumper;
+		if (newBumper != null && newBumper != prevBumper)
 		{
-			var newBumper = _hud.nextBumper;
 			for (key => schedule in _schedule)
 			{
-				schedule.sinceLast++;
+				if (schedule.toDeploy <= 0)
+					continue;
+				if (_rng.bool((++schedule.sinceLast) * 10))
+				{
+					schedule.sinceLast = 0;
+					schedule.toDeploy--;
+					switch (key)
+					{
+						case "booster":
+						// TODO: apply Booster flair
+						case "treasure":
+						// TODO: apply Treasure flair
+						case "hazard":
+							// TODO: create Hazard bumper
+					}
+					if (newBumper.flairCount > 0)
+						break;
+				}
 			}
 		}
 	}
