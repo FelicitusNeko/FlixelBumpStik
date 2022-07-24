@@ -1,5 +1,6 @@
 package state;
 
+import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxSubState;
 import flixel.text.FlxText;
@@ -52,4 +53,14 @@ class APErrorSubState extends FlxSubState
 
 		super.create();
 	}
+
+	#if !(FLX_NO_KEYBOARD)
+	override function update(elapsed:Float)
+	{
+		super.update(elapsed);
+
+		if (FlxG.keys.justPressed.ESCAPE || FlxG.keys.justPressed.ENTER)
+			close();
+	}
+	#end
 }
