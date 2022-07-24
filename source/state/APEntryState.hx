@@ -59,7 +59,7 @@ class APEntryState extends FlxState
 
 	function onPlay()
 	{
-		if (!~/^\d$/.match(_portInput.text))
+		if (!~/^\d+$/.match(_portInput.text))
 		{
 			openSubState(new APErrorSubState("Port must be numeric."));
 			return;
