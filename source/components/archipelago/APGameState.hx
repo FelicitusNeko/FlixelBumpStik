@@ -142,7 +142,7 @@ class APGameState extends ClassicGameState
 	private var _completedChecks:Set<APLocation>;
 	private var _ap:Client;
 
-	public function new(ap:Client)
+	public function new(ap:Client, slotData:Dynamic)
 	{
 		_bg = new BumperGenerator(2, [
 			APColor.Red,
