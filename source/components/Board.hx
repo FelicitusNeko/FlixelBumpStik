@@ -468,6 +468,8 @@ class Board extends FlxTypedGroup<FlxBasic>
 	private function smChecking(elapsed:Float)
 	{
 		var clearCount:Int = 0;
+
+		/** Marks bumpers to be cleared. **/
 		function clear(x:Int, y:Int, count:Int, horizontal:Bool)
 		{
 			for (_ in 0...count)
@@ -482,6 +484,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 			}
 		}
 
+		/** Checks for Bumper Stickers in a given direction. **/
 		function check(horizontal:Bool)
 		{
 			for (y in 0...(horizontal ? bHeight : bWidth))
@@ -490,7 +493,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 				for (x in 0...(horizontal ? bWidth : bHeight))
 				{
 					var bumper = horizontal ? atGrid(_bumpers, x, y) : atGrid(_bumpers, y, x);
-					if (bumper != null && bumper.bColor == streakColor)
+					if (bumper != null && bumper.bColor == streakColor && streakColor != null)
 						streakLength++;
 					else
 					{
