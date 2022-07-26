@@ -21,10 +21,14 @@ class APConnectingSubState extends FlxSubState
 
 		var backdrop = new FlxSprite(-11, -11);
 		backdrop.makeGraphic(Math.round(connectingText.width + 22), Math.round(connectingText.height + 22), FlxColor.TRANSPARENT);
-		backdrop.drawRoundRect(1, 1, backdrop.width, backdrop.height, 20, 20, FlxColor.BLACK, {color: FlxColor.WHITE, thickness: 3});
+		backdrop.drawRoundRect(1, 1, backdrop.width - 2, backdrop.height - 2, 20, 20, FlxColor.BLACK, {color: FlxColor.WHITE, thickness: 3});
 
-		add(backdrop);
-		add(connectingText);
+		for (item in [backdrop, connectingText])
+		{
+			item.x = Math.round(item.x);
+			item.y = Math.round(item.y);
+			add(item);
+		}
 
 		for (item in [connectingText, backdrop])
 			item.screenCenter();
