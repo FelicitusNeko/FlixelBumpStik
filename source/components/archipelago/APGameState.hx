@@ -2,31 +2,26 @@ package components.archipelago;
 
 import ap.Client;
 import ap.PacketTypes.NetworkItem;
+import boardObject.Bumper;
 import components.classic.ClassicGameState;
-import flixel.FlxG;
+import flixel.FlxSprite;
 import flixel.math.FlxRandom;
 import flixel.util.FlxColor;
-import helder.Set;
 
 /** The color of a bumper in Archipelago mode, for matching purposes. **/
-@:enum
-abstract APColor(FlxColor) from FlxColor to FlxColor
+enum abstract APColor(FlxColor) from FlxColor to FlxColor
 {
-	public static inline var None = FlxColor.GRAY;
-	public static inline var Red = 0xffc57683;
-	public static inline var Green = 0xff77c578;
-	public static inline var Rose = 0xffc991c2;
-	public static inline var Beige = 0xffd4a681;
-	public static inline var Purple = 0xff7c78bd;
-	public static inline var Yellow = 0xffe7ee95;
+	var Red = 0xffc57683;
+	var Green = 0xff77c578;
+	var Rose = 0xffc991c2;
+	var Beige = 0xffd4a681;
+	var Purple = 0xff7c78bd;
+	var Yellow = 0xffe7ee95;
 
 	@:to
 	public inline function toString()
-	{
 		switch (this)
 		{
-			case None:
-				return "None";
 			case Red:
 				return "Red";
 			case Green:
@@ -42,107 +37,160 @@ abstract APColor(FlxColor) from FlxColor to FlxColor
 			default:
 				return this.toHexString();
 		}
+}
+
+enum abstract APLocation(Int) from Int to Int
+{
+	var Points250 = 595000;
+	var Points500;
+	var Points750;
+	var Points1000;
+	var Points1250;
+	var Points1500;
+	var Points1750;
+	var Points2000;
+	var Points2250;
+	var Points2500;
+	var Points2750;
+	var Points3000;
+	var Points3250;
+	var Points3500;
+	var Points3750;
+	var Points4000;
+	var Combo4;
+	var Combo5;
+	var Combo6;
+	var Chain2;
+	var Chain3;
+	var AllClear;
+	var Booster1;
+	var Booster2;
+	var Booster3;
+	var Booster4;
+	var Booster5;
+	var ClearedHazards;
+	var Treasure1;
+	var Treasure2;
+	var Treasure3;
+	var Treasure4;
+	var Treasure5;
+	var Treasure6;
+	var Treasure7;
+	var Treasure8;
+
+	public inline function baseIndex()
+		return this - Points250;
+
+	@:op(A >= B)
+	public inline function geqInt(val:Int)
+		return this >= val;
+
+	@:to
+	public inline function toString()
+	{
+		var baseIndex = baseIndex();
+		if (Points4000 >= this)
+			return ((baseIndex + 1) * 250) + " Points";
+		else if (Combo6 >= this)
+			return "Combo " + (this - Combo4 + 4);
+		else if (Chain3 >= this)
+			return "Chain x" + (this - Chain2 + 2);
+		else if (AllClear == this)
+			return "All Clear";
+		else if (Booster5 >= this)
+			return "Booster Bumper " + (this - Booster1 + 1);
+		else if (ClearedHazards == this)
+			return "Cleared All Hazards";
+		else if (Treasure8 >= this)
+			return "Treasure Bumper " + (this - Treasure1 + 1);
+		else
+			return "Unknown";
 	}
 }
 
-abstract APLocation(Int) from Int to Int
+enum abstract APItem(Int) from Int to Int
 {
-	static inline var LocationOffset = 595000;
-
-	public static inline var Points250 = 0;
-	public static inline var Points500 = 1;
-	public static inline var Points750 = 2;
-	public static inline var Points1000 = 3;
-	public static inline var Points1250 = 4;
-	public static inline var Points1500 = 5;
-	public static inline var Points1750 = 6;
-	public static inline var Points2000 = 7;
-	public static inline var Points2250 = 8;
-	public static inline var Points2500 = 9;
-	public static inline var Points2750 = 10;
-	public static inline var Points3000 = 11;
-	public static inline var Points3250 = 12;
-	public static inline var Points3500 = 13;
-	public static inline var Points3750 = 14;
-	public static inline var Points4000 = 15;
-	public static inline var Combo4 = 16;
-	public static inline var Combo5 = 17;
-	public static inline var Combo6 = 18;
-	public static inline var Chain2 = 19;
-	public static inline var Chain3 = 20;
-	public static inline var AllClear = 21;
-	public static inline var Booster1 = 22;
-	public static inline var Booster2 = 23;
-	public static inline var Booster3 = 24;
-	public static inline var Booster4 = 25;
-	public static inline var Booster5 = 26;
-	public static inline var ClearedHazards = 27;
-
-	inline function new(value:Int)
-		this = value;
-
-	@:from
-	public static inline function fromInt(value:Int):APLocation
-	{
-		return new APLocation(value - LocationOffset);
-	}
+	var BoardWidth = 595000;
+	var BoardHeight;
+	var MinColor;
+	var MaxColor;
+	var StartPaintCan;
+	var BonusBooster;
+	var HazardBumper;
+	var TreasureBumper;
 
 	@:to
-	public inline function toLocation():Int
-	{
-		return this + LocationOffset;
-	}
-}
-
-abstract APItem(Int) from Int to Int
-{
-	static inline var ItemOffset = 595000;
-
-	public static inline var BoardWidth = 0;
-	public static inline var BoardHeight = 1;
-	public static inline var MinColor = 2;
-	public static inline var MaxColor = 3;
-	public static inline var StartPaintCan = 4;
-	public static inline var BonusBooster = 5;
-	public static inline var HazardBumper = 6;
-	public static inline var TreasureBumper = 7;
-
-	inline function new(value:Int)
-		this = value;
-
-	@:from
-	public static inline function fromInt(value:Int):APItem
-	{
-		return new APItem(value - ItemOffset);
-	}
-
-	@:to
-	public inline function toItem():Int
-	{
-		return this + ItemOffset;
-	}
+	public inline function toString()
+		switch (this)
+		{
+			case BoardWidth:
+				return "Board Width";
+			case BoardHeight:
+				return "Board Height";
+			case MinColor:
+				return "Starting Color Up";
+			case MaxColor:
+				return "Maximum Color Up";
+			case StartPaintCan:
+				return "Starting Paint Can";
+			case BonusBooster:
+				return "Bonus Booster";
+			case HazardBumper:
+				return "Hazard Bumper";
+			case TreasureBumper:
+				return "Treasure Bumper";
+			default:
+				return "Unknown";
+		}
 }
 
 typedef DeploymentSchedule =
 {
 	var toDeploy:Int;
 	var toClear:Int;
+	var cleared:Int;
 	var sinceLast:Int;
 }
 
 class APGameState extends ClassicGameState
 {
-	private var _curWidth = 3;
-	private var _curHeight = 3;
-	private var _startColors = 2;
-	private var _endColors = 3;
-	private var _startPaintCans = 0;
-
-	private var _schedule:Map<String, DeploymentSchedule> = [];
-
-	private var _completedChecks:Set<APLocation>;
+	/** The Archipelago client. **/
 	private var _ap:Client;
 
+	/** The width at which the next game will start. **/
+	private var _curWidth = 3;
+
+	/** The height at which the next game will start. **/
+	private var _curHeight = 3;
+
+	/** The number of colors with which the next game will start. **/
+	private var _startColors = 2;
+
+	/** The maximum number of colors the next came can reach. **/
+	private var _endColors = 3;
+
+	/** The number of Paint Cans with which the next game will start. **/
+	private var _startPaintCans = 0;
+
+	/** Scheduling data for special bumpers. **/
+	private var _schedule:Map<String, DeploymentSchedule> = [];
+
+	/** The top score achieved this multiworld. Used for determining checks to send. **/
+	private var _topScore = 0;
+
+	/** The most clears achieved this multiworld. Used for determining checks to send. **/
+	private var _topBlock = 0;
+
+	/** The top chain achieved this multiworld. Used for determining checks to send. **/
+	private var _topChain = 0;
+
+	/** The top combo achieved this multiworld. Used for determining checks to send. **/
+	private var _topCombo = 0;
+
+	/** The number of All Clears achieved this multiworld. Used for determining checks to send. **/
+	private var _allClears = 0;
+
+	/** The schedule randomiser for this multiworld. **/
 	private var _rng = new FlxRandom();
 
 	public function new(ap:Client, slotData:Dynamic)
@@ -163,9 +211,13 @@ class APGameState extends ClassicGameState
 		_nextColor = 75;
 		_nextColorEvery = 75;
 
-		_schedule.set("booster", {toDeploy: 0, toClear: 0, sinceLast: 0});
-		_schedule.set("hazard", {toDeploy: 0, toClear: 0, sinceLast: 0});
-		_schedule.set("treasure", {toDeploy: 0, toClear: 0, sinceLast: 0});
+		for (type in ["booster", "hazard", "treasure"])
+			_schedule.set(type, {
+				toDeploy: 0,
+				toClear: 0,
+				cleared: 0,
+				sinceLast: 0
+			});
 
 		super();
 	}
@@ -175,14 +227,16 @@ class APGameState extends ClassicGameState
 		if (_players.length == 0)
 			_players.push({
 				board: new APBoard(0, 0, _curWidth, _curHeight),
-				multStack: [1, 1]
+				multStack: [.8, 1]
 			});
 
 		super.create();
 
+		_hud.onScoreChanged.add(onScoreChanged);
 		_hudClassic.paintCansIncrementStep = 0;
 	}
 
+	/** Resets the game state and starts a new board without affecting multiworld stats. **/
 	function restartGame()
 	{
 		_hud.resetHUD();
@@ -206,12 +260,32 @@ class APGameState extends ClassicGameState
 		prepareBoard();
 	}
 
+	/** Called by HUD when score changes. **/
+	private function onScoreChanged(score:Int)
+	{
+		if (score > _topScore)
+		{
+			var checks:Array<Int> = [];
+			for (scan in (Math.floor(_topScore / 250) + 1)...17)
+			{
+				if (score > scan * 250)
+					checks.push(APLocation.Points250 + scan - 1);
+			}
+			if (checks.length > 0)
+				_ap.LocationChecks(checks);
+
+			_topScore = score;
+		}
+	}
+
+	/** Called by AP client when an item is received. **/
 	private function onItemsReceived(items:Array<NetworkItem>)
 	{
-		for (item in items)
+		for (itemObj in items)
 		{
-			trace("Item received: " + _ap.get_item_name(item.item));
-			switch (cast(item.item, APItem))
+			var item:APItem = itemObj.item;
+			trace("Item received: " + item);
+			switch (item)
 			{
 				case BoardWidth:
 					_curWidth++;
@@ -234,12 +308,18 @@ class APGameState extends ClassicGameState
 					_schedule["treasure"].toDeploy++;
 					_schedule["treasure"].toClear++;
 				default:
+					trace("Item ID:" + itemObj.item);
 			}
 		}
 	}
 
+	/** Called when the board requests a bumper to be generated. Usually when it goes into Idle state. **/
 	override function onRequestGenerate()
 	{
+		if (_boardClassic.bCount == 0 && _jackpot > 0)
+			if (++_allClears == 1)
+				_ap.LocationChecks([APLocation.AllClear]);
+
 		var prevBumper = _hud.nextBumper;
 		super.onRequestGenerate();
 		var newBumper = _hud.nextBumper;
@@ -256,9 +336,9 @@ class APGameState extends ClassicGameState
 					switch (key)
 					{
 						case "booster":
-						// TODO: apply Booster flair
+							newBumper.addFlair("booster", new FlxSprite(0, 0).loadGraphic(AssetPaths.BoosterFlair__png));
 						case "treasure":
-						// TODO: apply Treasure flair
+							newBumper.addFlair("treasure", new FlxSprite(0, 0).loadGraphic(AssetPaths.TreasureFlair__png));
 						case "hazard":
 							// TODO: create Hazard bumper
 					}
@@ -269,6 +349,54 @@ class APGameState extends ClassicGameState
 		}
 	}
 
+	/** Called when a match is formed. **/
+	override function onMatch(chain:Int, combo:Int)
+	{
+		super.onMatch(chain, combo);
+
+		var checks:Array<Int> = [];
+		if (_topChain <= 3)
+			while (_topChain < chain)
+				if (++_topChain > 1 && _topChain < 4)
+					checks.push(APLocation.Chain2 + _topChain - 2);
+		if (_topCombo <= 6)
+			while (_topCombo < combo)
+				if (++_topCombo > 3 && _topCombo < 7)
+					checks.push(APLocation.Combo4 + _topCombo - 2);
+		if (checks.length > 0)
+			_ap.LocationChecks(checks);
+	}
+
+	/** Called when a bumper is cleared. **/
+	override function onClear(chain:Int, bumper:Bumper)
+	{
+		for (key => schedule in _schedule)
+		{
+			if (bumper.hasFlair(key))
+			{
+				schedule.toClear--;
+				switch (key)
+				{
+					case "treasure":
+						if (schedule.cleared++ < 8)
+							_ap.LocationChecks([APLocation.Treasure1 + schedule.cleared - 1]);
+					case "booster":
+						if (schedule.cleared++ < 5)
+						{
+							_player.multStack[1] += .2;
+							_ap.LocationChecks([APLocation.Booster1 + schedule.cleared - 1]);
+						}
+					case "hazard":
+						if (++schedule.cleared == 3)
+							_ap.LocationChecks([APLocation.ClearedHazards]);
+				}
+			}
+		}
+
+		super.onClear(chain, bumper);
+	}
+
+	/** Called by the board when the board is jammed and the game is over. **/
 	override function onGameOver(animDone:Bool)
 	{
 		if (animDone)
@@ -277,14 +405,9 @@ class APGameState extends ClassicGameState
 			super.onGameOver(animDone);
 	}
 
-	private function onSlotRefused(errors:Array<String>)
-	{
-		// TODO: handle failure to connect
-	}
-
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
-		// _ap.poll();
+		_ap.poll();
 	}
 }
