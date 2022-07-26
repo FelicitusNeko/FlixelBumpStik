@@ -8,6 +8,7 @@ import flixel.addons.ui.FlxInputText;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
+import haxe.Timer;
 
 class APEntryState extends FlxState
 {
@@ -77,11 +78,18 @@ class APEntryState extends FlxState
 
 			var ap = new Client("BumpStik", "Bumper Stickers", "ws://" + _hostInput.text + ":" + _portInput.text);
 
-			ap._hOnRoomInfo = () -> ap.ConnectSlot(_slotInput.text, _pwInput.text.length > 0 ? _pwInput.text : null, 0x7, ["AP", "Testing"],
-				{major: 0, minor: 3, build: 3});
+			ap._hOnRoomInfo = () ->
+			{
+				trace("Got room info - sending connect packet");
+				ap.ConnectSlot(_slotInput.text, _pwInput.text.length > 0 ? _pwInput.text : null, 0x7, ["AP", "Testing"], {major: 0, minor: 3, build: 3});
+			};
+
+			var polltimer = new Timer(50);
+			polltimer.run = ap.poll;
 
 			ap._hOnSlotRefused = (errors:Array<String>) ->
 			{
+				trace("Slot refused - " + errors);
 				var error = "An unknown error occurred: ";
 				switch (errors[0])
 				{
@@ -92,14 +100,26 @@ class APEntryState extends FlxState
 					case "InvalidItemsHandling": error = "Please report a bug stating that an \"InvalidItemsHandling\" error was received.";
 					default: error += errors[0];
 				}
+				closeSubState();
 				openSubState(new APErrorSubState(error));
 			}
 
-			ap._hOnSocketDisconnected = () -> openSubState(new APErrorSubState("The server closed the connection."));
+			ap._hOnSocketDisconnected = () ->
+			{
+				trace("Disconnected");
+				closeSubState();
+				openSubState(new APErrorSubState("The server closed the connection."));
+			};
 
 			ap._hOnSlotConnected = (slotData:Dynamic) ->
 			{
+				trace("Connected - switching to game state");
+				polltimer.stop();
+				ap._hOnRoomInfo = null;
+				ap._hOnSlotRefused = null;
 				ap._hOnSocketDisconnected = null;
+				ap._hOnSlotConnected = null;
+				closeSubState();
 				FlxG.switchState(new APGameState(ap, slotData));
 			}
 		}
