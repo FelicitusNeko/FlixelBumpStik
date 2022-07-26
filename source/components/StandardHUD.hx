@@ -3,12 +3,9 @@ package components;
 import boardObject.Bumper;
 import flixel.FlxG;
 import flixel.FlxSprite;
-import flixel.graphics.frames.FlxBitmapFont;
 import flixel.group.FlxSpriteGroup;
-import flixel.math.FlxPoint;
-import flixel.text.FlxBitmapText;
-import flixel.text.FlxText;
 import flixel.util.FlxColor;
+import lime.app.Event;
 
 using StringTools;
 
@@ -35,6 +32,12 @@ class StandardHUD extends FlxSpriteGroup
 	/** The current next bumper displayed on the HUD. **/
 	public var nextBumper(default, set):Bumper = null;
 
+	/** Event that fires when the score value changes.**/
+	public var onScoreChanged(default, null) = new Event<Int->Void>();
+
+	/** Event that fires when the cleared bumper value changes.**/
+	public var onBlockChanged(default, null) = new Event<Int->Void>();
+
 	public function new()
 	{
 		super(0, 0);
@@ -58,6 +61,7 @@ class StandardHUD extends FlxSpriteGroup
 		}
 		else
 		{
+			// TODO: vertical HUD
 			// super(0, FlxG.height * .8);
 		}
 	}
@@ -69,6 +73,8 @@ class StandardHUD extends FlxSpriteGroup
 
 	function set_score(score:Int):Int
 	{
+		if (_scoreCounter.value != score)
+			onScoreChanged.dispatch(score);
 		return _scoreCounter.value = score;
 	}
 
@@ -79,6 +85,8 @@ class StandardHUD extends FlxSpriteGroup
 
 	function set_block(block:Int):Int
 	{
+		if (_blockCounter.value != block)
+			onBlockChanged.dispatch(block);
 		return _blockCounter.value = block;
 	}
 
