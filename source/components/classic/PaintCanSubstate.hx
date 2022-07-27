@@ -45,7 +45,7 @@ class PaintCanSubstate extends FlxSubState
 		hexbutton.scrollFactor.set(1, 1);
 		hexbutton.makeGraphic(144, 144, FlxColor.TRANSPARENT);
 
-		for (i => color in BumperGenerator.defaultColorOpts)
+		for (i => color in _colorSet)
 		{
 			var bumper = new Bumper(center.x, center.y, color, i < colors ? Up : None);
 			if (bumperHeight < 0)

@@ -56,10 +56,10 @@ class ClassicGameState extends GameState
 
 		// var test = new FlxButton(0, 0, "Test", () ->
 		// {
-		// 	// _hudClassic.paintCans++;
-		// 	var combo = new BonusMarker(_boardClassic.center.x, _boardClassic.center.y, 5);
-		// 	add(combo);
-		// 	add(new BonusMarker(_boardClassic.center.x + combo.height * 1.6, _boardClassic.center.y, 2, true));
+		// 	_hudClassic.paintCans++;
+		// 	// var combo = new BonusMarker(_boardClassic.center.x, _boardClassic.center.y, 5);
+		// 	// add(combo);
+		// 	// add(new BonusMarker(_boardClassic.center.x + combo.height * 1.6, _boardClassic.center.y, 2, true));
 		// });
 		// add(test);
 	}
@@ -164,7 +164,7 @@ class ClassicGameState extends GameState
 		{
 			FlxG.sound.play(AssetPaths.mselect__wav);
 			var bumperSize = new FlxPoint(_hud.nextBumper.width, _hud.nextBumper.height).scale(.5);
-			var paintDialog = new PaintCanSubstate(_boardClassic.center.subtractPoint(bumperSize), _bg.colors);
+			var paintDialog = new PaintCanSubstate(_boardClassic.center.subtractPoint(bumperSize), _bg.colors, _bg);
 			paintDialog.onDialogResult.add(onColorSelect);
 			openSubState(paintDialog);
 		}
