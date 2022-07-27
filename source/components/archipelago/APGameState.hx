@@ -4,6 +4,8 @@ import ap.Client;
 import ap.PacketTypes.NetworkItem;
 import boardObject.Bumper;
 import components.classic.ClassicGameState;
+import flixel.FlxCamera;
+import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.math.FlxRandom;
 import flixel.util.FlxColor;
@@ -152,6 +154,13 @@ typedef DeploymentSchedule =
 	var sinceLast:Int;
 }
 
+typedef QueuedToast =
+{
+	var message:String;
+	var color:FlxColor;
+	var delay:Int;
+}
+
 class APGameState extends ClassicGameState
 {
 	/** The Archipelago client. **/
@@ -193,6 +202,12 @@ class APGameState extends ClassicGameState
 	/** The schedule randomiser for this multiworld. **/
 	private var _rng = new FlxRandom();
 
+	private var _generalCamera:FlxCamera;
+
+	private var _curToast:APToast = null;
+
+	private var _toastQueue:Array<QueuedToast> = [];
+
 	public function new(ap:Client, slotData:Dynamic)
 	{
 		_bg = new BumperGenerator(2, [
@@ -208,9 +223,6 @@ class APGameState extends ClassicGameState
 		_ap = ap;
 		_ap._hOnItemsReceived = onItemsReceived;
 
-		_nextColor = 75;
-		_nextColorEvery = 75;
-
 		for (type in ["booster", "hazard", "treasure"])
 			_schedule.set(type, {
 				toDeploy: 0,
@@ -220,6 +232,9 @@ class APGameState extends ClassicGameState
 			});
 
 		super();
+
+		_nextColor = 50;
+		_nextColorEvery = 50;
 	}
 
 	override function create()
@@ -234,6 +249,9 @@ class APGameState extends ClassicGameState
 
 		super.create();
 
+		_generalCamera = FlxG.cameras.add(new FlxCamera(0, 0, FlxG.width, FlxG.height), false);
+		_generalCamera.bgColor = FlxColor.TRANSPARENT;
+
 		_hud.onScoreChanged.add(onScoreChanged);
 		_hudClassic.paintCansIncrementStep = 0;
 	}
@@ -242,6 +260,39 @@ class APGameState extends ClassicGameState
 	{
 		// TODO: save the game
 		super.destroy();
+	}
+
+	function pushToast(message:String, color = FlxColor.WHITE, delay = 2000)
+	{
+		var queueEmpty = _toastQueue.length == 0;
+		_toastQueue.push({
+			message: message,
+			color: color,
+			delay: delay
+		});
+		if (queueEmpty && _curToast == null)
+			popToast();
+	}
+
+	function popToast()
+	{
+		if (_curToast != null)
+		{
+			remove(_curToast);
+			_curToast.destroy();
+		}
+		if (_toastQueue.length > 0)
+		{
+			var queuedMsg = _toastQueue.shift();
+			_curToast = new APToast(0, FlxG.height, queuedMsg.message, queuedMsg.color, queuedMsg.delay);
+			_curToast.onFinish.add(popToast);
+			_curToast.camera = _generalCamera;
+			_curToast.screenCenter(X);
+			_curToast.slideIn();
+			add(_curToast);
+		}
+		else
+			_curToast = null;
 	}
 
 	/** Resets the game state and starts a new board without affecting multiworld stats. **/
@@ -292,7 +343,8 @@ class APGameState extends ClassicGameState
 		for (itemObj in items)
 		{
 			var item:APItem = itemObj.item;
-			trace("Item received: " + item);
+			// trace("Item received: " + item);
+			pushToast("Received: " + item, FlxColor.CYAN);
 			switch (item)
 			{
 				case BoardWidth:
