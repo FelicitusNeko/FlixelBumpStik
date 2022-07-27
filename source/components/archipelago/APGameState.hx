@@ -224,6 +224,8 @@ class APGameState extends ClassicGameState
 
 	override function create()
 	{
+		// TODO: load the game, if a save file exists
+
 		if (_players.length == 0)
 			_players.push({
 				board: new APBoard(0, 0, _curWidth, _curHeight),
@@ -234,6 +236,12 @@ class APGameState extends ClassicGameState
 
 		_hud.onScoreChanged.add(onScoreChanged);
 		_hudClassic.paintCansIncrementStep = 0;
+	}
+
+	override function destroy()
+	{
+		// TODO: save the game
+		super.destroy();
 	}
 
 	/** Resets the game state and starts a new board without affecting multiworld stats. **/
@@ -316,7 +324,7 @@ class APGameState extends ClassicGameState
 	/** Called when the board requests a bumper to be generated. Usually when it goes into Idle state. **/
 	override function onRequestGenerate()
 	{
-		if (_boardClassic.bCount == 0 && _jackpot > 0)
+		if (_boardClassic.bCount <= 0 && _jackpot > 0)
 			if (++_allClears == 1)
 				_ap.LocationChecks([APLocation.AllClear]);
 
@@ -362,7 +370,7 @@ class APGameState extends ClassicGameState
 		if (_topCombo <= 6)
 			while (_topCombo < combo)
 				if (++_topCombo > 3 && _topCombo < 7)
-					checks.push(APLocation.Combo4 + _topCombo - 2);
+					checks.push(APLocation.Combo4 + _topCombo - 4);
 		if (checks.length > 0)
 			_ap.LocationChecks(checks);
 	}
