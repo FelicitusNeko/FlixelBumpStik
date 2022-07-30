@@ -9,6 +9,7 @@ import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxPoint;
+import flixel.math.FlxRandom;
 import flixel.util.FlxColor;
 import lime.app.Event;
 
@@ -44,6 +45,9 @@ class Board extends FlxTypedGroup<FlxBasic>
 
 	/** The collection of board spaces. **/
 	private var _spaces = new FlxTypedGroup<BoardSpace>();
+
+	/** The collection of obstacles. **/
+	private var _obstacles = new FlxTypedGroup<BoardSpace>();
 
 	/** The collection of bumpers in play. **/
 	private var _bumpers = new FlxTypedGroup<Bumper>();
@@ -129,6 +133,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 					_launchers.add(new Launcher(ox, oy + (z * sHeight), dir, this));
 			}
 		}
+		add(_obstacles);
 		add(_bumpers);
 		add(_launchers);
 
@@ -344,6 +349,33 @@ class Board extends FlxTypedGroup<FlxBasic>
 				retval.push(bumper);
 		});
 		return retval;
+	}
+
+	/**
+		Get a random X/Y position on the board.
+		@param shouldBeEmpty Optional. Whether the returned position should be empty. If omitted or `null`, no check will be made.
+		@return An array with two elements indicating the X and Y coordinates, or `null` if no suitable position was found.
+	**/
+	public function getRandomSpace(?shouldBeEmpty:Bool)
+	{
+		var rng = new FlxRandom();
+		var startX = rng.int(0, bWidth - 1), startY = rng.int(0, bHeight - 1);
+		if (shouldBeEmpty == null)
+			return [startX, startY];
+
+		for (deltaY in 0...bHeight)
+		{
+			var curY = (startY + deltaY) % bHeight;
+			for (deltaX in 0...bWidth)
+			{
+				var curX = (startX + deltaX) % bWidth;
+				var bumper = bumperAt(curX, curY);
+				if ((bumper == null) == shouldBeEmpty)
+					return [curX, curY];
+			}
+		}
+
+		return null;
 	}
 
 	/**
