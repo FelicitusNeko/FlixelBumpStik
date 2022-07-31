@@ -138,6 +138,12 @@ abstract class BoardObject extends FlxSpriteGroup
 		onClick.dispatch(this);
 	}
 
-	/** Called when a move has been completed. Does nothing on its own; meant to be overridden. **/
-	public function onAdvanceTurn() {}
+	/**
+		Called when a move has been completed. Does nothing on its own; meant to be overridden.
+		@return Whether a recheck should be performed. If not overridden, always returns `false`.
+	**/
+	public function onAdvanceTurn()
+	{
+		return false;
+	}
 }
