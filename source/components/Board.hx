@@ -193,53 +193,53 @@ class Board extends FlxTypedGroup<FlxBasic>
 		switch (test)
 		{
 			case 0: // Stationary bumper collision test ✔️
-				putBumperAt(4, 3, Color.Green);
-				putBumperAt(1, 3, Color.Red, Direction.Right);
+				makeBumperAt(4, 3, Color.Green);
+				makeBumperAt(1, 3, Color.Red, Direction.Right);
 			case 1: // Head-on collision test ✔️
-				putBumperAt(0, 1, Color.Red, Direction.Right);
-				putBumperAt(4, 1, Color.Blue, Direction.Left);
+				makeBumperAt(0, 1, Color.Red, Direction.Right);
+				makeBumperAt(4, 1, Color.Blue, Direction.Left);
 			case 2: // Cross-collision test #1 - both shifting on same frame ✔️?
-				putBumperAt(0, 1, Color.Red, Direction.Right);
-				putBumperAt(2, 4, Color.Blue, Direction.Up);
+				makeBumperAt(0, 1, Color.Red, Direction.Right);
+				makeBumperAt(2, 4, Color.Blue, Direction.Up);
 			case 3: // Cross-collision test #2 - shifting on different frame ✔️
-				putBumperAt(0, 1, Color.Red, Direction.Right);
-				var halfBumper = putBumperAt(2, 4, Color.Blue, Direction.Up);
+				makeBumperAt(0, 1, Color.Red, Direction.Right);
+				var halfBumper = makeBumperAt(2, 4, Color.Blue, Direction.Up);
 				halfBumper.y -= halfBumper.height / 2;
 			case 4: // Launch test ✔️
-				var lbumper = putBumperAt(-40, -40, Color.Blue, Direction.Right);
+				var lbumper = makeBumperAt(-40, -40, Color.Blue, Direction.Right);
 				_launchers.getFirstAlive().launchBumper(lbumper);
 				autoLaunch = false;
 			case 5: // Driveby test #1 - horizontal ✔️
-				putBumperAt(0, 1, Color.Blue, Direction.Right);
-				putBumperAt(4, 2, Color.Red, Direction.Left);
+				makeBumperAt(0, 1, Color.Blue, Direction.Right);
+				makeBumperAt(4, 2, Color.Red, Direction.Left);
 			case 6: // Driveby test #2 - vertical ✔️
-				putBumperAt(1, 0, Color.Blue, Direction.Down);
-				putBumperAt(2, 4, Color.Red, Direction.Up);
+				makeBumperAt(1, 0, Color.Blue, Direction.Down);
+				makeBumperAt(2, 4, Color.Red, Direction.Up);
 			case 7: // Match test #1 - vertical ✔️
-				putBumperAt(4, 0, Color.Green, None);
-				putBumperAt(4, 1, Color.Blue, None);
-				putBumperAt(0, 2, Color.Blue, Right);
-				putBumperAt(4, 3, Color.Blue, None);
-				putBumperAt(4, 4, Color.Red, None);
+				makeBumperAt(4, 0, Color.Green, None);
+				makeBumperAt(4, 1, Color.Blue, None);
+				makeBumperAt(0, 2, Color.Blue, Right);
+				makeBumperAt(4, 3, Color.Blue, None);
+				makeBumperAt(4, 4, Color.Red, None);
 			case 8: // Match test #2 - horizontal ✔️
-				putBumperAt(0, 4, Color.Green, None);
-				putBumperAt(1, 4, Color.Blue, None);
-				putBumperAt(2, 0, Color.Blue, Down);
-				putBumperAt(3, 4, Color.Blue, None);
-				putBumperAt(4, 4, Color.Red, None);
+				makeBumperAt(0, 4, Color.Green, None);
+				makeBumperAt(1, 4, Color.Blue, None);
+				makeBumperAt(2, 0, Color.Blue, Down);
+				makeBumperAt(3, 4, Color.Blue, None);
+				makeBumperAt(4, 4, Color.Red, None);
 			case 9: // Corner collision ✔️
-				putBumperAt(2, 4, Color.Blue, Right);
-				putBumperAt(4, 4, Color.Blue, Right);
-				putBumperAt(2, 0, Color.Green, Down);
+				makeBumperAt(2, 4, Color.Blue, Right);
+				makeBumperAt(4, 4, Color.Blue, Right);
+				makeBumperAt(2, 0, Color.Green, Down);
 			case 10: // Chain scoring (×3)
-				putBumperAt(2, 2, Color.Blue, Down);
-				putBumperAt(2, 3, Color.Blue, Up);
-				putBumperAt(0, 2, Color.Green, Left);
-				putBumperAt(1, 2, Color.Green, Left);
-				putBumperAt(3, 2, Color.Green, Left);
-				putBumperAt(0, 0, Color.Red, Up);
-				putBumperAt(0, 1, Color.Red, Up);
-				putBumperAt(0, 3, Color.Red, Up);
+				makeBumperAt(2, 2, Color.Blue, Down);
+				makeBumperAt(2, 3, Color.Blue, Up);
+				makeBumperAt(0, 2, Color.Green, Left);
+				makeBumperAt(1, 2, Color.Green, Left);
+				makeBumperAt(3, 2, Color.Green, Left);
+				makeBumperAt(0, 0, Color.Red, Up);
+				makeBumperAt(0, 1, Color.Red, Up);
+				makeBumperAt(0, 3, Color.Red, Up);
 				var launcher = atPoint(_launchers, new FlxPoint(origin.x, origin.y).add(sWidth * 2.5, sHeight * 5.5));
 				if (launcher != null)
 					launcher.launchBumper(new Bumper(0, 0, Color.Blue, Up));
@@ -256,16 +256,33 @@ class Board extends FlxTypedGroup<FlxBasic>
 	}
 
 	/**
-		Creates a new bumper and puts it at the given grid coordinates.
+		Creates a new bumper on the bumper layer and puts it at the given grid coordinates.
 		@param x The horizontal board grid coordinate.
 		@param y The vertical board grid coordinate.
-		@param color The color of the bumper.
+		@param color The color of the bumper. May be `null` for an unmatchable colorless bumper.
 		@param dir Optional. The direction of the bumper. Defaults to `Direction.None`.
 		@return The new bumper.
 	**/
-	public function putBumperAt(x:Int, y:Int, color:FlxColor, dir:Direction = Direction.None)
+	public function makeBumperAt(x:Int, y:Int, color:Null<FlxColor>, dir:Direction = Direction.None)
 	{
 		var bumper = new Bumper(x * sWidth, y * sHeight, color, dir, None, this);
+		bumper.onClick.add(onClickBumper);
+		_bumpers.add(bumper);
+		return bumper;
+	}
+
+	/**
+		Places an existing bumper on the bumper layer and puts it at the given grid coordinates.
+		@param x The horizontal board grid coordinate.
+		@param y The vertical board grid coordinate.
+		@param bumper The bumper to place.
+		@return The bumper.
+	**/
+	public function putBumperAt(x:Int, y:Int, bumper:Bumper)
+	{
+		bumper.owner = this;
+		bumper.boardX = x;
+		bumper.boardY = y;
 		bumper.onClick.add(onClickBumper);
 		_bumpers.add(bumper);
 		return bumper;
