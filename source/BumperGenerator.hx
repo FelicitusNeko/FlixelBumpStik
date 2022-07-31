@@ -119,6 +119,19 @@ class BumperGenerator
 		return generate(color);
 	}
 
+	/**
+		Generates a random color from the available list.
+		@param track Optional. Whether to track 
+		@return The generated color.
+	**/
+	public function generateColor(track = false)
+	{
+		var retval = _rng.getObject(colorOpts, null, 0, colors - 1);
+		if (track)
+			_drops[retval]++;
+		return retval;
+	}
+
 	/** Resets the generator to its initial setting. **/
 	public function reset()
 	{
