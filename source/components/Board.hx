@@ -607,7 +607,13 @@ class Board extends FlxTypedGroup<FlxBasic>
 					launchersAvailable++;
 			});
 			if (launchersAvailable > 0)
-				_csm.chain("nomatch");
+			{
+				var recheck = false;
+				_bumpers.forEachAlive(bumper -> recheck = recheck || bumper.onAdvanceTurn());
+				_obstacles.forEachAlive(obstacle -> recheck = recheck || obstacle.onAdvanceTurn());
+				if (!recheck)
+					_csm.chain("nomatch");
+			}
 			else
 			{
 				// NOTE: Game over
