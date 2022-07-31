@@ -228,8 +228,8 @@ class APGameState extends ClassicGameState
 
 		for (type in ["booster", "hazard", "treasure"])
 			_schedule.set(type, {
-				toDeploy: 1,
-				toClear: 1,
+				toDeploy: 0,
+				toClear: 0,
 				cleared: 0,
 				sinceLast: 0
 			});
@@ -264,11 +264,14 @@ class APGameState extends ClassicGameState
 			_itemBuffer = [];
 			restartGame();
 		}
+
+		FlxG.autoPause = false;
 	}
 
 	override function destroy()
 	{
 		// TODO: save the game
+		FlxG.autoPause = true;
 		super.destroy();
 	}
 
