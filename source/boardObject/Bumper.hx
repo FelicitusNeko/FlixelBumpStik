@@ -7,16 +7,15 @@ import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 
 /** The current color of the bumper, for matching purposes. **/
-@:enum
-abstract Color(FlxColor) from FlxColor to FlxColor
+enum abstract Color(FlxColor) from FlxColor to FlxColor
 {
-	public static inline var None = FlxColor.GRAY;
-	public static inline var Blue = 0xff2365e0;
-	public static inline var Green = 0xff1dec62;
-	public static inline var Red = 0xffe04f4f;
-	public static inline var Purple = 0xffa45ced;
-	public static inline var Yellow = 0xfffffb23;
-	public static inline var White = 0xffdddddd;
+	var None = FlxColor.GRAY;
+	var Blue = 0xff2365e0;
+	var Green = 0xff1dec62;
+	var Red = 0xffe04f4f;
+	var Purple = 0xffa45ced;
+	var Yellow = 0xfffffb23;
+	var White = 0xffdddddd;
 
 	@:to
 	public inline function toString()
@@ -132,7 +131,7 @@ class Bumper extends BoardObject
 
 		arrow = new FlxSprite(0, 0);
 		arrow.loadGraphic(AssetPaths.BumperSymbols__png, true, cast(width, Int), cast(height, Int));
-		arrow.alive = false;
+		arrow.solid = false;
 		// arrow.blend = Math.random() >= .5 ? "multiply" : "add";
 		add(arrow);
 
@@ -355,6 +354,13 @@ class Bumper extends BoardObject
 	/** Marks the bumper as Game Over, and flings it off the board. It will be killed once it leaves the screen. **/
 	public function gameOver()
 	{
+		solid = false;
+		alive = false;
+		group.forEachAlive(sprite ->
+		{
+			sprite.alive = false;
+			sprite.solid = false;
+		});
 		direction = GameOver;
 		acceleration.y = height * 8;
 		velocity.x = width * 4 * (Math.random() - .5);
@@ -370,6 +376,7 @@ class Bumper extends BoardObject
 	**/
 	public function addFlair(name:String, sprite:FlxSprite)
 	{
+		sprite.solid = false;
 		insert(group.length - 1, sprite);
 		_flairList.set(name, sprite);
 	}

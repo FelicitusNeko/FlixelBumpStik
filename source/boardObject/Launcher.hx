@@ -52,7 +52,7 @@ class Launcher extends BoardObject
 		arrow = new FlxSprite(0, 0);
 		arrow.loadGraphic(AssetPaths.BumperSymbols__png, true, cast(width, Int), cast(height, Int));
 		// arrow.blend = "multiply";
-		arrow.alive = false;
+		arrow.solid = false;
 		add(arrow);
 
 		this.direction = direction;
