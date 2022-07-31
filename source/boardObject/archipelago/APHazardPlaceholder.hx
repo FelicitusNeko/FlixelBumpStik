@@ -1,9 +1,25 @@
 package boardObject.archipelago;
 
 import boardObject.Bumper.Direction;
+import components.Board;
+import flixel.util.FlxColor;
 
 class APHazardPlaceholder extends BoardObject
 {
+	private var _resolveColor:FlxColor;
+
+	public function new(x:Float, y:Float, resolveColor:FlxColor, owner:Board = null)
+	{
+		super(x, y, owner);
+
+		solid = false;
+
+		base.makeGraphic(64, 64, FlxColor.fromRGBFloat(1, 0, 0, .5));
+		base.solid = false;
+
+		_resolveColor = resolveColor;
+	}
+
 	override function onAdvanceTurn():Bool
 	{
 		if (owner == null)
@@ -21,7 +37,7 @@ class APHazardPlaceholder extends BoardObject
 		}
 		else
 		{
-			owner.makeBumperAt(boardX, boardY, null, Direction.None);
+			owner.putBumperAt(boardX, boardY, new APHazardBumper(0, 0, _resolveColor, owner));
 			return true;
 		}
 		return false;
