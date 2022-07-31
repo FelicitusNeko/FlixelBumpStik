@@ -24,7 +24,8 @@ class APHazardBumper extends Bumper
 		{
 			if (--health <= 0)
 			{
-				_flairList["hazard"].color.alpha = 128;
+				var hazardFlair = _flairList["hazard"];
+				hazardFlair.color.alpha = 128;
 				color = _resolveColor;
 				return true;
 			}
