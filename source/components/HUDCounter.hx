@@ -44,7 +44,8 @@ class HUDCounter extends FlxSpriteGroup
 
 	function set_value(value:Int)
 	{
-		_counterText.text = Std.string(Math.min(value, Math.pow(10, maxLength) - 1)).lpad("z", maxLength);
+		if (_counterText != null)
+			_counterText.text = Std.string(Math.min(value, Math.pow(10, maxLength) - 1)).lpad("z", maxLength);
 		return this.value = value;
 	}
 
