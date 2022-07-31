@@ -3,6 +3,7 @@ package components.archipelago;
 import ap.Client;
 import ap.PacketTypes.NetworkItem;
 import boardObject.Bumper;
+import boardObject.archipelago.APHazardPlaceholder;
 import components.classic.ClassicGameState;
 import flixel.FlxCamera;
 import flixel.FlxG;
@@ -225,8 +226,8 @@ class APGameState extends ClassicGameState
 
 		for (type in ["booster", "hazard", "treasure"])
 			_schedule.set(type, {
-				toDeploy: 0,
-				toClear: 0,
+				toDeploy: 1,
+				toClear: 1,
 				cleared: 0,
 				sinceLast: 0
 			});
@@ -400,7 +401,9 @@ class APGameState extends ClassicGameState
 						case "treasure":
 							newBumper.addFlair("treasure", new FlxSprite(0, 0).loadGraphic(AssetPaths.TreasureFlair__png));
 						case "hazard":
-							// TODO: create Hazard bumper
+							var emptyPos = _boardClassic.getRandomSpace(true);
+							if (emptyPos != null)
+								_boardClassic.putObstacleAt(emptyPos[0], emptyPos[1], new APHazardPlaceholder(0, 0, _bg.generateColor(true), _boardClassic));
 					}
 					if (newBumper.flairCount > 0)
 						break;
