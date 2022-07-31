@@ -209,6 +209,8 @@ class APGameState extends ClassicGameState
 
 	private var _toastQueue:Array<QueuedToast> = [];
 
+	private var _itemBuffer:Array<NetworkItem> = [];
+
 	public function new(ap:Client, slotData:Dynamic)
 	{
 		_bg = new BumperGenerator(2, [
@@ -255,6 +257,13 @@ class APGameState extends ClassicGameState
 
 		_hud.onScoreChanged.add(onScoreChanged);
 		_hudClassic.paintCansIncrementStep = 0;
+
+		if (_itemBuffer.length > 0)
+		{
+			onItemsReceived(_itemBuffer);
+			_itemBuffer = [];
+			restartGame();
+		}
 	}
 
 	override function destroy()
@@ -341,37 +350,40 @@ class APGameState extends ClassicGameState
 	/** Called by AP client when an item is received. **/
 	private function onItemsReceived(items:Array<NetworkItem>)
 	{
-		for (itemObj in items)
-		{
-			var item:APItem = itemObj.item;
-			// trace("Item received: " + item);
-			pushToast("Received: " + item, FlxColor.CYAN);
-			switch (item)
+		if (_players.length == 0)
+			_itemBuffer = _itemBuffer.concat(items);
+		else
+			for (itemObj in items)
 			{
-				case BoardWidth:
-					_curWidth++;
-				case BoardHeight:
-					_curHeight++;
-				case MinColor:
-					_startColors++;
-				case MaxColor:
-					_endColors++;
-				case StartPaintCan:
-					_startPaintCans++;
-					_hudClassic.paintCans++;
-				case BonusBooster:
-					_schedule["booster"].toDeploy++;
-					_schedule["booster"].toClear++;
-				case HazardBumper:
-					_schedule["hazard"].toDeploy++;
-					_schedule["hazard"].toClear++;
-				case TreasureBumper:
-					_schedule["treasure"].toDeploy++;
-					_schedule["treasure"].toClear++;
-				default:
-					trace("Item ID:" + itemObj.item);
+				var item:APItem = itemObj.item;
+				// trace("Item received: " + item);
+				pushToast("Received: " + item, FlxColor.CYAN);
+				switch (item)
+				{
+					case BoardWidth:
+						_curWidth++;
+					case BoardHeight:
+						_curHeight++;
+					case MinColor:
+						_startColors++;
+					case MaxColor:
+						_endColors++;
+					case StartPaintCan:
+						_startPaintCans++;
+						_hudClassic.paintCans++;
+					case BonusBooster:
+						_schedule["booster"].toDeploy++;
+						_schedule["booster"].toClear++;
+					case HazardBumper:
+						_schedule["hazard"].toDeploy++;
+						_schedule["hazard"].toClear++;
+					case TreasureBumper:
+						_schedule["treasure"].toDeploy++;
+						_schedule["treasure"].toClear++;
+					default:
+						trace("Item ID:" + itemObj.item);
+				}
 			}
-		}
 	}
 
 	/** Called when the board requests a bumper to be generated. Usually when it goes into Idle state. **/
