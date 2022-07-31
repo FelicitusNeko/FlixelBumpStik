@@ -47,7 +47,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 	private var _spaces = new FlxTypedGroup<BoardSpace>();
 
 	/** The collection of obstacles. **/
-	private var _obstacles = new FlxTypedGroup<BoardSpace>();
+	private var _obstacles = new FlxTypedGroup<BoardObject>();
 
 	/** The collection of bumpers in play. **/
 	private var _bumpers = new FlxTypedGroup<Bumper>();
@@ -269,6 +269,22 @@ class Board extends FlxTypedGroup<FlxBasic>
 		bumper.onClick.add(onClickBumper);
 		_bumpers.add(bumper);
 		return bumper;
+	}
+
+	/**
+		Places a board object on the obstacle layer at the given grid coordinates.
+		@param x The horizontal board grid coordinate.
+		@param y The vertical board grid coordinate.
+		@param obstacle The obstacle to place.
+		@return The obstacle.
+	**/
+	public function putObstacleAt(x:Int, y:Int, obstacle:BoardObject)
+	{
+		obstacle.owner = this;
+		obstacle.boardX = x;
+		obstacle.boardY = y;
+		_obstacles.add(obstacle);
+		return obstacle;
 	}
 
 	/** 
