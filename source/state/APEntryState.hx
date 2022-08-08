@@ -43,7 +43,7 @@ class APEntryState extends FlxState
 		var portLabel = new FlxText(FlxG.width / 2 - 100, 100, 0, "Port", 12);
 		_portInput = new FlxInputText(FlxG.width / 2, 100, 150, "38281", 12, FlxColor.WHITE, FlxColor.GRAY);
 		_portInput.filterMode = FlxInputText.ONLY_NUMERIC;
-		_portInput.maxLength = 5;
+		_portInput.maxLength = 6;
 		add(portLabel);
 		add(_portInput);
 
