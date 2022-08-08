@@ -103,7 +103,7 @@ class ClassicGameState extends GameState
 			var mJackpot = addScore(_jackpot, _player.multStack);
 			_jackpot = 0;
 			_hud.bonus = mJackpot;
-			trace("Awarding jackpot of " + mJackpot);
+			trace('Awarding jackpot of $mJackpot');
 
 			var allClearSub = new AllClearSubstate(mJackpot, _boardClassic.center);
 			allClearSub.closeCallback = onRequestGenerate;
@@ -115,7 +115,7 @@ class ClassicGameState extends GameState
 			FlxG.sound.play(AssetPaths.levelup__wav);
 			_nextColor += _nextColorEvery;
 			_player.multStack[0] += .2;
-			trace("Adding new colour; now at " + _bg.colors);
+			trace('Adding new colour; now at ${_bg.colors}');
 
 			var newColorSub = new NewColorSubstate(_bg.colorOpts[_bg.colors++], _boardClassic.center);
 			newColorSub.closeCallback = onRequestGenerate;

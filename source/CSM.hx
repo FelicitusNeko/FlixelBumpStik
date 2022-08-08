@@ -143,9 +143,9 @@ class CSM
 		else
 		{
 			if (_chainList.exists(currentState))
-				trace("Trigger " + trigger + " not defined for " + currentState);
+				trace('Trigger $trigger" not defined for $currentState');
 			else
-				trace("No trigger for " + currentState);
+				trace('No trigger for $currentState');
 			return false;
 		}
 	}

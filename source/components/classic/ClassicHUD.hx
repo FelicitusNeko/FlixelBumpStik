@@ -66,7 +66,7 @@ class ClassicHUD extends StandardHUD
 			plusPaint++;
 			_paintCansNext += _paintCansIncrement;
 			_paintCansIncrement += paintCansIncrementStep;
-			trace("Awarding paint can; next at " + _paintCansNext);
+			trace('Awarding paint can; next at $_paintCansNext');
 		}
 		if (plusPaint > 0)
 		{

@@ -79,7 +79,7 @@ class APEntryState extends FlxState
 			var connectSubState = new APConnectingSubState();
 			openSubState(connectSubState);
 
-			var ap = new Client("BumpStik", "Bumper Stickers", "ws://" + _hostInput.text + ":" + _portInput.text);
+			var ap = new Client("BumpStik", "Bumper Stickers", 'ws://${_hostInput.text}:${_portInput.text}');
 
 			ap._hOnRoomInfo = () ->
 			{
@@ -92,12 +92,12 @@ class APEntryState extends FlxState
 
 			ap._hOnSlotRefused = (errors:Array<String>) ->
 			{
-				trace("Slot refused - " + errors);
+				trace("Slot refused", errors);
 				var error = "An unknown error occurred: ";
 				switch (errors[0])
 				{
-					case "InvalidSlot": error = "No player \"" + _slotInput.text + "\" is listed for this server instance.";
-					case "InvalidGame": error = "Player \"" + _slotInput.text + "\" is not listed as a Bumper Stickers slot.";
+					case "InvalidSlot": error = 'No player "${_slotInput.text}" is listed for this server instance.';
+					case "InvalidGame": error = 'Player "${_slotInput.text}" is not listed as a Bumper Stickers slot.';
 					case "IncompatibleVersion": error = "The server is expecting a newer version of the game. Please ensure you're running the latest version.";
 					case "InvalidPassword": error = "The password supplied is incorrect.";
 					case "InvalidItemsHandling": error = "Please report a bug stating that an \"InvalidItemsHandling\" error was received.";
