@@ -1,6 +1,5 @@
 package boardObject.archipelago;
 
-import boardObject.Bumper.Direction;
 import components.Board;
 import flixel.util.FlxColor;
 
