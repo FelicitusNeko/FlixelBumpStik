@@ -1,10 +1,12 @@
 package;
 
-import components.classic.ClassicGameState;
 import flixel.FlxGame;
 import openfl.display.Sprite;
+#if debug
 import state.APEntryState;
-import state.MenuState;
+#else
+import components.classic.ClassicGameState;
+#end
 
 class Main extends Sprite
 {
