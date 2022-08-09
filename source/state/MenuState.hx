@@ -17,18 +17,20 @@ class MenuState extends FlxState
 
 	override public function create()
 	{
-		titleText = new FlxText(20, 0, 0, "Bumper Stickers", 22);
+		var t = BumpStikGame.g().i18n.tr;
+
+		titleText = new FlxText(20, 0, 0, t("title"), 22);
 		titleText.alignment = CENTER;
 		titleText.screenCenter(X);
 		add(titleText);
 
-		playButton = new FlxButton(0, 0, "Classic Mode", clickPlay);
+		playButton = new FlxButton(0, 0, t("menu/main/classic"), clickPlay);
 		// playButton.onUp.sound = FlxG.sound.load(AssetPaths.select__wav);
 		playButton.x = (FlxG.width / 2) - 10 - playButton.width;
 		playButton.y = FlxG.height - playButton.height - 10;
 		add(playButton);
 
-		apButton = new FlxButton(0, 0, "Archipelago", clickAP);
+		apButton = new FlxButton(0, 0, t("menu/main/ap"), clickAP);
 		apButton.x = (FlxG.width / 2) + 10;
 		apButton.y = FlxG.height - apButton.height - 10;
 		add(apButton);

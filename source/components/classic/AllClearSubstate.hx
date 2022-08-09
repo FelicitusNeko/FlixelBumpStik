@@ -27,12 +27,13 @@ class AllClearSubstate extends FlxSubState
 
 	override function create()
 	{
+		// TODO: Make the backdrop *after* the text, to size it appropriately
 		var backdrop = new FlxSprite(_center.x - 100, _center.y - 40);
 		backdrop.makeGraphic(200, 80, FlxColor.TRANSPARENT);
 		backdrop.drawRoundRect(0, 0, backdrop.width, backdrop.height, 20, 20, FlxColor.BLACK, {color: FlxColor.WHITE, thickness: 3});
 		add(backdrop);
 
-		var text = new FlxText(backdrop.x, backdrop.y, backdrop.width, "All Clear", 30);
+		var text = new FlxText(backdrop.x, backdrop.y, backdrop.width, BumpStikGame.g().i18n.tr("game/classic/allClear"), 30);
 		text.height = backdrop.height;
 		text.alignment = CENTER;
 		add(text);

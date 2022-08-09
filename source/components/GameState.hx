@@ -1,5 +1,6 @@
 package components;
 
+import Main.I18nFunction;
 import components.StandardHUD;
 import flixel.FlxCamera;
 import flixel.FlxG;
@@ -32,10 +33,13 @@ abstract class GameState extends FlxState
 	/** The bumper generator for this game. **/
 	private var _bg:BumperGenerator;
 
+	private var _t:I18nFunction;
+
 	public function new()
 	{
 		if (_bg == null)
 			_bg = new BumperGenerator(3);
+		_t = BumpStikGame.g().i18n.tr;
 		super();
 	}
 

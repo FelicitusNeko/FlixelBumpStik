@@ -42,6 +42,7 @@ enum abstract APColor(FlxColor) from FlxColor to FlxColor
 		}
 }
 
+/** AP Location definitions. **/
 enum abstract APLocation(Int) from Int to Int
 {
 	var Points250 = 595000;
@@ -111,6 +112,7 @@ enum abstract APLocation(Int) from Int to Int
 	}
 }
 
+/** AP Item definitions. **/
 enum abstract APItem(Int) from Int to Int
 {
 	var BoardWidth = 595000;
@@ -127,38 +129,55 @@ enum abstract APItem(Int) from Int to Int
 		switch (this)
 		{
 			case BoardWidth:
-				return "Board Width";
+				return "game/ap/item/width";
 			case BoardHeight:
-				return "Board Height";
+				return "game/ap/item/height";
 			case MinColor:
-				return "Starting Color Up";
+				return "game/ap/item/minColor";
 			case MaxColor:
-				return "Maximum Color Up";
+				return "game/ap/item/maxColor";
 			case StartPaintCan:
-				return "Starting Paint Can";
+				return "game/ap/item/paintCan";
 			case BonusBooster:
-				return "Bonus Booster";
+				return "game/ap/item/booster";
 			case HazardBumper:
-				return "Hazard Bumper";
+				return "game/ap/item/hazard";
 			case TreasureBumper:
-				return "Treasure Bumper";
+				return "game/ap/item/treasure";
 			default:
-				return "Unknown";
+				return "game/ap/item/default";
 		}
 }
 
+/** Keeps track of special bumpers. **/
 typedef DeploymentSchedule =
 {
+	/** This many are queued to be deployed. **/
 	var toDeploy:Int;
+
+	/** This many are yet to be cleared. **/
 	var toClear:Int;
+
+	/** This many have been cleared. **/
 	var cleared:Int;
+
+	/**
+		It has been this many turns since one has been deployed since becoming available.
+		A special bumper will usually be deployed within ten turns of receipt.
+	**/
 	var sinceLast:Int;
 }
 
+/** A queued toast popup message. **/
 typedef QueuedToast =
 {
+	/** The content of the message. **/
 	var message:String;
+
+	/** The background color of the message. **/
 	var color:FlxColor;
+
+	/** The amount of time, in milliseconds, to fully display the message. **/
 	var delay:Int;
 }
 
@@ -360,7 +379,7 @@ class APGameState extends ClassicGameState
 			{
 				var item:APItem = itemObj.item;
 				// trace("Item received: " + item);
-				pushToast("Received: " + item, FlxColor.CYAN);
+				pushToast(_t("game/ap/received", ["item" => _t(item)]), FlxColor.CYAN);
 				switch (item)
 				{
 					case BoardWidth:

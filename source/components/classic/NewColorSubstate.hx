@@ -26,12 +26,13 @@ class NewColorSubstate extends FlxSubState
 
 	override function create()
 	{
+		// TODO: create backdrop after text, to size it appropriately
 		var backdrop = new FlxSprite(_center.x - 75, _center.y - 40);
 		backdrop.makeGraphic(150, 80, FlxColor.TRANSPARENT);
 		backdrop.drawRoundRect(0, 0, backdrop.width, backdrop.height, 20, 20, FlxColor.BLACK, {color: FlxColor.WHITE, thickness: 3});
 		add(backdrop);
 
-		var text = new FlxText(backdrop.x, backdrop.y, backdrop.width, "New Color", 30);
+		var text = new FlxText(backdrop.x, backdrop.y, backdrop.width, BumpStikGame.g().i18n.tr("game/classic/newCol"), 30);
 		text.height = backdrop.height;
 		text.alignment = CENTER;
 		add(text);

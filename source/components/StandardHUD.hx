@@ -1,5 +1,6 @@
 package components;
 
+import Main.I18nFunction;
 import boardObject.Bumper;
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -38,9 +39,13 @@ class StandardHUD extends FlxSpriteGroup
 	/** Event that fires when the cleared bumper value changes.**/
 	public var onBlockChanged(default, null) = new Event<Int->Void>();
 
+	private var _t:I18nFunction;
+
 	public function new()
 	{
 		super(0, 0);
+		_t = BumpStikGame.g().i18n.tr;
+
 		_rightSide = FlxG.width > FlxG.height;
 
 		if (_rightSide)
@@ -51,11 +56,11 @@ class StandardHUD extends FlxSpriteGroup
 
 			add(new FlxSprite().makeGraphic(180, Math.ceil(FlxG.height * widthRatio), FlxColor.fromRGBFloat(.1, .1, .8, .5)));
 
-			_scoreCounter = new HUDCounter(25, 40, "SCORE");
+			_scoreCounter = new HUDCounter(25, 40, _t("base/score"));
 			_scoreCounter.counterColor = FlxColor.GREEN;
 			add(_scoreCounter);
 
-			_blockCounter = new HUDCounter(25, 40 + _scoreCounter.height, "BLOCK");
+			_blockCounter = new HUDCounter(25, 40 + _scoreCounter.height, _t("base/block"));
 			_blockCounter.counterColor = FlxColor.RED;
 			add(_blockCounter);
 		}

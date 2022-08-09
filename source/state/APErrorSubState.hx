@@ -21,7 +21,9 @@ class APErrorSubState extends FlxSubState
 
 	override function create()
 	{
-		var errorText = new FlxText(0, 0, 0, "Error", 20);
+		var _t = BumpStikGame.g().i18n.tr;
+
+		var errorText = new FlxText(0, 0, 0, _t("base/error"), 20);
 		errorText.color = FlxColor.fromRGBFloat(1, .5, .5);
 
 		var messageText = new FlxText(0, 0, 0, message, 12);
@@ -29,7 +31,7 @@ class APErrorSubState extends FlxSubState
 		messageText.color = FlxColor.WHITE;
 		messageText.alignment = CENTER;
 
-		var closeButton = new FlxButton(0, 0, "Close", close);
+		var closeButton = new FlxButton(0, 0, _t("base/close"), close);
 
 		var backdrop = new FlxSprite(-11, -11);
 		backdrop.makeGraphic(Math.round(Math.max(errorText.width, messageText.width) + 22),

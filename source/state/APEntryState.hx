@@ -1,5 +1,6 @@
 package state;
 
+import Main.I18nFunction;
 import ap.Client;
 import components.archipelago.APGameState;
 import flixel.FlxG;
@@ -17,42 +18,47 @@ class APEntryState extends FlxState
 	private var _slotInput:FlxInputText;
 	private var _pwInput:FlxInputText;
 
+	/** I18n function. **/
+	private var _t:I18nFunction;
+
 	override function create()
 	{
+		_t = BumpStikGame.g().i18n.tr;
+
 		var titleText = new FlxText(20, 0, 0, "Archipelago", 22);
 		titleText.alignment = CENTER;
 		titleText.screenCenter(X);
 		add(titleText);
 
-		var playButton = new FlxButton(0, 0, "Play", onPlay);
+		var playButton = new FlxButton(0, 0, _t("base/play"), onPlay);
 		// playButton.onUp.sound = FlxG.sound.load(AssetPaths.select__wav);
 		playButton.x = (FlxG.width / 2) - 10 - playButton.width;
 		playButton.y = FlxG.height - playButton.height - 10;
 		add(playButton);
 
-		var backButton = new FlxButton(0, 0, "Back", onBack);
+		var backButton = new FlxButton(0, 0, _t("base/back"), onBack);
 		backButton.x = (FlxG.width / 2) + 10;
 		backButton.y = FlxG.height - backButton.height - 10;
 		add(backButton);
 
-		var hostLabel = new FlxText(FlxG.width / 2 - 100, 80, 0, "Host", 12);
+		var hostLabel = new FlxText(FlxG.width / 2 - 100, 80, 0, _t("menu/ap/host"), 12);
 		_hostInput = new FlxInputText(FlxG.width / 2, 80, 150, "localhost", 12, FlxColor.WHITE, FlxColor.GRAY);
 		add(hostLabel);
 		add(_hostInput);
 
-		var portLabel = new FlxText(FlxG.width / 2 - 100, 100, 0, "Port", 12);
+		var portLabel = new FlxText(FlxG.width / 2 - 100, 100, 0, _t("menu/ap/port"), 12);
 		_portInput = new FlxInputText(FlxG.width / 2, 100, 150, "38281", 12, FlxColor.WHITE, FlxColor.GRAY);
 		_portInput.filterMode = FlxInputText.ONLY_NUMERIC;
 		_portInput.maxLength = 6;
 		add(portLabel);
 		add(_portInput);
 
-		var slotLabel = new FlxText(FlxG.width / 2 - 100, 120, 0, "Slot Name", 12);
+		var slotLabel = new FlxText(FlxG.width / 2 - 100, 120, 0, _t("menu/ap/slot"), 12);
 		_slotInput = new FlxInputText(FlxG.width / 2, 120, 150, "", 12, FlxColor.WHITE, FlxColor.GRAY);
 		add(slotLabel);
 		add(_slotInput);
 
-		var pwLabel = new FlxText(FlxG.width / 2 - 100, 140, 0, "Password", 12);
+		var pwLabel = new FlxText(FlxG.width / 2 - 100, 140, 0, _t("menu/ap/pw"), 12);
 		_pwInput = new FlxInputText(FlxG.width / 2, 140, 150, "", 12, FlxColor.WHITE, FlxColor.GRAY);
 		_pwInput.passwordMode = true;
 		add(pwLabel);
@@ -65,15 +71,15 @@ class APEntryState extends FlxState
 	{
 		var port = Std.parseInt(_portInput.text);
 		if (_hostInput.text == "")
-			openSubState(new APErrorSubState("Host name cannot be empty. (That's the address of the server you're connecting to.)"));
+			openSubState(new APErrorSubState(_t("menu/ap/error/noHost")));
 		else if (_portInput.text == "")
-			openSubState(new APErrorSubState("Port number cannot be empty. (That's the 4-5 digits at the end of the server address, often 38281.)"));
+			openSubState(new APErrorSubState(_t("menu/ap/error/noPort")));
 		else if (!~/^\d+$/.match(_portInput.text))
-			openSubState(new APErrorSubState("Port must be numeric."));
+			openSubState(new APErrorSubState(_t("menu/ap/error/portNonNumeric")));
 		else if (port <= 0 || port > 65535)
-			openSubState(new APErrorSubState("Port should be a number from 1 to 65535 (most likely 38281)."));
+			openSubState(new APErrorSubState(_t("menu/ap/error/portOutOfRange")));
 		else if (_slotInput.text == "")
-			openSubState(new APErrorSubState("Slot name cannot be empty. (That's your name on your YAML configuration file.)"));
+			openSubState(new APErrorSubState(_t("menu/ap/error/noSlot")));
 		else
 		{
 			var connectSubState = new APConnectingSubState();
@@ -84,7 +90,7 @@ class APEntryState extends FlxState
 			ap._hOnRoomInfo = () ->
 			{
 				trace("Got room info - sending connect packet");
-				ap.ConnectSlot(_slotInput.text, _pwInput.text.length > 0 ? _pwInput.text : null, 0x7, ["AP", "Testing"], {major: 0, minor: 3, build: 3});
+				ap.ConnectSlot(_slotInput.text, _pwInput.text.length > 0 ? _pwInput.text : null, 0x7, ["AP", "Testing"], {major: 0, minor: 3, build: 4});
 			};
 
 			var polltimer = new Timer(50);
@@ -96,12 +102,9 @@ class APEntryState extends FlxState
 				var error = "An unknown error occurred: ";
 				switch (errors[0])
 				{
-					case "InvalidSlot": error = 'No player "${_slotInput.text}" is listed for this server instance.';
-					case "InvalidGame": error = 'Player "${_slotInput.text}" is not listed as a Bumper Stickers slot.';
-					case "IncompatibleVersion": error = "The server is expecting a newer version of the game. Please ensure you're running the latest version.";
-					case "InvalidPassword": error = "The password supplied is incorrect.";
-					case "InvalidItemsHandling": error = "Please report a bug stating that an \"InvalidItemsHandling\" error was received.";
-					default: error += errors[0];
+					case "InvalidSlot" | "InvalidGame": error = _t('menu/ap/error/${errors[0]}', ["name" => _slotInput.text]);
+					case "IncompatibleVersion" | "InvalidPassword" | "InvalidItemsHandling": error = _t('menu/ap/error/${errors[0]}');
+					default: error = _t("menu/ap/error/default", ["error" => errors[0]]);
 				}
 				closeSubState();
 				openSubState(new APErrorSubState(error));
@@ -111,7 +114,7 @@ class APEntryState extends FlxState
 			{
 				trace("Disconnected");
 				closeSubState();
-				openSubState(new APErrorSubState("The server closed the connection."));
+				openSubState(new APErrorSubState(_t("menu/ap/error/connectionReset")));
 			};
 
 			ap._hOnSlotConnected = (slotData:Dynamic) ->

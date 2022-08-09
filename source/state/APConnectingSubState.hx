@@ -16,7 +16,7 @@ class APConnectingSubState extends FlxSubState
 
 	override function create()
 	{
-		var connectingText = new FlxText(0, 0, 0, "Connecting...", 20);
+		var connectingText = new FlxText(0, 0, 0, BumpStikGame.g().i18n.tr("menu/ap/connecting"), 20);
 		connectingText.color = FlxColor.WHITE;
 
 		var backdrop = new FlxSprite(-11, -11);
