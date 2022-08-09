@@ -22,6 +22,9 @@ class BumperGenerator
 	/** The number of colors currently in play. **/
 	public var colors(default, set):Int = 0;
 
+	/** The maximum number of colors available to be put into play. **/
+	public var maxColors(get, never):Int;
+
 	/** The average number of each color generated. **/
 	public var average(get, never):Float;
 
@@ -42,6 +45,11 @@ class BumperGenerator
 
 	function set_colors(colors:Int):Int
 	{
+		if (colors < 0)
+			colors = 0;
+		else if (colors > colorOpts.length)
+			colors = colorOpts.length;
+
 		if (colors == 0)
 		{
 			this.colors = 0;
@@ -57,6 +65,9 @@ class BumperGenerator
 		}
 		return this.colors;
 	}
+
+	inline function get_maxColors()
+		return colorOpts.length;
 
 	function get_average():Float
 	{
