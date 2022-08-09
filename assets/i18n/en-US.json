@@ -1,0 +1,58 @@
+{
+  "title": "Bumper Stickers",
+  "basic": {
+    "play": "Play",
+    "back": "Back",
+    "score": "SCORE",
+    "block": "BLOCK",
+    "gameOver": "Game Over"
+  },
+  "menu": {
+    "mode": {
+      "classic": "Classic Mode",
+      "ap": "Archipelago"
+    },
+    "ap": {
+      "host": "Host",
+      "port": "Port",
+      "slot": "Slot name",
+      "pw": "Password",
+      "error": {
+        "noHost": "Host name cannot be empty. (That's the address of the server you're connecting to.)",
+        "noPort": "Port number cannot be empty. (That's the 4-5 digits at the end of the server address, often 38281.)",
+        "portNonNumeric": "Port must be numeric.",
+        "portOutOfRange": "Port should be a number from 1 to 65535 (most likely 38281).",
+        "noSlot": "Slot name cannot be empty. (That's your name on your YAML configuration file.)",
+        "InvalidSlot": "No player \":name\" is listed for this server instance.",
+        "InvalidGame": "Player \":name\" is not listed as a Bumper Stickers slot.",
+        "IncompatibleVersion": "The server is expecting a newer version of the game. Please ensure you're running the latest version.",
+        "InvalidPassword": "The password supplied is incorrect.",
+        "InvalidItemsHandling": "Please report a bug stating that an \"InvalidItemsHandling\" error was received.",
+        "connectionReset": "The server closed the connection.",
+        "default": "An unknown error occurred: :error"
+      }
+    }
+  },
+  "game": {
+    "classic": {
+      "newCol": "New Color",
+      "allClear": "All Clear",
+      "paintCol": "Select a color",
+      "paintBump": "Select a bumper"
+    },
+    "ap": {
+      "received": "Received :item",
+      "item": {
+        "width": "Board Width",
+        "height": "Board Height",
+        "minColor": "Starting Color Up",
+        "maxColor": "Maximum Color Up",
+        "paintCan": "Starting Paint Can",
+        "booster": "Bonus Booster",
+        "hazard": "Hazard Bumper",
+        "treasure": "Treasure Bumper",
+        "default": "Unknown"
+      }
+    }
+  }
+}
