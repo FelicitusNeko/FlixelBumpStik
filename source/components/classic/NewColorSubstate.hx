@@ -26,20 +26,23 @@ class NewColorSubstate extends FlxSubState
 
 	override function create()
 	{
-		// TODO: create backdrop after text, to size it appropriately
-		var backdrop = new FlxSprite(_center.x - 75, _center.y - 40);
-		backdrop.makeGraphic(150, 80, FlxColor.TRANSPARENT);
-		backdrop.drawRoundRect(0, 0, backdrop.width, backdrop.height, 20, 20, FlxColor.BLACK, {color: FlxColor.WHITE, thickness: 3});
-		add(backdrop);
-
-		var text = new FlxText(backdrop.x, backdrop.y, backdrop.width, BumpStikGame.g().i18n.tr("game/classic/newCol"), 30);
-		text.height = backdrop.height;
+		var text = new FlxText(0, 0, 0, BumpStikGame.g().i18n.tr("game/classic/newCol"), 30);
+		text.autoSize = false;
 		text.alignment = CENTER;
-		add(text);
+		text.setPosition(_center.x - text.width / 2, _center.y - text.height / 2);
 
-		_bumper.x = backdrop.x + backdrop.width - (_bumper.width / 3);
-		_bumper.y = backdrop.y + ((backdrop.height - _bumper.height) / 2);
-		add(_bumper);
+		var backdrop = new FlxSprite();
+		backdrop.makeGraphic(Math.round(text.width + (_bumper.width / 3)) + 16, Math.round(text.height) + 16, FlxColor.TRANSPARENT);
+		backdrop.drawRoundRect(1, 1, backdrop.width - 2, backdrop.height - 2, 20, 20, FlxColor.BLACK, {color: FlxColor.WHITE, thickness: 3});
+		backdrop.setPosition(text.x - 8, text.y - 8);
+
+		_bumper.setPosition(backdrop.x + backdrop.width - (_bumper.width / 3), backdrop.y + ((backdrop.height - _bumper.height) / 2));
+
+		for (item in [backdrop, text, _bumper])
+		{
+			item.setPosition(Math.round(item.x), Math.round(item.y));
+			add(item);
+		}
 
 		super.create();
 	}
