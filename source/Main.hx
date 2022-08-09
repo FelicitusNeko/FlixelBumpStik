@@ -14,9 +14,9 @@ class Main extends Sprite
 	{
 		super();
 		#if debug
-		addChild(new FlxGame(0, 0, APEntryState));
+		addChild(new BumpStikGame(0, 0, APEntryState));
 		#else
-		addChild(new FlxGame(0, 0, ClassicGameState));
+		addChild(new BumpStikGame(0, 0, ClassicGameState));
 		#end
 	}
 }
