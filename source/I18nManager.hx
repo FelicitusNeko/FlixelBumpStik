@@ -22,6 +22,8 @@ class I18nManager
 
 	private function set_lang(lang:String)
 	{
+		if (!Assets.exists('assets/i18n/$defaultLang.json'))
+			throw new Exception('Default language file $defaultLang.json not found');
 		if (!Assets.exists('assets/i18n/$lang.json'))
 			throw new Exception('Language file $lang.json not found');
 		_i18n.clear();
