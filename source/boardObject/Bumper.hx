@@ -413,7 +413,7 @@ class Bumper extends BoardObject
 			if (justLaunched)
 				justLaunched = false;
 
-			if (alive && !isOnScreen(camera))
+			if (exists && !isOnScreen(camera))
 			{
 				alive = exists = false;
 				velocity.set(0, 0);

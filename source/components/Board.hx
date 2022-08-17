@@ -689,7 +689,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 
 	private function smGameOverWait(_:Float)
 	{
-		if (_bumpers.countLiving() <= 0)
+		if (_bumpers.getFirstExisting() == null)
 		{
 			onGameOver.dispatch(true);
 			_csm.chain("goanimdone");
