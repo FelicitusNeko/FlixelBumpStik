@@ -54,14 +54,11 @@ class ClassicGameState extends GameState
 
 		prepareBoard();
 
-		// var test = new FlxButton(0, 0, "Test", () ->
-		// {
-		// 	_hudClassic.paintCans++;
-		// 	// var combo = new BonusMarker(_boardClassic.center.x, _boardClassic.center.y, 5);
-		// 	// add(combo);
-		// 	// add(new BonusMarker(_boardClassic.center.x + combo.height * 1.6, _boardClassic.center.y, 2, true));
-		// });
-		// add(test);
+		var test = new FlxButton(0, 0, "Test", () ->
+		{
+			openSubState(new AllClearSubstate(12345, _boardClassic.center));
+		});
+		add(test);
 	}
 
 	override function prepareBoard()
@@ -110,7 +107,7 @@ class ClassicGameState extends GameState
 			openSubState(allClearSub);
 			return;
 		}
-		if (_hud.block >= _nextColor && _bg.colors < 6)
+		if (_hud.block >= _nextColor && _bg.colors < _bg.colorLimit)
 		{
 			FlxG.sound.play(AssetPaths.levelup__wav);
 			_nextColor += _nextColorEvery;
