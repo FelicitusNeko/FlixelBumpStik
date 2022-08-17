@@ -255,6 +255,9 @@ class APGameState extends ClassicGameState
 
 		super();
 
+		_bg.colors = _startColors;
+		_bg.colorLimit = _endColors;
+
 		_nextColor = 50;
 		_nextColorEvery = 50;
 	}
@@ -275,6 +278,7 @@ class APGameState extends ClassicGameState
 		_generalCamera.bgColor = FlxColor.TRANSPARENT;
 
 		_hud.onScoreChanged.add(onScoreChanged);
+		_hudClassic.paintCans = _startPaintCans;
 		_hudClassic.paintCansIncrementStep = 0;
 
 		if (_itemBuffer.length > 0)
@@ -337,6 +341,7 @@ class APGameState extends ClassicGameState
 
 		_bg.shuffleColors();
 		_bg.colors = _startColors;
+		_bg.colorLimit = _endColors;
 		_hudClassic.paintCans = _startPaintCans;
 
 		_player.board = new APBoard(0, 0, _curWidth, _curHeight);
@@ -346,6 +351,14 @@ class APGameState extends ClassicGameState
 		{
 			schedule.toDeploy = schedule.toClear;
 			schedule.sinceLast = 0;
+		}
+
+		if (_paintCanBumper != null)
+		{
+			_paintCanBumper.destroy();
+			_paintCanBumper = null;
+			_paintCanCancelButton.destroy();
+			_paintCanCancelButton = null;
 		}
 
 		prepareBoard();
