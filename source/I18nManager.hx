@@ -24,8 +24,9 @@ class I18nManager
 	{
 		if (!Assets.exists('assets/i18n/$defaultLang.json'))
 			throw new Exception('Default language file $defaultLang.json not found');
-		if (!Assets.exists('assets/i18n/$lang.json'))
+		if (lang != defaultLang && !Assets.exists('assets/i18n/$lang.json'))
 			throw new Exception('Language file $lang.json not found');
+
 		_i18n.clear();
 		_i18n.loadFromString(Assets.getText('assets/i18n/$defaultLang.json'));
 		if (lang != defaultLang)
