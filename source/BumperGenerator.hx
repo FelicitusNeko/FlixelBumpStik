@@ -25,6 +25,9 @@ class BumperGenerator
 	/** The maximum number of colors available to be put into play. **/
 	public var maxColors(get, never):Int;
 
+	/** The maximum number of colors to be made available, regardless of how many are actually on the list. **/
+	public var colorLimit(default, set):Int;
+
 	/** The average number of each color generated. **/
 	public var average(get, never):Float;
 
@@ -41,13 +44,14 @@ class BumperGenerator
 	{
 		colorOpts = initOpts != null ? initOpts.copy() : defaultColorOpts.copy();
 		colors = this.initColors = initColors;
+		colorLimit = maxColors;
 	}
 
 	function set_colors(colors:Int):Int
 	{
 		if (colors < 0)
 			colors = 0;
-		else if (colors > colorOpts.length)
+		else if (colors > colorLimit)
 			colors = colorOpts.length;
 
 		if (colors == 0)
@@ -64,6 +68,15 @@ class BumperGenerator
 				_drops.remove(colorOpts[--this.colors]);
 		}
 		return this.colors;
+	}
+
+	function set_colorLimit(colorLimit:Int)
+	{
+		if (colorLimit < colors)
+			colorLimit = colors;
+		if (colorLimit > maxColors)
+			colorLimit = maxColors;
+		return this.colorLimit = colorLimit;
 	}
 
 	inline function get_maxColors()
@@ -148,5 +161,6 @@ class BumperGenerator
 	{
 		colors = 0;
 		colors = initColors;
+		colorLimit = maxColors;
 	}
 }
