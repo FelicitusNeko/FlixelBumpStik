@@ -361,6 +361,8 @@ class Bumper extends BoardObject
 			sprite.alive = false;
 			sprite.solid = false;
 		});
+		for (flair in _flairList)
+			flair.exists = false;
 		direction = GameOver;
 		acceleration.y = height * 8;
 		velocity.x = width * 4 * (Math.random() - .5);
