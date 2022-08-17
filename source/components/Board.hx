@@ -83,8 +83,9 @@ class Board extends FlxTypedGroup<FlxBasic>
 		Event that fires when a match occurs.
 		@param chain The chain step for this match.
 		@param combo The number of bumpers matched.
+		@param bumpers The bumpers to be cleared.
 	**/
-	public var onMatch(default, null) = new Event<(Int, Int) -> Void>();
+	public var onMatch(default, null) = new Event<(Int, Int, Array<Bumper>) -> Void>();
 
 	/**
 		Event that fires when a bumper clears.
@@ -532,7 +533,8 @@ class Board extends FlxTypedGroup<FlxBasic>
 	/** Checks for Bumper Stickers, and marks bumpers to be cleared if any have been formed. **/
 	private function smChecking(elapsed:Float)
 	{
-		var clearCount:Int = 0;
+		var clearBumpers:Array<Bumper> = [];
+		// var clearCount:Int = 0;
 
 		/** Marks bumpers to be cleared. **/
 		function clear(x:Int, y:Int, count:Int, horizontal:Bool)
@@ -544,8 +546,8 @@ class Board extends FlxTypedGroup<FlxBasic>
 				else
 					y--;
 				var bumper = atGrid(_bumpers, x, y);
-				if (bumper != null && bumper.markForClear())
-					clearCount++;
+				if (bumper != null && bumper.markForClear() && !clearBumpers.contains(bumper))
+					clearBumpers.push(bumper);
 			}
 		}
 
@@ -576,14 +578,14 @@ class Board extends FlxTypedGroup<FlxBasic>
 		for (horizontal in [true, false])
 			check(horizontal);
 
-		if (clearCount > 0)
+		if (clearBumpers.length > 0)
 		{
 			_delay = .5;
 			curChain++;
-			onMatch.dispatch(curChain, clearCount);
+			onMatch.dispatch(curChain, clearBumpers.length, clearBumpers);
 			_csm.chain("match");
 
-			if (curChain > 1 || clearCount > 3)
+			if (curChain > 1 || clearBumpers.length > 3)
 			{
 				var firstClearBumper:Bumper = null;
 				for (y in 0...bHeight)
@@ -603,9 +605,9 @@ class Board extends FlxTypedGroup<FlxBasic>
 				if (firstClearBumper != null)
 				{
 					var putx = firstClearBumper.x - (firstClearBumper.width / 3);
-					if (clearCount > 3)
+					if (clearBumpers.length > 3)
 					{
-						var comboMarker = new BonusMarker(putx, firstClearBumper.y, clearCount);
+						var comboMarker = new BonusMarker(putx, firstClearBumper.y, clearBumpers.length);
 						add(comboMarker);
 						putx += comboMarker.height * 1.6;
 					}

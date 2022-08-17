@@ -134,7 +134,7 @@ class ClassicGameState extends GameState
 	}
 
 	/** Called when a match is formed. **/
-	function onMatch(chain:Int, combo:Int)
+	function onMatch(chain:Int, combo:Int, bumpers:Array<Bumper>)
 	{
 		var bonus = ((combo - 3) + (chain - 1)) * Math.floor(Math.pow(2, (chain - 1))) * 50;
 		if (chain > 1)

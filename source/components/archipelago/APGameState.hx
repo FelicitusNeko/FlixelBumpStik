@@ -460,9 +460,13 @@ class APGameState extends ClassicGameState
 	}
 
 	/** Called when a match is formed. **/
-	override function onMatch(chain:Int, combo:Int)
+	override function onMatch(chain:Int, combo:Int, bumpers:Array<Bumper>)
 	{
-		super.onMatch(chain, combo);
+		for (bumper in bumpers)
+			if (bumper.hasFlair("booster"))
+				_player.multStack[1] += .2;
+
+		super.onMatch(chain, combo, bumpers);
 
 		var checks:Array<Int> = [];
 		if (_topChain <= 3)
@@ -492,10 +496,7 @@ class APGameState extends ClassicGameState
 							_ap.LocationChecks([APLocation.Treasure1 + schedule.cleared - 1]);
 					case "booster":
 						if (schedule.cleared++ < 5)
-						{
-							_player.multStack[1] += .2;
 							_ap.LocationChecks([APLocation.Booster1 + schedule.cleared - 1]);
-						}
 					case "hazard":
 						if (++schedule.cleared == 3)
 							_ap.LocationChecks([APLocation.ClearedHazards]);
