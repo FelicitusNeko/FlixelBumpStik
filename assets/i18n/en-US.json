@@ -38,7 +38,7 @@
   },
   "game": {
     "classic": {
-      "newCol": "New Color",
+      "newCol": "New\nColor",
       "allClear": "All Clear",
       "paintCol": "Select a color",
       "paintBump": "Select a bumper"
