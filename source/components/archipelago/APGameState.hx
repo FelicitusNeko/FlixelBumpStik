@@ -334,15 +334,18 @@ class APGameState extends ClassicGameState
 	/** Resets the game state and starts a new board without affecting multiworld stats. **/
 	function restartGame()
 	{
-		_hud.resetHUD();
-		_bg.reset();
-		_jackpot = 0;
 		remove(_player.board);
+		_jackpot = 0;
 
+		_bg.reset();
 		_bg.shuffleColors();
 		_bg.colors = _startColors;
 		_bg.colorLimit = _endColors;
+
+		_hudClassic.paintCanStartThreshold = 1000 + (_startPaintCans * 500);
+		_hud.resetHUD();
 		_hudClassic.paintCans = _startPaintCans;
+		_hudClassic.paintCansIncrementStep = (_curWidth + _curHeight - 6) * 500;
 
 		_player.board = new APBoard(0, 0, _curWidth, _curHeight);
 		_player.multStack[0] = _startColors == 2 ? .8 : 1;
