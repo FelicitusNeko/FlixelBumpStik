@@ -43,8 +43,9 @@ class ClassicGameState extends GameState
 			});
 
 		if (_hud == null)
-		{
 			_hud = new ClassicHUD();
+		if (_hudClassic != null)
+		{
 			_hudClassic.onPaintCanGet.add((_) -> FlxG.sound.play(AssetPaths.paintcan__wav));
 			_hudClassic.onPaintCanClick.add(onPaintCanClick);
 			_hudClassic.onNextBumperClick.add(onBumperSelect);
