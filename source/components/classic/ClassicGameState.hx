@@ -76,14 +76,10 @@ class ClassicGameState extends GameState
 	}
 
 	inline function get__hudClassic()
-	{
 		return cast(_hud, ClassicHUD);
-	}
 
 	inline function get__boardClassic()
-	{
 		return cast(_player.board, ClassicBoard);
-	}
 
 	/** Calculates score to be added. **/
 	override function addScore(add:Int, ?multStack:Array<Float>):Int
@@ -234,8 +230,6 @@ class ClassicGameState extends GameState
 	}
 
 	function onGameOver(animDone:Bool)
-	{
 		if (!animDone)
 			FlxG.sound.play(AssetPaths.gameover__wav);
-	}
 }

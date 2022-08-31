@@ -72,10 +72,8 @@ class StandardHUD extends FlxSpriteGroup
 		}
 	}
 
-	function get_score()
-	{
+	inline function get_score()
 		return _scoreCounter.value;
-	}
 
 	function set_score(score:Int):Int
 	{
@@ -84,10 +82,8 @@ class StandardHUD extends FlxSpriteGroup
 		return _scoreCounter.value = score;
 	}
 
-	function get_block()
-	{
+	inline function get_block()
 		return _blockCounter.value;
-	}
 
 	function set_block(block:Int):Int
 	{
