@@ -39,6 +39,7 @@ class StandardHUD extends FlxSpriteGroup
 	/** Event that fires when the cleared bumper value changes.**/
 	public var onBlockChanged(default, null) = new Event<Int->Void>();
 
+	/** Retrieve a string based on an i18n key. **/
 	private var _t:I18nFunction;
 
 	public function new()

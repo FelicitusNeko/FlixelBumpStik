@@ -8,7 +8,7 @@ import state.APEntryState;
 import components.classic.ClassicGameState;
 #end
 
-typedef I18nFunction = (String, ?Map<String, String>) -> String;
+typedef I18nFunction = (String, ?Map<String, Dynamic>) -> String;
 
 class Main extends Sprite
 {

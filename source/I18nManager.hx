@@ -12,7 +12,7 @@ class I18nManager
 
 	public var lang(default, set):String;
 
-	public var tr(default, null):(String, ?Map<String, String>) -> String;
+	public var tr(default, null):(String, ?Map<String, Dynamic>) -> String;
 
 	public function new(?lang:String)
 	{
