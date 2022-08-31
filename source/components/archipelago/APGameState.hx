@@ -230,6 +230,10 @@ class APGameState extends ClassicGameState
 
 	private var _itemBuffer:Array<NetworkItem> = [];
 
+	private var _boardAP(get, never):APBoard;
+
+	private var _hudAP(get, never):APHud;
+
 	public function new(ap:Client, slotData:Dynamic)
 	{
 		_bg = new BumperGenerator(2, [
@@ -262,6 +266,12 @@ class APGameState extends ClassicGameState
 		_nextColorEvery = 50;
 	}
 
+	inline function get__hudAP()
+		return cast(_hud, APHud);
+
+	inline function get__boardAP()
+		return cast(_player.board, APBoard);
+
 	override function create()
 	{
 		// TODO: load the game, if a save file exists
@@ -273,6 +283,11 @@ class APGameState extends ClassicGameState
 			});
 
 		_hud = new APHud();
+		_hudAP.addTask(LevelHeader, 1);
+		_hudAP.addTask(Score, 1000);
+		_hudAP.addTask(TotalScore, 2000, 753);
+		_hudAP.addTask(Combo, 4);
+		_hudAP.updateTask(Combo, 7);
 
 		super.create();
 
