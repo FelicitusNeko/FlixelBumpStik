@@ -36,7 +36,7 @@ class APHazardPlaceholder extends BoardObject
 		}
 		else
 		{
-			owner.putBumperAt(boardX, boardY, new APHazardBumper(0, 0, _resolveColor, owner));
+			owner.putBumperAt(boardX, boardY, new APHazardBumper(0, 0, _resolveColor, owner)).snapToPos();
 			destroy();
 			return true;
 		}
