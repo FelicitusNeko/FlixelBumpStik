@@ -11,6 +11,7 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRandom;
 import flixel.util.FlxColor;
+import haxe.Timer;
 import lime.app.Event;
 
 typedef BumperCallback = Bumper->Void;
@@ -69,6 +70,9 @@ class Board extends FlxTypedGroup<FlxBasic>
 
 	/** The current count of bumpers on the field. **/
 	public var bCount(get, never):Int;
+
+	/** When Game Over hits, as a preventative measure, the game over sequence will be forced to progress after five seconds. **/
+	private var _forceGameOver = false;
 
 	/** Event that fires when the game requests that a next bumper be generated. **/
 	public var onRequestGenerate(default, null) = new Event<Void->Void>();
@@ -636,6 +640,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 				else
 				{
 					// NOTE: Game over
+					Timer.delay(() -> if (_csm.is("gameoverwait")) _forceGameOver = true, 5000);
 					onGameOver.dispatch(false);
 					_bumpers.forEach(bumper -> bumper.gameOver());
 					_csm.chain("gameover");
@@ -666,7 +671,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 			_delay = 0;
 
 			var deadBuffer:Array<Bumper> = [];
-			_bumpers.forEachDead(bumper -> _bumpers.remove(bumper));
+			_bumpers.forEachDead(bumper -> deadBuffer.push(bumper));
 			for (bumper in deadBuffer)
 			{
 				_bumpers.remove(bumper);
@@ -691,7 +696,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 
 	private function smGameOverWait(_:Float)
 	{
-		if (_bumpers.getFirstExisting() == null)
+		if (_bumpers.getFirstExisting() == null || _forceGameOver)
 		{
 			onGameOver.dispatch(true);
 			_csm.chain("goanimdone");
