@@ -23,6 +23,12 @@ class APHazardBumper extends Bumper
 		_resolveColor = resolveColor;
 	}
 
+	override function gameOver()
+	{
+		immovable = false;
+		super.gameOver();
+	}
+
 	override function onAdvanceTurn():Bool
 	{
 		if (health > 0)
@@ -30,7 +36,15 @@ class APHazardBumper extends Bumper
 			if (--health <= 0)
 			{
 				var hazardFlair = _flairList["hazard"];
-				hazardFlair.tween({alpha: 0, "scale.x": 1.25, "scale.y": 1.25}, .5, {ease: FlxEase.circOut});
+				hazardFlair.tween({alpha: 0, "scale.x": 1.25, "scale.y": 1.25}, .5, {
+					ease: FlxEase.circOut,
+					onComplete: (_) ->
+					{
+						remove(hazardFlair);
+						add(_flairList["hazard"] = new FlxSprite(0, 0));
+						hazardFlair.destroy();
+					}
+				});
 				bColor = _resolveColor;
 				return true;
 			}
