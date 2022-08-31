@@ -272,6 +272,8 @@ class APGameState extends ClassicGameState
 				multStack: [.8, 1]
 			});
 
+		_hud = new APHud();
+
 		super.create();
 
 		_generalCamera = FlxG.cameras.add(new FlxCamera(0, 0, FlxG.width, FlxG.height), false);
