@@ -57,7 +57,7 @@
         "default": "Unknown"
       },
       "task": {
-        "LevelHeader": "- Level :level -",
+        "LevelHeader": "- Level :goal -",
         "Score": "Score: :current/:goal",
         "TotalScore": "Total score: :current/:goal",
         "Cleared": "Bumpers sticked: :current/:goal",
