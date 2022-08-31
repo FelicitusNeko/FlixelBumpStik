@@ -102,16 +102,16 @@ class APHud extends ClassicHUD
 		{
 			var more = "+<X>";
 			var listy = _blockCounter.y + _blockCounter.height;
-			var list = new FlxUIList(10, listy, [], width - 20, height - listy - 69, more);
+			_taskListbox = new FlxUIList(10, listy, [], width - 20, height - listy - 69, more);
 
-			add(list);
+			add(_taskListbox);
 		}
 	}
 
-	function get_totalScore()
+	inline function get_totalScore()
 		return _totalScore + score;
 
-	function get_totalBlock()
+	inline function get_totalBlock()
 		return _totalBlock + block;
 
 	/**
@@ -141,6 +141,11 @@ class APHud extends ClassicHUD
 			current: current,
 			complete: current >= goal,
 			uiText: new FlxUIText(0, 0, 0, _t('game/ap/task/$type', ["current" => current, "goal" => goal]))
+		}
+		if (type == LevelHeader)
+		{
+			newTask.uiText.size += 4;
+			newTask.uiText.alignment = CENTER;
 		}
 		if (newTask.complete)
 		{
