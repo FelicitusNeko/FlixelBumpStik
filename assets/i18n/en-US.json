@@ -55,6 +55,19 @@
         "hazard": "Hazard Bumper",
         "treasure": "Treasure Bumper",
         "default": "Unknown"
+      },
+      "task": {
+        "LevelHeader": "- Level :level -",
+        "Score": "Score: :current/:goal",
+        "TotalScore": "Total score: :current/:goal",
+        "Cleared": "Bumpers sticked: :current/:goal",
+        "TotalCleared": "Total sticked: :current/:goal",
+        "Combo": "Combo clear :goal",
+        "Chain": "Chain x:goal",
+        "Treasures": "Treasure Bumper #:goal",
+        "Boosters": "Bonus Booster #:goal",
+        "Hazards": "Hazards cleared: :current/:goal",
+        "AllClear": "All Clear with at least :goal colors"
       }
     }
   }
