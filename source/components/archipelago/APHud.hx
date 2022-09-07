@@ -136,15 +136,15 @@ class APHud extends ClassicHUD
 			task.uiText.text = _t('game/ap/task/$type', ["current" => current, "goal" => task.curGoal]);
 		}
 
-		var allTasksCleared = true;
-		for (task in _taskList)
-			allTasksCleared = allTasksCleared && (task.type == LevelHeader ? true : task.complete);
-		if (allTasksCleared)
+		var levelTask = _taskList[0];
+		if (levelTask.type == LevelHeader && !levelTask.complete && _taskList.length > 1)
 		{
-			var levelTask = _taskList[0];
-			if (levelTask.type == LevelHeader)
+			var allTasksCleared = true;
+			for (task in _taskList.slice(1))
+				allTasksCleared = allTasksCleared && task.complete;
+			if (allTasksCleared)
 			{
-				levelTask.uiText.color = FlxColor.GREEN;
+				levelTask.current = levelTask.curGoal;
 				onTaskCleared.dispatch(LevelHeader, levelTask.curGoal, levelTask.curGoal);
 			}
 		}
