@@ -4,6 +4,7 @@ import ap.Client;
 import ap.PacketTypes.NetworkItem;
 import boardObject.Bumper;
 import boardObject.archipelago.APHazardPlaceholder;
+import components.archipelago.APTask.APTaskType;
 import components.classic.ClassicGameState;
 import flixel.FlxCamera;
 import flixel.FlxG;
@@ -283,20 +284,20 @@ class APGameState extends ClassicGameState
 			});
 
 		_hud = new APHud();
-		_hudAP.addTask(LevelHeader, 1);
-		_hudAP.addTask(Score, 1000);
-		_hudAP.addTask(TotalScore, 2000, 753);
-		_hudAP.addTask(Combo, 4);
-		_hudAP.updateTask(Combo, 7);
+		_hudAP.addTask(LevelHeader, [1]);
+		_hudAP.addTask(Score, [250, 500, 750, 1000]);
+		_hudAP.addTask(TotalScore, [2000]);
+		_hudAP.addTask(Combo, [4]);
 
 		super.create();
 
 		_generalCamera = FlxG.cameras.add(new FlxCamera(0, 0, FlxG.width, FlxG.height), false);
 		_generalCamera.bgColor = FlxColor.TRANSPARENT;
 
-		_hud.onScoreChanged.add(onScoreChanged);
+		// _hud.onScoreChanged.add(onScoreChanged);
 		_hudClassic.paintCans = _startPaintCans;
 		_hudClassic.paintCansIncrementStep = 0;
+		_hudAP.onTaskCleared.add(onTaskComplete);
 
 		if (_itemBuffer.length > 0)
 		{
@@ -385,22 +386,21 @@ class APGameState extends ClassicGameState
 	}
 
 	/** Called by HUD when score changes. **/
-	private function onScoreChanged(score:Int)
-	{
-		if (score > _topScore)
-		{
-			var checks:Array<Int> = [];
-			for (scan in (Math.floor(_topScore / 250) + 1)...17)
-			{
-				if (score > scan * 250)
-					checks.push(APLocation.Points250 + scan - 1);
-			}
-			if (checks.length > 0)
-				_ap.LocationChecks(checks);
-
-			_topScore = score;
-		}
-	}
+	// private function onScoreChanged(score:Int)
+	// {
+	// 	if (score > _topScore)
+	// 	{
+	// 		var checks:Array<Int> = [];
+	// 		for (scan in (Math.floor(_topScore / 250) + 1)...17)
+	// 		{
+	// 			if (score > scan * 250)
+	// 				checks.push(APLocation.Points250 + scan - 1);
+	// 		}
+	// 		if (checks.length > 0)
+	// 			_ap.LocationChecks(checks);
+	// 		_topScore = score;
+	// 	}
+	// }
 
 	/** Called by AP client when an item is received. **/
 	private function onItemsReceived(items:Array<NetworkItem>)
@@ -441,12 +441,19 @@ class APGameState extends ClassicGameState
 			}
 	}
 
+	private function onTaskComplete(task:APTaskType, goal:Int, current:Int)
+	{
+		// TODO: here's where we actually send checks
+		trace("Task complete", task, '$current/$goal');
+	}
+
 	/** Called when the board requests a bumper to be generated. Usually when it goes into Idle state. **/
 	override function onRequestGenerate()
 	{
 		if (_boardClassic.bCount <= 0 && _jackpot > 0)
-			if (++_allClears == 1)
-				_ap.LocationChecks([APLocation.AllClear]);
+			_hudAP.updateTask(AllClear, _bg.colors);
+		// if (++_allClears == 1)
+		// 	_ap.LocationChecks([APLocation.AllClear]);
 
 		var prevBumper = _hud.nextBumper;
 		super.onRequestGenerate();
@@ -488,17 +495,20 @@ class APGameState extends ClassicGameState
 
 		super.onMatch(chain, combo, bumpers);
 
-		var checks:Array<Int> = [];
-		if (_topChain <= 3)
-			while (_topChain < chain)
-				if (++_topChain > 1 && _topChain < 4)
-					checks.push(APLocation.Chain2 + _topChain - 2);
-		if (_topCombo <= 6)
-			while (_topCombo < combo)
-				if (++_topCombo > 3 && _topCombo < 7)
-					checks.push(APLocation.Combo4 + _topCombo - 4);
-		if (checks.length > 0)
-			_ap.LocationChecks(checks);
+		_hudAP.updateTask(Chain, chain);
+		_hudAP.updateTask(Combo, combo);
+
+		// var checks:Array<Int> = [];
+		// if (_topChain <= 3)
+		// 	while (_topChain < chain)
+		// 		if (++_topChain > 1 && _topChain < 4)
+		// 			checks.push(APLocation.Chain2 + _topChain - 2);
+		// if (_topCombo <= 6)
+		// 	while (_topCombo < combo)
+		// 		if (++_topCombo > 3 && _topCombo < 7)
+		// 			checks.push(APLocation.Combo4 + _topCombo - 4);
+		// if (checks.length > 0)
+		// 	_ap.LocationChecks(checks);
 	}
 
 	/** Called when a bumper is cleared. **/
@@ -512,14 +522,17 @@ class APGameState extends ClassicGameState
 				switch (key)
 				{
 					case "treasure":
-						if (schedule.cleared++ < 8)
-							_ap.LocationChecks([APLocation.Treasure1 + schedule.cleared - 1]);
+						_hudAP.updateTask(Treasures, ++schedule.cleared);
+					// if (schedule.cleared++ < 8)
+					// 	_ap.LocationChecks([APLocation.Treasure1 + schedule.cleared - 1]);
 					case "booster":
-						if (schedule.cleared++ < 5)
-							_ap.LocationChecks([APLocation.Booster1 + schedule.cleared - 1]);
+						_hudAP.updateTask(Boosters, ++schedule.cleared);
+					// if (schedule.cleared++ < 5)
+					// 	_ap.LocationChecks([APLocation.Booster1 + schedule.cleared - 1]);
 					case "hazard":
-						if (++schedule.cleared == 3)
-							_ap.LocationChecks([APLocation.ClearedHazards]);
+						_hudAP.updateTask(Hazards, ++schedule.cleared);
+						// if (++schedule.cleared == 3)
+						// 	_ap.LocationChecks([APLocation.ClearedHazards]);
 				}
 			}
 		}

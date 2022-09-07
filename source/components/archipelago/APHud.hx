@@ -1,5 +1,6 @@
 package components.archipelago;
 
+import components.archipelago.APTask;
 import components.classic.ClassicHUD;
 import flixel.addons.ui.FlxUIList;
 import flixel.addons.ui.FlxUIText;
@@ -7,72 +8,14 @@ import flixel.util.FlxColor;
 import haxe.Exception;
 import lime.app.Event;
 
-/** The type of task to be completed. **/
-enum APTaskType
-{
-	/** The pseudotask at the top of the list to indicate the current level. **/
-	LevelHeader;
-
-	/** A certain number of points must be obtained this game. **/
-	Score;
-
-	/** A certain number of points must be obtained across all games this session. **/
-	TotalScore;
-
-	/** A certain number of bumpers must be cleared this game. **/
-	Cleared;
-
-	/** A certain number of bumpers must be cleared across all games this session. **/
-	TotalCleared;
-
-	/** A combo of a certain number of bumpers must be formed. **/
-	Combo;
-
-	/** A chain of a certain length must be formed. **/
-	Chain;
-
-	/** A certain number of Treasure Bumpers must be cleared across all games this session. **/
-	Treasures;
-
-	/** A certain number of Bonus Boosters must be cleared across all games this session. **/
-	Boosters;
-
-	/** A certain number of Hazard Bumpers must be cleared across all games this session. **/
-	Hazards;
-
-	/** An All Clear must be obtained with at least a certain number of colors. **/
-	AllClear;
-}
-
-/** The definition for an Archipelago check task. **/
-typedef APTask =
-{
-	/** The type of task. **/
-	var type:APTaskType;
-
-	// TODO: rolling goals, to have a task that has multiple goals for multiple checks
-
-	/** The current goal number for this task. **/
-	var goal:Int;
-
-	/** The current number achieved for this task. **/
-	var current:Int;
-
-	/** Whether this task has been marked as complete. **/
-	var complete:Bool;
-
-	/** The UI text for the task list. **/
-	var uiText:FlxUIText;
-}
-
 /** Adds Archipelago-specific elements to the Classic mode HUD. **/
 class APHud extends ClassicHUD
 {
 	/** The total number of points accrued through previous games. **/
-	private var _totalScore = 0;
+	private var _accruedScore = 0;
 
 	/** The total number of bumpers cleared accured through previous games. **/
-	private var _totalBlock = 0;
+	private var _accruedBlock = 0;
 
 	/** The task list display component. **/
 	private var _taskListbox:FlxUIList;
@@ -109,10 +52,26 @@ class APHud extends ClassicHUD
 	}
 
 	inline function get_totalScore()
-		return _totalScore + score;
+		return _accruedScore + score;
 
 	inline function get_totalBlock()
-		return _totalBlock + block;
+		return _accruedBlock + block;
+
+	override function set_score(score:Int):Int
+	{
+		var retval = super.set_score(score);
+		updateTask(Score, retval);
+		updateTask(TotalScore, totalScore);
+		return retval;
+	}
+
+	override function set_block(block:Int):Int
+	{
+		var retval = super.set_block(block);
+		updateTask(Cleared, retval);
+		updateTask(TotalCleared, totalBlock);
+		return retval;
+	}
 
 	/**
 		Adds a task to the list.
@@ -121,7 +80,7 @@ class APHud extends ClassicHUD
 		@param current Optional. The current value for the goal.
 		If this is omitted and it is a Score or Clear-based goal, the current value stored by the HUD is used. Otherwise defaults to 0.
 	**/
-	public function addTask(type:APTaskType, goal:Int, ?current:Int)
+	public function addTask(type:APTaskType, goals:Array<Int>, ?current:Int)
 	{
 		if (type == LevelHeader && _taskList.length > 0)
 			throw new Exception("Only first task may be Level pseudotask");
@@ -137,22 +96,18 @@ class APHud extends ClassicHUD
 			}
 		var newTask:APTask = {
 			type: type,
-			goal: goal,
-			current: current,
-			complete: current >= goal,
-			uiText: new FlxUIText(0, 0, 0, _t('game/ap/task/$type', ["current" => current, "goal" => goal]))
-		}
+			goals: goals,
+			goalIndex: 0,
+			current: 0,
+			uiText: new FlxUIText(0, 0, 0, _t('game/ap/task/$type', ["current" => current, "goal" => goals[0]]))
+		};
 		if (type == LevelHeader)
 		{
 			newTask.uiText.size += 4;
 			newTask.uiText.alignment = CENTER;
 		}
-		if (newTask.complete)
-		{
-			newTask.uiText.color = FlxColor.GREEN;
-			onTaskCleared.dispatch(newTask.type, newTask.goal, newTask.current);
-		}
 		_taskList.push(newTask);
+		updateTask(type, current);
 		_taskListbox.add(newTask.uiText);
 	}
 
@@ -170,12 +125,15 @@ class APHud extends ClassicHUD
 			if (task.type != type || task.current > current)
 				continue;
 
+			var wasComplete = task.complete;
 			task.current = current;
-			if (!task.complete && (task.complete = task.complete || (task.current >= task.goal)))
+			if ((!task.complete && task.current >= task.curGoal) || (!wasComplete && task.complete))
 			{
-				task.uiText.color = FlxColor.GREEN;
-				onTaskCleared.dispatch(task.type, task.goal, task.current);
+				onTaskCleared.dispatch(task.type, task.curGoal, task.current);
+				if (!task.complete)
+					task.goalIndex++;
 			}
+			task.uiText.text = _t('game/ap/task/$type', ["current" => current, "goal" => task.curGoal]);
 		}
 
 		var allTasksCleared = true;
@@ -186,9 +144,8 @@ class APHud extends ClassicHUD
 			var levelTask = _taskList[0];
 			if (levelTask.type == LevelHeader)
 			{
-				levelTask.complete = true;
 				levelTask.uiText.color = FlxColor.GREEN;
-				onTaskCleared.dispatch(LevelHeader, levelTask.goal, levelTask.goal);
+				onTaskCleared.dispatch(LevelHeader, levelTask.curGoal, levelTask.curGoal);
 			}
 		}
 	}
@@ -204,11 +161,11 @@ class APHud extends ClassicHUD
 		}
 	}
 
-	/** Resets the HUD to its starting values. For Archipelago games, it will also increment `_totalScore` and `_totalBlock`. **/
+	/** Resets the HUD to its starting values. For Archipelago games, it will also increment `_accruedScore` and `_accruedBlock`. **/
 	override public function resetHUD()
 	{
-		_totalScore += score;
-		_totalBlock += block;
+		_accruedScore += score;
+		_accruedBlock += block;
 		super.resetHUD();
 	}
 }
