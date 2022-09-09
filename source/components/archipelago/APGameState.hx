@@ -11,6 +11,7 @@ import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.math.FlxRandom;
 import flixel.util.FlxColor;
+import utilities.DeploymentSchedule;
 
 /** The color of a bumper in Archipelago mode, for matching purposes. **/
 enum abstract APColor(FlxColor) from FlxColor to FlxColor
@@ -150,25 +151,6 @@ enum abstract APItem(Int) from Int to Int
 		}
 }
 
-/** Keeps track of special bumpers. **/
-typedef DeploymentSchedule =
-{
-	/** This many are queued to be deployed. **/
-	var toDeploy:Int;
-
-	/** This many are yet to be cleared. **/
-	var toClear:Int;
-
-	/** This many have been cleared. **/
-	var cleared:Int;
-
-	/**
-		It has been this many turns since one has been deployed since becoming available.
-		A special bumper will usually be deployed within ten turns of receipt.
-	**/
-	var sinceLast:Int;
-}
-
 /** A queued toast popup message. **/
 typedef QueuedToast =
 {
@@ -205,34 +187,28 @@ class APGameState extends ClassicGameState
 	/** Scheduling data for special bumpers. **/
 	private var _schedule:Map<String, DeploymentSchedule> = [];
 
-	/** The top score achieved this multiworld. Used for determining checks to send. **/
-	private var _topScore = 0;
-
-	/** The most clears achieved this multiworld. Used for determining checks to send. **/
-	private var _topBlock = 0;
-
-	/** The top chain achieved this multiworld. Used for determining checks to send. **/
-	private var _topChain = 0;
-
-	/** The top combo achieved this multiworld. Used for determining checks to send. **/
-	private var _topCombo = 0;
-
 	/** The number of All Clears achieved this multiworld. Used for determining checks to send. **/
 	private var _allClears = 0;
 
 	/** The schedule randomiser for this multiworld. **/
 	private var _rng = new FlxRandom();
 
+	/** The primary camera where the game board lives. **/
 	private var _generalCamera:FlxCamera;
 
+	/** The current popup toast being displayed. **/
 	private var _curToast:APToast = null;
 
+	/** The queue of popup toasts to display. **/
 	private var _toastQueue:Array<QueuedToast> = [];
 
+	/** The items have been received from the server which have yet to be processed. **/
 	private var _itemBuffer:Array<NetworkItem> = [];
 
+	/** The APBoard instance for the current game. **/
 	private var _boardAP(get, never):APBoard;
 
+	/** The APHud instance for the current game. **/
 	private var _hudAP(get, never):APHud;
 
 	public function new(ap:Client, slotData:Dynamic)
@@ -253,9 +229,12 @@ class APGameState extends ClassicGameState
 		for (type in ["booster", "hazard", "treasure"])
 			_schedule.set(type, {
 				toDeploy: 0,
+				deployable: 0,
 				toClear: 0,
 				cleared: 0,
-				sinceLast: 0
+				sinceLast: 0,
+				minDelay: 0,
+				maxDelay: 10
 			});
 
 		super();
@@ -284,10 +263,7 @@ class APGameState extends ClassicGameState
 			});
 
 		_hud = new APHud();
-		_hudAP.addTask(LevelHeader, [1]);
-		_hudAP.addTask(Score, [250, 500, 750, 1000]);
-		_hudAP.addTask(TotalScore, [2000]);
-		_hudAP.addTask(Combo, [4]);
+		createLevel(1);
 
 		super.create();
 
@@ -314,6 +290,30 @@ class APGameState extends ClassicGameState
 		// TODO: save the game
 		FlxG.autoPause = true;
 		super.destroy();
+	}
+
+	function createLevel(level:Int)
+	{
+		_hudAP.wipeTasks();
+		if (level > 0)
+			_hudAP.addTask(LevelHeader, [level]);
+		switch (level)
+		{
+			case 1:
+				_hudAP.addTask(Score, [250, 500, 750, 1000]);
+				_hudAP.addTask(TotalScore, [500, 1000, 1500, 2000]);
+				_hudAP.addTask(Combo, [4]);
+				_hudAP.addTask(Boosters, [1]);
+				_hudAP.addTask(Treasures, [4]);
+				_schedule["booster"].deployable += 2;
+				_schedule["treasure"].deployable += 4;
+			// _schedule["hazard"].deployable += 0;
+			case -1: // the game is complete in this case; send a goal condition to the server
+				_ap.clientStatus = GOAL;
+			// TODO: show a congratulatory dialog which will resolve into exiting back to the title screen
+			default: // If we don't recognise the level, just default to 99999 score and make it obvious something's wrong
+				_hudAP.addTask(Score, [99999]);
+		}
 	}
 
 	function pushToast(message:String, color = FlxColor.WHITE, delay = 2000)
@@ -385,23 +385,6 @@ class APGameState extends ClassicGameState
 		prepareBoard();
 	}
 
-	/** Called by HUD when score changes. **/
-	// private function onScoreChanged(score:Int)
-	// {
-	// 	if (score > _topScore)
-	// 	{
-	// 		var checks:Array<Int> = [];
-	// 		for (scan in (Math.floor(_topScore / 250) + 1)...17)
-	// 		{
-	// 			if (score > scan * 250)
-	// 				checks.push(APLocation.Points250 + scan - 1);
-	// 		}
-	// 		if (checks.length > 0)
-	// 			_ap.LocationChecks(checks);
-	// 		_topScore = score;
-	// 	}
-	// }
-
 	/** Called by AP client when an item is received. **/
 	private function onItemsReceived(items:Array<NetworkItem>)
 	{
@@ -445,6 +428,8 @@ class APGameState extends ClassicGameState
 	{
 		// TODO: here's where we actually send checks
 		trace("Task complete", task, '$current/$goal');
+
+		switch (task) {}
 	}
 
 	/** Called when the board requests a bumper to be generated. Usually when it goes into Idle state. **/
@@ -462,12 +447,15 @@ class APGameState extends ClassicGameState
 		{
 			for (key => schedule in _schedule)
 			{
-				if (schedule.toDeploy <= 0)
+				if (schedule.toDeploy <= 0 || schedule.deployable <= 0)
 					continue;
-				if (_rng.bool((++schedule.sinceLast) * 10))
+				if (++schedule.sinceLast < schedule.minDelay)
+					continue;
+				if (schedule.sinceLast >= schedule.maxDelay || _rng.bool(schedule.eligibleTurns / schedule.maxEligible * 100))
 				{
 					schedule.sinceLast = 0;
 					schedule.toDeploy--;
+					schedule.deployable--;
 					switch (key)
 					{
 						case "booster":
@@ -497,18 +485,6 @@ class APGameState extends ClassicGameState
 
 		_hudAP.updateTask(Chain, chain);
 		_hudAP.updateTask(Combo, combo);
-
-		// var checks:Array<Int> = [];
-		// if (_topChain <= 3)
-		// 	while (_topChain < chain)
-		// 		if (++_topChain > 1 && _topChain < 4)
-		// 			checks.push(APLocation.Chain2 + _topChain - 2);
-		// if (_topCombo <= 6)
-		// 	while (_topCombo < combo)
-		// 		if (++_topCombo > 3 && _topCombo < 7)
-		// 			checks.push(APLocation.Combo4 + _topCombo - 4);
-		// if (checks.length > 0)
-		// 	_ap.LocationChecks(checks);
 	}
 
 	/** Called when a bumper is cleared. **/
@@ -523,16 +499,16 @@ class APGameState extends ClassicGameState
 				{
 					case "treasure":
 						_hudAP.updateTask(Treasures, ++schedule.cleared);
-					// if (schedule.cleared++ < 8)
-					// 	_ap.LocationChecks([APLocation.Treasure1 + schedule.cleared - 1]);
+						if (schedule.cleared++ < 8)
+							_ap.LocationChecks([APLocation.Treasure1 + schedule.cleared - 1]);
 					case "booster":
 						_hudAP.updateTask(Boosters, ++schedule.cleared);
-					// if (schedule.cleared++ < 5)
-					// 	_ap.LocationChecks([APLocation.Booster1 + schedule.cleared - 1]);
+						if (schedule.cleared++ < 5)
+							_ap.LocationChecks([APLocation.Booster1 + schedule.cleared - 1]);
 					case "hazard":
 						_hudAP.updateTask(Hazards, ++schedule.cleared);
-						// if (++schedule.cleared == 3)
-						// 	_ap.LocationChecks([APLocation.ClearedHazards]);
+						if (++schedule.cleared == 3)
+							_ap.LocationChecks([APLocation.ClearedHazards]);
 				}
 			}
 		}
