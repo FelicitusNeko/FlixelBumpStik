@@ -395,7 +395,7 @@ class APGameState extends ClassicGameState
 			{
 				var item:APItem = itemObj.item;
 				// trace("Item received: " + item);
-				pushToast(_t("game/ap/received", ["item" => _t(item)]), FlxColor.CYAN);
+				pushToast(_t("game/ap/received", ["item" => Std.string(_t(item))]), FlxColor.CYAN);
 				switch (item)
 				{
 					case BoardWidth:
