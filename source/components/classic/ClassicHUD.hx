@@ -112,6 +112,7 @@ class ClassicHUD extends StandardHUD
 		return super.set_nextBumper(nextBumper);
 	}
 
+	/** Resets the HUD to its starting values. **/
 	public override function resetHUD()
 	{
 		super.resetHUD();
