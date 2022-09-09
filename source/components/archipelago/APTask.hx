@@ -60,22 +60,14 @@ typedef IAPTask =
 }
 
 /** The implementation for an Archipelago check task. **/
+@:forward(type, goals, uiText)
 abstract APTask(IAPTask) from IAPTask
 {
-	/** The type of task. **/
-	public var type(get, never):APTaskType;
-
-	/** The current goal number for this task. **/
-	public var goals(get, never):Array<Int>;
-
 	/** The index of the current goal. **/
 	public var goalIndex(get, set):Int;
 
 	/** The current number achieved for this task. **/
 	public var current(get, set):Int;
-
-	/** The UI text for the task list. **/
-	public var uiText(get, never):FlxUIText;
 
 	/** The current goal for this task. **/
 	public var curGoal(get, never):Int;
@@ -85,21 +77,6 @@ abstract APTask(IAPTask) from IAPTask
 
 	/** Whether this task has been completed. **/
 	public var complete(get, never):Bool;
-
-	// inline public function new(type:APTaskType, goals:Array<Int>, uiText:FlxUIText)
-	// {
-	// 	this.type = type;
-	// 	this.goals = goals;
-	// 	this.goalIndex = 0;
-	// 	this.current = 0;
-	// 	this.uiText = uiText;
-	// }
-
-	inline function get_type()
-		return this.type;
-
-	inline function get_goals()
-		return this.goals;
 
 	inline function get_goalIndex()
 		return this.goalIndex;
@@ -125,8 +102,9 @@ abstract APTask(IAPTask) from IAPTask
 		return this.current;
 	}
 
-	inline function get_uiText()
-		return this.uiText;
+	@:arrayAccess
+	inline function getGoalByIndex(index)
+		return this.goals[index];
 
 	inline function get_curGoal()
 		return this.goals[this.goalIndex];
