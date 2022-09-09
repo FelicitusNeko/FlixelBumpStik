@@ -29,6 +29,9 @@ class APHud extends ClassicHUD
 	/** The total number of bumpers cleared through all games. **/
 	public var totalBlock(get, never):Int;
 
+	/** The current task level. **/
+	public var level(get, never):Null<Int>;
+
 	/**
 		Fires when a task has been cleared.
 		@param type The type of task.
@@ -71,6 +74,15 @@ class APHud extends ClassicHUD
 		updateTask(Cleared, retval);
 		updateTask(TotalCleared, totalBlock);
 		return retval;
+	}
+
+	function get_level():Null<Int>
+	{
+		if (_taskList.length == 0)
+			return null;
+		if (_taskList[0].type != LevelHeader)
+			return null;
+		return _taskList[0].curGoal;
 	}
 
 	/**
@@ -120,6 +132,9 @@ class APHud extends ClassicHUD
 	**/
 	public function updateTask(type:APTaskType, current:Int)
 	{
+		if (_taskList.length == 0)
+			return;
+
 		for (task in _taskList)
 		{
 			if (task.type != type || task.current > current)
@@ -153,12 +168,12 @@ class APHud extends ClassicHUD
 	/** Removes all tasks from the task list. **/
 	public function wipeTasks()
 	{
-		while (_taskList.pop() != null) {}
-		for (task in _taskListbox.group)
+		for (task in _taskList)
 		{
-			_taskListbox.remove(task);
-			task.destroy();
+			_taskListbox.remove(task.uiText);
+			task.uiText.destroy();
 		}
+		_taskList = [];
 	}
 
 	/** Resets the HUD to its starting values. For Archipelago games, it will also increment `_accruedScore` and `_accruedBlock`. **/
