@@ -451,7 +451,7 @@ class APGameState extends ClassicGameState
 			{
 				case null:
 					createLevel(1);
-				case x if (x < 3):
+				case x if (x < 5):
 					createLevel(x + 1);
 				default:
 					createLevel(-1);
