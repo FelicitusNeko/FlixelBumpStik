@@ -18,6 +18,8 @@ class APBoard extends ClassicBoard
 
 	public function levelClear()
 	{
+		for (launcher in _launchers)
+			launcher.enabled = false;
 		for (bumper in _bumpers)
 			bumper.markForClear();
 		_randomClearList = [];
