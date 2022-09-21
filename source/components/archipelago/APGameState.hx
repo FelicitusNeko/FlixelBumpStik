@@ -47,34 +47,33 @@ enum abstract APColor(FlxColor) from FlxColor to FlxColor
 /** AP Location definitions. **/
 enum abstract APLocation(Int) from Int to Int
 {
-	var Points250 = 595000;
-	var Points500;
-	var Points750;
-	var Points1000;
-	var Points1250;
-	var Points1500;
-	var Points1750;
-	var Points2000;
-	var Points2250;
-	var Points2500;
-	var Points2750;
-	var Points3000;
-	var Points3250;
-	var Points3500;
-	var Points3750;
-	var Points4000;
-	var Combo4;
-	var Combo5;
-	var Combo6;
-	var Chain2;
-	var Chain3;
-	var AllClear;
+	var L1Score250 = 595000;
+	var L1Score500;
+	var L1Score750;
+	var L1Score1000;
+	var L1TScore500;
+	var L1TScore1000;
+	var L1TScore1500;
+	var L1TScore2000;
+	var L1Combo5;
+	var L2Score500;
+	var L2Score1000;
+	var L2Score1500;
+	var L2Score2000;
+	var L2TScore2000;
+	var L2TScore3000;
+	var L2TScore4000;
+	var L2TScore5000;
+	var L2Combo5;
+	var L2Chain2;
+	var L3Dummy; // TODO: actual goals
+	var L4Dummy; // TODO: actual goals
+	var L5AllHazards;
 	var Booster1;
 	var Booster2;
 	var Booster3;
 	var Booster4;
 	var Booster5;
-	var ClearedHazards;
 	var Treasure1;
 	var Treasure2;
 	var Treasure3;
@@ -83,9 +82,33 @@ enum abstract APLocation(Int) from Int to Int
 	var Treasure6;
 	var Treasure7;
 	var Treasure8;
+	var Treasure9;
+	var Treasure10;
+	var Treasure11;
+	var Treasure12;
+	var Treasure13;
+	var Treasure14;
+	var Treasure15;
+	var Treasure16;
+	var Treasure17;
+	var Treasure18;
+	var Treasure19;
+	var Treasure20;
+	var Treasure21;
+	var Treasure22;
+	var Treasure23;
+	var Treasure24;
+	var Treasure25;
+	var Treasure26;
+	var Treasure27;
+	var Treasure28;
+	var Treasure29;
+	var Treasure30;
+	var Treasure31;
+	var Treasure32;
 
 	public inline function baseIndex()
-		return this - Points250;
+		return this - L1Score250;
 
 	@:op(A >= B)
 	public inline function geqInt(val:Int)
@@ -94,23 +117,25 @@ enum abstract APLocation(Int) from Int to Int
 	@:to
 	public inline function toString()
 	{
-		var baseIndex = baseIndex();
-		if (Points4000 >= this)
-			return ((baseIndex + 1) * 250) + " Points";
-		else if (Combo6 >= this)
-			return "Combo " + (this - Combo4 + 4);
-		else if (Chain3 >= this)
-			return "Chain x" + (this - Chain2 + 2);
-		else if (AllClear == this)
-			return "All Clear";
-		else if (Booster5 >= this)
-			return "Booster Bumper " + (this - Booster1 + 1);
-		else if (ClearedHazards == this)
-			return "Cleared All Hazards";
-		else if (Treasure8 >= this)
-			return "Treasure Bumper " + (this - Treasure1 + 1);
-		else
-			return "Unknown";
+		// TODO: new string table for this
+		// var baseIndex = baseIndex();
+		// if (Points4000 >= this)
+		// 	return ((baseIndex + 1) * 250) + " Points";
+		// else if (Combo6 >= this)
+		// 	return "Combo " + (this - Combo4 + 4);
+		// else if (Chain3 >= this)
+		// 	return "Chain x" + (this - Chain2 + 2);
+		// else if (AllClear == this)
+		// 	return "All Clear";
+		// else if (Booster5 >= this)
+		// 	return "Booster Bumper " + (this - Booster1 + 1);
+		// else if (ClearedHazards == this)
+		// 	return "Cleared All Hazards";
+		// else if (Treasure8 >= this)
+		// 	return "Treasure Bumper " + (this - Treasure1 + 1);
+		// else
+		// 	return "Unknown";
+		return "NYI";
 	}
 }
 
@@ -205,6 +230,11 @@ class APGameState extends ClassicGameState
 	/** The items have been received from the server which have yet to be processed. **/
 	private var _itemBuffer:Array<NetworkItem> = [];
 
+	/** Stores whether a level has been cleared. The level clear sequence will then be fired when a new bumper is requested. **/
+	private var _levelClear = false;
+
+	// TODO: will need to make this check before game over check (not that it makes much of a difference in this mode, but it could later)
+
 	/** The APBoard instance for the current game. **/
 	private var _boardAP(get, never):APBoard;
 
@@ -228,10 +258,10 @@ class APGameState extends ClassicGameState
 
 		for (type in ["booster", "hazard", "treasure"])
 			_schedule.set(type, {
-				toDeploy: 0,
-				deployable: 0,
-				toClear: 0,
-				cleared: 0,
+				inStock: 0,
+				maxAvailable: 0,
+				onBoard: 0,
+				clear: 0,
 				sinceLast: 0,
 				minDelay: 0,
 				maxDelay: 10
@@ -292,8 +322,13 @@ class APGameState extends ClassicGameState
 		super.destroy();
 	}
 
+	/**
+		Creates the tasks for a level. Also removes any tasks that currently exist.
+		@param level The level number to set up.
+	**/
 	function createLevel(level:Int)
 	{
+		_levelClear = false;
 		_hudAP.wipeTasks();
 		if (level > 0)
 			_hudAP.addTask(LevelHeader, [level]);
@@ -302,20 +337,75 @@ class APGameState extends ClassicGameState
 			case 1:
 				_hudAP.addTask(Score, [250, 500, 750, 1000]);
 				_hudAP.addTask(TotalScore, [500, 1000, 1500, 2000]);
-				_hudAP.addTask(Combo, [4]);
-				_hudAP.addTask(Boosters, [1]);
-				_hudAP.addTask(Treasures, [4]);
-				_schedule["booster"].deployable += 2;
-				_schedule["treasure"].deployable += 4;
-			// _schedule["hazard"].deployable += 0;
+				_hudAP.addTask(Combo, [5]);
+				_hudAP.addTask(Boosters, [1], _schedule["booster"].clear);
+				_hudAP.addTask(Treasures, [8], _schedule["treasure"].clear);
+				_schedule["booster"].maxAvailable = 2;
+				_schedule["treasure"].maxAvailable = 9;
+				_schedule["hazard"].maxAvailable = 0;
+				_curWidth = 3;
+				_curHeight = 3;
+				_startColors = 2;
+				_endColors = 3;
+			case 2:
+				_hudAP.addTask(Score, [500, 1000, 1500, 2000]);
+				_hudAP.addTask(TotalScore, [2000, 3000, 4000, 5000]);
+				_hudAP.addTask(Combo, [5]);
+				_hudAP.addTask(Boosters, [2], _schedule["booster"].clear);
+				_hudAP.addTask(Treasures, [16], _schedule["treasure"].clear);
+				_schedule["booster"].maxAvailable = 3;
+				_schedule["treasure"].maxAvailable = 17;
+				_schedule["hazard"].maxAvailable = 3;
+				_curWidth = 4;
+				_curHeight = 4;
+				_startColors = 3;
+				_endColors = 4;
+			case 3:
+				_hudAP.addTask(Score, [99999]);
+				_hudAP.addTask(Boosters, [3], _schedule["booster"].clear);
+				_hudAP.addTask(Treasures, [24], _schedule["treasure"].clear);
+				_schedule["booster"].maxAvailable = 4;
+				_schedule["treasure"].maxAvailable = 25;
+				_schedule["hazard"].maxAvailable = 8;
+				_curWidth = 4;
+				_curHeight = 5;
+				_startColors = 3;
+				_endColors = 5;
+			case 4:
+				_hudAP.addTask(Score, [99999]);
+				_hudAP.addTask(Boosters, [5], _schedule["booster"].clear);
+				_hudAP.addTask(Treasures, [32], _schedule["treasure"].clear);
+				_schedule["booster"].maxAvailable = 5;
+				_schedule["treasure"].maxAvailable = Math.round(Math.POSITIVE_INFINITY);
+				_schedule["hazard"].maxAvailable = 15;
+				_curWidth = 5;
+				_curHeight = 5;
+				_startColors = 3;
+				_endColors = 6;
+			case 5:
+				_hudAP.addTask(Hazards, [10], _schedule["hazard"].clear);
+				for (schedule in _schedule)
+					schedule.maxAvailable = Math.round(Math.POSITIVE_INFINITY);
+				_curWidth = 6;
+				_curHeight = 6;
+				_startColors = 4;
+				_endColors = 6;
 			case -1: // the game is complete in this case; send a goal condition to the server
 				_ap.clientStatus = GOAL;
+				_hudAP.addTask(Score, [99999]);
 			// TODO: show a congratulatory dialog which will resolve into exiting back to the title screen
 			default: // If we don't recognise the level, just default to 99999 score and make it obvious something's wrong
 				_hudAP.addTask(Score, [99999]);
 		}
 	}
 
+	/**
+		Pushes a notification toast onto the stack.
+		@param message The message to display.
+		@param color Optional. The background color for this message. Default is `FlxColor.WHITE`.
+		@param delay Optional. The number of milliseconds to display the message. This is the amount of time for which it will be stationary on the screen.
+		Default is 2000msec.
+	**/
 	function pushToast(message:String, color = FlxColor.WHITE, delay = 2000)
 	{
 		var queueEmpty = _toastQueue.length == 0;
@@ -328,6 +418,7 @@ class APGameState extends ClassicGameState
 			popToast();
 	}
 
+	/** Displays the oldest message on the toast stack. **/
 	function popToast()
 	{
 		if (_curToast != null)
@@ -355,6 +446,18 @@ class APGameState extends ClassicGameState
 		remove(_player.board);
 		_jackpot = 0;
 
+		if (_levelClear || _hudAP.level == null)
+			switch (_hudAP.level)
+			{
+				case null:
+					createLevel(1);
+				case x if (x < 3):
+					createLevel(x + 1);
+				default:
+					createLevel(-1);
+					return; // because we're done at this point
+			}
+
 		_bg.reset();
 		_bg.shuffleColors();
 		_bg.colors = _startColors;
@@ -369,10 +472,7 @@ class APGameState extends ClassicGameState
 		_player.multStack[0] = _startColors == 2 ? .8 : 1;
 
 		for (schedule in _schedule)
-		{
-			schedule.toDeploy = schedule.toClear;
-			schedule.sinceLast = 0;
-		}
+			schedule.reset();
 
 		if (_paintCanBumper != null)
 		{
@@ -398,38 +498,76 @@ class APGameState extends ClassicGameState
 				pushToast(_t("game/ap/received", ["item" => Std.string(_t(item))]), FlxColor.CYAN);
 				switch (item)
 				{
-					case BoardWidth:
+					case BoardWidth: // deprecated
 						_curWidth++;
-					case BoardHeight:
+					case BoardHeight: // deprecated
 						_curHeight++;
-					case MinColor:
+					case MinColor: // deprecated
 						_startColors++;
-					case MaxColor:
+					case MaxColor: // deprecated
 						_endColors++;
 					case StartPaintCan:
 						_startPaintCans++;
 						_hudClassic.paintCans++;
 					case BonusBooster:
-						_schedule["booster"].toDeploy++;
-						_schedule["booster"].toClear++;
+						_schedule["booster"].inStock++;
 					case HazardBumper:
-						_schedule["hazard"].toDeploy++;
-						_schedule["hazard"].toClear++;
+						_schedule["hazard"].inStock++;
 					case TreasureBumper:
-						_schedule["treasure"].toDeploy++;
-						_schedule["treasure"].toClear++;
+						_schedule["treasure"].inStock++;
 					default:
 						trace("Item ID:" + itemObj.item);
 				}
 			}
 	}
 
-	private function onTaskComplete(task:APTaskType, goal:Int, current:Int)
+	/**
+		Called when a task is completed.
+		@param level The level number related to the cleared task.
+		@param type The type of task.
+		@param goal The goal achieved.
+		@param current The current value for the goal.
+	**/
+	private function onTaskComplete(level:Null<Int>, task:APTaskType, goal:Int, current:Int)
 	{
 		// TODO: here's where we actually send checks
 		trace("Task complete", task, '$current/$goal');
 
-		switch (task) {}
+		if (task == LevelHeader)
+			_levelClear = true;
+		else
+		{
+			var check = switch ([task, level, goal])
+			{
+				case [Score, 1, x]:
+					L1Score250 + (x / 250 - 1);
+				case [TotalScore, 1, x]:
+					L1TScore500 + (x / 500 - 1);
+				case [Combo, 1, _]:
+					L1Combo5;
+
+				case [Score, 2, x]:
+					L2Score500 + (x / 500 - 1);
+				case [TotalScore, 2, x]:
+					L2TScore2000 + (x / 1000 - 2);
+				case [Combo, 2, _]:
+					L2Combo5;
+
+				case [Score, 3, _]:
+					L3Dummy;
+
+				case [Score, 4, _]:
+					L4Dummy;
+
+				case [Hazards, 5, _]:
+					L5AllHazards;
+
+				default:
+					null;
+			}
+			if (check != null)
+				_ap.LocationChecks([Math.round(check)]);
+		}
 	}
 
 	/** Called when the board requests a bumper to be generated. Usually when it goes into Idle state. **/
@@ -439,6 +577,13 @@ class APGameState extends ClassicGameState
 			_hudAP.updateTask(AllClear, _bg.colors);
 		// if (++_allClears == 1)
 		// 	_ap.LocationChecks([APLocation.AllClear]);
+		if (_levelClear)
+		{
+			FlxG.sound.play(AssetPaths.levelup__wav);
+			pushToast(_t("game/ap/levelcomplete"), FlxColor.GREEN, 3000);
+			_boardAP.levelClear();
+			return;
+		}
 
 		var prevBumper = _hud.nextBumper;
 		super.onRequestGenerate();
@@ -447,15 +592,15 @@ class APGameState extends ClassicGameState
 		{
 			for (key => schedule in _schedule)
 			{
-				if (schedule.toDeploy <= 0 || schedule.deployable <= 0)
+				if (schedule.inStock <= 0 || schedule.available <= 0)
 					continue;
 				if (++schedule.sinceLast < schedule.minDelay)
 					continue;
 				if (schedule.sinceLast >= schedule.maxDelay || _rng.bool(schedule.eligibleTurns / schedule.maxEligible * 100))
 				{
 					schedule.sinceLast = 0;
-					schedule.toDeploy--;
-					schedule.deployable--;
+					schedule.inStock--;
+					schedule.onBoard++;
 					switch (key)
 					{
 						case "booster":
@@ -494,21 +639,19 @@ class APGameState extends ClassicGameState
 		{
 			if (bumper.hasFlair(key))
 			{
-				schedule.toClear--;
+				schedule.onBoard--;
 				switch (key)
 				{
 					case "treasure":
-						_hudAP.updateTask(Treasures, ++schedule.cleared);
-						if (schedule.cleared++ < 8)
-							_ap.LocationChecks([APLocation.Treasure1 + schedule.cleared - 1]);
+						_hudAP.updateTask(Treasures, ++schedule.clear);
+						if (schedule.clear < 32)
+							_ap.LocationChecks([APLocation.Treasure1 + schedule.clear - 1]);
 					case "booster":
-						_hudAP.updateTask(Boosters, ++schedule.cleared);
-						if (schedule.cleared++ < 5)
-							_ap.LocationChecks([APLocation.Booster1 + schedule.cleared - 1]);
+						_hudAP.updateTask(Boosters, ++schedule.clear);
+						if (schedule.clear < 5)
+							_ap.LocationChecks([APLocation.Booster1 + schedule.clear - 1]);
 					case "hazard":
-						_hudAP.updateTask(Hazards, ++schedule.cleared);
-						if (++schedule.cleared == 3)
-							_ap.LocationChecks([APLocation.ClearedHazards]);
+						_hudAP.updateTask(Hazards, ++schedule.clear);
 				}
 			}
 		}
