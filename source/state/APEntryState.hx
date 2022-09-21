@@ -90,7 +90,7 @@ class APEntryState extends FlxState
 			ap._hOnRoomInfo = () ->
 			{
 				trace("Got room info - sending connect packet");
-				ap.ConnectSlot(_slotInput.text, _pwInput.text.length > 0 ? _pwInput.text : null, 0x7, ["AP", "Testing"], {major: 0, minor: 3, build: 4});
+				ap.ConnectSlot(_slotInput.text, _pwInput.text.length > 0 ? _pwInput.text : null, 0x7, ["AP", "Testing"], {major: 0, minor: 3, build: 5});
 			};
 
 			var polltimer = new Timer(50);
