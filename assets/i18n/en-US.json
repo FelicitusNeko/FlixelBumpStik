@@ -45,6 +45,7 @@
     },
     "ap": {
       "received": "Received :item",
+      "levelcomplete": "- Level Complete -",
       "item": {
         "width": "Board Width",
         "height": "Board Height",
@@ -64,8 +65,8 @@
         "TotalCleared": "Total sticked: :current/:goal",
         "Combo": "Combo clear :goal",
         "Chain": "Chain x:goal",
-        "Treasures": "Treasure Bumper #:goal",
-        "Boosters": "Bonus Booster #:goal",
+        "Treasures": "Treasure Bumpers: :current/:goal",
+        "Boosters": "Bonus Boosters: :current/:goal",
         "Hazards": "Hazards cleared: :current/:goal",
         "AllClear": "All Clear with at least :goal colors"
       }
