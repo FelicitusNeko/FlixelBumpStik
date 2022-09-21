@@ -34,11 +34,12 @@ class APHud extends ClassicHUD
 
 	/**
 		Fires when a task has been cleared.
+		@param level The level number related to the cleared task.
 		@param type The type of task.
 		@param goal The goal achieved.
 		@param current The current value for the goal.
 	**/
-	public var onTaskCleared(default, null) = new Event<(APTaskType, Int, Int) -> Void>();
+	public var onTaskCleared(default, null) = new Event<(Null<Int>, APTaskType, Int, Int) -> Void>();
 
 	public function new()
 	{
@@ -144,7 +145,7 @@ class APHud extends ClassicHUD
 			task.current = current;
 			if ((!task.complete && task.current >= task.curGoal) || (!wasComplete && task.complete))
 			{
-				onTaskCleared.dispatch(task.type, task.curGoal, task.current);
+				onTaskCleared.dispatch(level, task.type, task.curGoal, task.current);
 				if (!task.complete)
 					task.goalIndex++;
 			}
@@ -160,7 +161,7 @@ class APHud extends ClassicHUD
 			if (allTasksCleared)
 			{
 				levelTask.current = levelTask.curGoal;
-				onTaskCleared.dispatch(LevelHeader, levelTask.curGoal, levelTask.curGoal);
+				onTaskCleared.dispatch(level, LevelHeader, levelTask.curGoal, levelTask.curGoal);
 			}
 		}
 	}
@@ -168,11 +169,9 @@ class APHud extends ClassicHUD
 	/** Removes all tasks from the task list. **/
 	public function wipeTasks()
 	{
+		_taskListbox.clear();
 		for (task in _taskList)
-		{
-			_taskListbox.remove(task.uiText);
 			task.uiText.destroy();
-		}
 		_taskList = [];
 	}
 
