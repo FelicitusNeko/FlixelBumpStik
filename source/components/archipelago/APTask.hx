@@ -12,11 +12,17 @@ enum APTaskType
 	/** A certain number of points must be obtained this game. **/
 	Score;
 
+	/** A certain number of points must be obtained across all games this level. **/
+	LevelScore;
+
 	/** A certain number of points must be obtained across all games this session. **/
 	TotalScore;
 
 	/** A certain number of bumpers must be cleared this game. **/
 	Cleared;
+
+	/** A certain number of bumpers must be cleared across all games this level. **/
+	LevelCleared;
 
 	/** A certain number of bumpers must be cleared across all games this session. **/
 	TotalCleared;

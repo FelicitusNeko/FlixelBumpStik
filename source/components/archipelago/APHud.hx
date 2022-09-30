@@ -4,15 +4,20 @@ import components.archipelago.APTask;
 import components.classic.ClassicHUD;
 import flixel.addons.ui.FlxUIList;
 import flixel.addons.ui.FlxUIText;
-import flixel.util.FlxColor;
 import haxe.Exception;
 import lime.app.Event;
 
 /** Adds Archipelago-specific elements to the Classic mode HUD. **/
 class APHud extends ClassicHUD
 {
+	/** The total number of points accrued through previous games on this level. **/
+	private var _accruedScoreThisLevel = 0;
+
 	/** The total number of points accrued through previous games. **/
 	private var _accruedScore = 0;
+
+	/** The total number of bumpers cleared accured through previous games on this level. **/
+	private var _accruedBlockThisLevel = 0;
 
 	/** The total number of bumpers cleared accured through previous games. **/
 	private var _accruedBlock = 0;
@@ -23,8 +28,14 @@ class APHud extends ClassicHUD
 	/** The internal list of tasks to clear. **/
 	private var _taskList:Array<APTask> = [];
 
+	/** The total number of points obtained through games on this level. **/
+	public var levelScore(get, never):Int;
+
 	/** The total number of points obtained through all games. **/
 	public var totalScore(get, never):Int;
+
+	/** The total number of bumpers cleared through games on this level. **/
+	public var levelBlock(get, never):Int;
 
 	/** The total number of bumpers cleared through all games. **/
 	public var totalBlock(get, never):Int;
@@ -55,8 +66,14 @@ class APHud extends ClassicHUD
 		}
 	}
 
+	inline function get_levelScore()
+		return _accruedScoreThisLevel + score;
+
 	inline function get_totalScore()
 		return _accruedScore + score;
+
+	inline function get_levelBlock()
+		return _accruedBlockThisLevel + block;
 
 	inline function get_totalBlock()
 		return _accruedBlock + block;
@@ -65,6 +82,7 @@ class APHud extends ClassicHUD
 	{
 		var retval = super.set_score(score);
 		updateTask(Score, retval);
+		updateTask(LevelScore, levelScore);
 		updateTask(TotalScore, totalScore);
 		return retval;
 	}
@@ -73,6 +91,7 @@ class APHud extends ClassicHUD
 	{
 		var retval = super.set_block(block);
 		updateTask(Cleared, retval);
+		updateTask(LevelCleared, levelBlock);
 		updateTask(TotalCleared, totalBlock);
 		return retval;
 	}
@@ -102,8 +121,10 @@ class APHud extends ClassicHUD
 			current = switch (type)
 			{
 				case Score: score;
+				case LevelScore: levelScore;
 				case TotalScore: totalScore;
 				case Cleared: block;
+				case LevelCleared: levelBlock;
 				case TotalCleared: totalBlock;
 				default: 0;
 			}
@@ -173,11 +194,14 @@ class APHud extends ClassicHUD
 		for (task in _taskList)
 			task.uiText.destroy();
 		_taskList = [];
+		_accruedScoreThisLevel = _accruedBlockThisLevel = 0;
 	}
 
 	/** Resets the HUD to its starting values. For Archipelago games, it will also increment `_accruedScore` and `_accruedBlock`. **/
 	override public function resetHUD()
 	{
+		_accruedScoreThisLevel += score;
+		_accruedBlockThisLevel += block;
 		_accruedScore += score;
 		_accruedBlock += block;
 		super.resetHUD();

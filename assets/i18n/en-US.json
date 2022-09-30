@@ -60,8 +60,10 @@
       "task": {
         "LevelHeader": "- Level :goal -",
         "Score": "Score: :current/:goal",
+        "LevelScore": "Score this level: :current/:goal",
         "TotalScore": "Total score: :current/:goal",
         "Cleared": "Bumpers sticked: :current/:goal",
+        "LevelCleared": "Sticked this level: :current/:goal",
         "TotalCleared": "Total sticked: :current/:goal",
         "Combo": "Combo clear :goal",
         "Chain": "Chain x:goal",
