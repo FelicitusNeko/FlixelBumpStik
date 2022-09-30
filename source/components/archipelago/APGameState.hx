@@ -51,23 +51,46 @@ enum abstract APLocation(Int) from Int to Int
 	var L1Score500;
 	var L1Score750;
 	var L1Score1000;
-	var L1TScore500;
-	var L1TScore1000;
-	var L1TScore1500;
-	var L1TScore2000;
+	var L1LScore500;
+	var L1LScore1000;
+	var L1LScore1500;
+	var L1LScore2000;
 	var L1Combo5;
 	var L2Score500;
 	var L2Score1000;
 	var L2Score1500;
 	var L2Score2000;
-	var L2TScore2000;
-	var L2TScore3000;
-	var L2TScore4000;
-	var L2TScore5000;
+	var L2LScore1000;
+	var L2LScore2000;
+	var L2LScore3000;
+	var L2LScore4000;
 	var L2Combo5;
 	var L2Chain2;
-	var L3Dummy; // TODO: actual goals
-	var L4Dummy; // TODO: actual goals
+	var L3Score800;
+	var L3Score1600;
+	var L3Score2400;
+	var L3Score3200;
+	var L3LScore2000;
+	var L3LScore4000;
+	var L3LScore6000;
+	var L3LScore8000;
+	var L3Combo5;
+	var L3Combo7;
+	var L3Chain2;
+	var L3AllClear3Col;
+	var L4Score1500;
+	var L4Score3000;
+	var L4Score4500;
+	var L4Score6000;
+	var L4LScore3000;
+	var L4LScore6000;
+	var L4LScore9000;
+	var L4LScore12000;
+	var L4Combo5;
+	var L4Combo7;
+	var L4Chain2;
+	var L4Chain3;
+	var L5TScore100k;
 	var L5AllHazards;
 	var Booster1;
 	var Booster2;
@@ -142,7 +165,8 @@ enum abstract APLocation(Int) from Int to Int
 /** AP Item definitions. **/
 enum abstract APItem(Int) from Int to Int
 {
-	var BoardWidth = 595000;
+	var Nothing = 595000;
+	var BoardWidth;
 	var BoardHeight;
 	var MinColor;
 	var MaxColor;
@@ -335,61 +359,66 @@ class APGameState extends ClassicGameState
 		switch (level)
 		{
 			case 1:
+				_curWidth = 3;
+				_curHeight = 3;
+				_startColors = 2;
+				_endColors = 3;
 				_hudAP.addTask(Score, [250, 500, 750, 1000]);
-				_hudAP.addTask(TotalScore, [500, 1000, 1500, 2000]);
+				_hudAP.addTask(LevelScore, [500, 1000, 1500, 2000]);
 				_hudAP.addTask(Combo, [5]);
 				_hudAP.addTask(Boosters, [1], _schedule["booster"].clear);
 				_hudAP.addTask(Treasures, [8], _schedule["treasure"].clear);
 				_schedule["booster"].maxAvailable = 2;
 				_schedule["treasure"].maxAvailable = 9;
 				_schedule["hazard"].maxAvailable = 0;
-				_curWidth = 3;
-				_curHeight = 3;
-				_startColors = 2;
-				_endColors = 3;
 			case 2:
+				_curWidth = 4;
+				_curHeight = 4;
+				_startColors = 3;
+				_endColors = 4;
 				_hudAP.addTask(Score, [500, 1000, 1500, 2000]);
-				_hudAP.addTask(TotalScore, [2000, 3000, 4000, 5000]);
+				_hudAP.addTask(LevelScore, [1000, 2000, 3000, 4000]);
 				_hudAP.addTask(Combo, [5]);
+				_hudAP.addTask(Chain, [2]);
 				_hudAP.addTask(Boosters, [2], _schedule["booster"].clear);
 				_hudAP.addTask(Treasures, [16], _schedule["treasure"].clear);
 				_schedule["booster"].maxAvailable = 3;
 				_schedule["treasure"].maxAvailable = 17;
 				_schedule["hazard"].maxAvailable = 3;
-				_curWidth = 4;
-				_curHeight = 4;
-				_startColors = 3;
-				_endColors = 4;
 			case 3:
-				_hudAP.addTask(Score, [99999]);
+				_curWidth = 4;
+				_curHeight = 5;
+				_startColors = 3;
+				_endColors = 5;
+				_hudAP.addTask(Score, [800, 1600, 2400, 3200]);
+				_hudAP.addTask(LevelScore, [2000, 4000, 6000, 8000]);
+				_hudAP.addTask(Combo, [5, 7]);
+				_hudAP.addTask(Chain, [2]);
+				_hudAP.addTask(AllClear, [3]);
 				_hudAP.addTask(Boosters, [3], _schedule["booster"].clear);
 				_hudAP.addTask(Treasures, [24], _schedule["treasure"].clear);
 				_schedule["booster"].maxAvailable = 4;
 				_schedule["treasure"].maxAvailable = 25;
 				_schedule["hazard"].maxAvailable = 8;
-				_curWidth = 4;
+			case 4:
+				_curWidth = 5;
 				_curHeight = 5;
 				_startColors = 3;
-				_endColors = 5;
-			case 4:
+				_endColors = 6;
 				_hudAP.addTask(Score, [99999]);
 				_hudAP.addTask(Boosters, [5], _schedule["booster"].clear);
 				_hudAP.addTask(Treasures, [32], _schedule["treasure"].clear);
 				_schedule["booster"].maxAvailable = 5;
 				_schedule["treasure"].maxAvailable = Math.round(Math.POSITIVE_INFINITY);
 				_schedule["hazard"].maxAvailable = 15;
-				_curWidth = 5;
-				_curHeight = 5;
-				_startColors = 3;
-				_endColors = 6;
 			case 5:
-				_hudAP.addTask(Hazards, [10], _schedule["hazard"].clear);
-				for (schedule in _schedule)
-					schedule.maxAvailable = Math.round(Math.POSITIVE_INFINITY);
 				_curWidth = 6;
 				_curHeight = 6;
 				_startColors = 4;
 				_endColors = 6;
+				_hudAP.addTask(Hazards, [10], _schedule["hazard"].clear);
+				for (schedule in _schedule)
+					schedule.maxAvailable = Math.round(Math.POSITIVE_INFINITY);
 			case -1: // the game is complete in this case; send a goal condition to the server
 				_ap.clientStatus = GOAL;
 				_hudAP.addTask(Score, [99999]);
@@ -445,6 +474,7 @@ class APGameState extends ClassicGameState
 	{
 		remove(_player.board);
 		_jackpot = 0;
+		_hud.resetHUD();
 
 		if (_levelClear || _hudAP.level == null)
 			switch (_hudAP.level)
@@ -464,12 +494,11 @@ class APGameState extends ClassicGameState
 		_bg.colorLimit = _endColors;
 
 		_hudClassic.paintCanStartThreshold = 1000 + (_startPaintCans * 500);
-		_hud.resetHUD();
 		_hudClassic.paintCans = _startPaintCans;
 		_hudClassic.paintCansIncrementStep = (_curWidth + _curHeight - 6) * 500;
 
 		_player.board = new APBoard(0, 0, _curWidth, _curHeight);
-		_player.multStack[0] = _startColors == 2 ? .8 : 1;
+		_player.multStack[0] = (_startColors + 2) * .2;
 
 		for (schedule in _schedule)
 			schedule.reset();
@@ -494,6 +523,9 @@ class APGameState extends ClassicGameState
 			for (itemObj in items)
 			{
 				var item:APItem = itemObj.item;
+				if (item == Nothing)
+					continue;
+
 				// trace("Item received: " + item);
 				pushToast(_t("game/ap/received", ["item" => Std.string(_t(item))]), FlxColor.CYAN);
 				switch (item)
@@ -541,24 +573,44 @@ class APGameState extends ClassicGameState
 			{
 				case [Score, 1, x]:
 					L1Score250 + (x / 250 - 1);
-				case [TotalScore, 1, x]:
-					L1TScore500 + (x / 500 - 1);
+				case [LevelScore, 1, x]:
+					L1LScore500 + (x / 500 - 1);
 				case [Combo, 1, _]:
 					L1Combo5;
 
 				case [Score, 2, x]:
 					L2Score500 + (x / 500 - 1);
-				case [TotalScore, 2, x]:
-					L2TScore2000 + (x / 1000 - 2);
+				case [LevelScore, 2, x]:
+					L2LScore1000 + (x / 1000 - 1);
 				case [Combo, 2, _]:
 					L2Combo5;
+				case [Chain, 2, _]:
+					L2Combo5;
 
-				case [Score, 3, _]:
-					L3Dummy;
+				case [Score, 3, x]:
+					L3Score800 + (x / 800 - 1);
+				case [LevelScore, 3, x]:
+					L3LScore2000 + (x / 2000 - 1);
+				case [Combo, 3, 5]:
+					L3Combo5;
+				case [Combo, 3, 7]:
+					L3Combo7;
+				case [Chain, 3, 2]:
+					L3Chain2;
+				case [AllClear, 3, _]:
+					L3AllClear3Col;
 
-				case [Score, 4, _]:
-					L4Dummy;
+				case [Score, 4, x]:
+					L4Score1500 + (x / 1500 - 1);
+				case [LevelScore, 4, x]:
+					L4LScore3000 + (x / 3000 - 1);
+				case [Combo, 4, 5]: L4Combo5;
+				case [Combo, 4, 7]: L4Combo7;
+				case [Chain, 4, 2]: L4Chain2;
+				case [Chain, 4, 3]: L4Chain3;
 
+				case [TotalScore, 5, _]:
+					L5TScore100k;
 				case [Hazards, 5, _]:
 					L5AllHazards;
 
@@ -640,18 +692,20 @@ class APGameState extends ClassicGameState
 			if (bumper.hasFlair(key))
 			{
 				schedule.onBoard--;
+				schedule.clear++;
+
 				switch (key)
 				{
 					case "treasure":
-						_hudAP.updateTask(Treasures, ++schedule.clear);
+						_hudAP.updateTask(Treasures, schedule.clear);
 						if (schedule.clear < 32)
 							_ap.LocationChecks([APLocation.Treasure1 + schedule.clear - 1]);
 					case "booster":
-						_hudAP.updateTask(Boosters, ++schedule.clear);
+						_hudAP.updateTask(Boosters, schedule.clear);
 						if (schedule.clear < 5)
 							_ap.LocationChecks([APLocation.Booster1 + schedule.clear - 1]);
 					case "hazard":
-						_hudAP.updateTask(Hazards, ++schedule.clear);
+						_hudAP.updateTask(Hazards, schedule.clear);
 				}
 			}
 		}
