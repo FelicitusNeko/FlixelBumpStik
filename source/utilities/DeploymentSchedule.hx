@@ -56,10 +56,18 @@ abstract DeploymentSchedule(IDeploymentSchedule) from IDeploymentSchedule
 	inline function get_available()
 		return Math.round(Math.min(total, this.maxAvailable)) - this.clear - this.onBoard;
 
+	/** Resets this schedule to a state appropriate for starting a new board in the same game. **/
 	inline public function reset()
 	{
 		this.inStock += this.onBoard;
 		this.onBoard = 0;
 		this.sinceLast = 0;
+	}
+
+	/** Shortcut for setting both minDelay and maxDelay. **/
+	inline public function setDelay(minDelay, maxDelay)
+	{
+		this.minDelay = minDelay;
+		this.maxDelay = maxDelay;
 	}
 }

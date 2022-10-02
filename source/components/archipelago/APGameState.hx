@@ -290,6 +290,7 @@ class APGameState extends ClassicGameState
 				minDelay: 0,
 				maxDelay: 10
 			});
+		_schedule["booster"].setDelay(7, 20);
 
 		super();
 
@@ -384,6 +385,7 @@ class APGameState extends ClassicGameState
 				_hudAP.addTask(Treasures, [16], _schedule["treasure"].clear);
 				_schedule["booster"].maxAvailable = 3;
 				_schedule["treasure"].maxAvailable = 17;
+				_schedule["hazard"].setDelay(5, 15);
 				_schedule["hazard"].maxAvailable = 3;
 			case 3:
 				_curWidth = 4;
@@ -399,27 +401,34 @@ class APGameState extends ClassicGameState
 				_hudAP.addTask(Treasures, [24], _schedule["treasure"].clear);
 				_schedule["booster"].maxAvailable = 4;
 				_schedule["treasure"].maxAvailable = 25;
+				_schedule["hazard"].setDelay(3, 12);
 				_schedule["hazard"].maxAvailable = 8;
 			case 4:
 				_curWidth = 5;
 				_curHeight = 5;
 				_startColors = 3;
 				_endColors = 6;
-				_hudAP.addTask(Score, [99999]);
+				_hudAP.addTask(Score, [1500, 3000, 4500, 6000]);
+				_hudAP.addTask(LevelScore, [3000, 6000, 9000, 12000]);
+				_hudAP.addTask(Combo, [5, 7]);
+				_hudAP.addTask(Chain, [2, 3]);
 				_hudAP.addTask(Boosters, [5], _schedule["booster"].clear);
 				_hudAP.addTask(Treasures, [32], _schedule["treasure"].clear);
 				_schedule["booster"].maxAvailable = 5;
 				_schedule["treasure"].maxAvailable = Math.round(Math.POSITIVE_INFINITY);
+				_schedule["hazard"].setDelay(1, 10);
 				_schedule["hazard"].maxAvailable = 15;
 			case 5:
 				_curWidth = 6;
 				_curHeight = 6;
 				_startColors = 4;
 				_endColors = 6;
-				_hudAP.addTask(Hazards, [10], _schedule["hazard"].clear);
+				_hudAP.addTask(TotalScore, [100000]);
+				_hudAP.addTask(Hazards, [25], _schedule["hazard"].clear);
+				_schedule["hazard"].setDelay(0, 7);
 				for (schedule in _schedule)
 					schedule.maxAvailable = Math.round(Math.POSITIVE_INFINITY);
-			case -1: // the game is complete in this case; send a goal condition to the server
+			case 6 | -1: // the game is complete in this case; send a goal condition to the server
 				_ap.clientStatus = GOAL;
 				_hudAP.addTask(Score, [99999]);
 			// TODO: show a congratulatory dialog which will resolve into exiting back to the title screen
