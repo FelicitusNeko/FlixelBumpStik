@@ -45,6 +45,7 @@
     },
     "ap": {
       "received": "Received :item",
+      "booster": "Booster Up - Now x:value",
       "levelcomplete": "- Level Complete -",
       "item": {
         "width": "Board Width",

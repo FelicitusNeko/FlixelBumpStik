@@ -689,9 +689,16 @@ class APGameState extends ClassicGameState
 	/** Called when a match is formed. **/
 	override function onMatch(chain:Int, combo:Int, bumpers:Array<Bumper>)
 	{
+		var boosterUp = false;
 		for (bumper in bumpers)
 			if (bumper.hasFlair("booster"))
+			{
+				boosterUp = true;
 				_player.multStack[1] += .2;
+			}
+
+		if (boosterUp)
+			pushToast(_t("game/ap/booster", ["value" => _player.multStack[1]]), FlxColor.YELLOW);
 
 		super.onMatch(chain, combo, bumpers);
 
