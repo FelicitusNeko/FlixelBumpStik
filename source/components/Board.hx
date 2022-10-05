@@ -74,6 +74,9 @@ class Board extends FlxTypedGroup<FlxBasic>
 	/** When Game Over hits, as a preventative measure, the game over sequence will be forced to progress after five seconds. **/
 	private var _forceGameOver = false;
 
+	/** If this is true, `onAdvanceTurn` will not be called. **/
+	private var _dontAdvanceTurn = false;
+
 	/** Event that fires when the game requests that a next bumper be generated. **/
 	public var onRequestGenerate(default, null) = new Event<Void->Void>();
 
@@ -623,8 +626,13 @@ class Board extends FlxTypedGroup<FlxBasic>
 		else
 		{
 			var recheck = false;
-			_bumpers.forEachAlive(bumper -> recheck = recheck || bumper.onAdvanceTurn());
-			_obstacles.forEachAlive(obstacle -> recheck = recheck || obstacle.onAdvanceTurn());
+			if (_dontAdvanceTurn)
+				_dontAdvanceTurn = false;
+			else
+			{
+				_bumpers.forEachAlive(bumper -> recheck = recheck || bumper.onAdvanceTurn());
+				_obstacles.forEachAlive(obstacle -> recheck = recheck || obstacle.onAdvanceTurn());
+			}
 			if (!recheck)
 			{
 				var launchersAvailable = 0;

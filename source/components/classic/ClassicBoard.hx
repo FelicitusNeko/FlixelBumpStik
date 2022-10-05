@@ -33,6 +33,8 @@ class ClassicBoard extends Board
 		if (cancel)
 			for (launcher in _launchers)
 				launcher.enabled = true;
+		else
+			_dontAdvanceTurn = true;
 		_csm.chain(cancel ? "cancel" : "painted");
 	}
 
