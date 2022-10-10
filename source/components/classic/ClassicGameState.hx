@@ -216,6 +216,8 @@ class ClassicGameState extends GameState
 		{
 			if (bumper != null)
 			{
+				if (bumper.bColor == null)
+					return;
 				FlxG.sound.play(AssetPaths.mselect__wav);
 				_hudClassic.paintCans--;
 				bumper.bColor = _selectedColor;
