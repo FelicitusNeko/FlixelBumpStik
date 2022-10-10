@@ -90,7 +90,7 @@ enum abstract APLocation(Int) from Int to Int
 	var L4Combo7;
 	var L4Chain2;
 	var L4Chain3;
-	var L5TScore100k;
+	var L5TScore75k;
 	var L5AllHazards;
 	var Booster1;
 	var Booster2;
@@ -435,7 +435,7 @@ class APGameState extends ClassicGameState
 				_startColors = 4;
 				_endColors = 6;
 				_levelNextColor = _levelStepColor = 100;
-				_hudAP.addTask(TotalScore, [100000]);
+				_hudAP.addTask(TotalScore, [75000]);
 				_hudAP.addTask(Hazards, [25], _schedule["hazard"].clear);
 				_schedule["hazard"].setDelay(1, 10);
 				for (schedule in _schedule)
@@ -634,7 +634,7 @@ class APGameState extends ClassicGameState
 				case [Chain, 4, 3]: L4Chain3;
 
 				case [TotalScore, 5, _]:
-					L5TScore100k;
+					L5TScore75k;
 				case [Hazards, 5, _]:
 					L5AllHazards;
 
