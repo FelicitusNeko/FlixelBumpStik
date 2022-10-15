@@ -216,7 +216,8 @@ class ClassicGameState extends GameState
 		{
 			if (bumper != null)
 			{
-				if (bumper.bColor == null)
+				// don't paint the bumper if it's colorless or the same color
+				if (bumper.bColor == null || bumper.bColor == _selectedColor)
 					return;
 				FlxG.sound.play(AssetPaths.mselect__wav);
 				_hudClassic.paintCans--;
