@@ -497,6 +497,9 @@ class APGameState extends ClassicGameState
 		_jackpot = 0;
 		_hud.resetHUD();
 
+		for (schedule in _schedule)
+			schedule.reset();
+
 		if (_levelClear || _hudAP.level == null)
 			switch (_hudAP.level)
 			{
@@ -523,9 +526,6 @@ class APGameState extends ClassicGameState
 
 		_player.board = new APBoard(0, 0, _curWidth, _curHeight);
 		_player.multStack[0] = (_startColors + 2) * .2;
-
-		for (schedule in _schedule)
-			schedule.reset();
 
 		if (_paintCanBumper != null)
 		{
