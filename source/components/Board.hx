@@ -148,13 +148,16 @@ class Board extends FlxTypedGroup<FlxBasic>
 		add(_launchers);
 
 		_csm = new CSM(smIdle);
+		_csm.addState("lmoving", smMoving);
 		_csm.addState("moving", smMoving);
 		_csm.addState("checking", smChecking);
 		_csm.addState("clearing", smClearing);
 		_csm.addState("gameoverwait", smGameOverWait);
 		_csm.addState("gameover", null);
 
-		_csm.set("initial", "launch", "moving");
+		_csm.set("initial", "launch", "lmoving");
+		_csm.set("initial", "sdlaunch", "moving");
+		_csm.set("lmoving", "stopped", "moving");
 		_csm.set("moving", "stopped", "checking");
 		_csm.set("checking", "match", "clearing");
 		_csm.set("checking", "nomatch", "initial");
@@ -452,6 +455,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 	/** State machine call for moving state. **/
 	private function smMoving(elapsed:Float)
 	{
+		var isSomethingMoving = false;
 		_bumpers.forEachAlive(bumper ->
 		{
 			if (bumper.isMoving)
@@ -481,10 +485,10 @@ class Board extends FlxTypedGroup<FlxBasic>
 		FlxG.overlap(_bumpers, _bumpers, bumperBump);
 		FlxG.overlap(_bumpers, _spaces, bumperToSpace);
 
-		var isSomethingMoving = false;
-		for (bumper in _bumpers)
-			if (isSomethingMoving = bumper.isMoving)
-				break;
+		if (!isSomethingMoving)
+			for (bumper in _bumpers)
+				if (isSomethingMoving = bumper.isMoving)
+					break;
 		if (!isSomethingMoving)
 		{
 			var dirOpts = BumperGenerator.dirOpts;
@@ -741,7 +745,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 			for (launcher in _launchers)
 				launcher.enabled = false;
 			// _csm.activeState = smMoving;
-			_csm.chain("launch");
+			_csm.chain(bumper.direction == bumper.launchDirection ? "sdlaunch" : "launch");
 		}
 	}
 
