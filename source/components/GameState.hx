@@ -7,6 +7,7 @@ import flixel.FlxG;
 import flixel.FlxState;
 import flixel.math.FlxPoint;
 import flixel.util.FlxColor;
+import flixel.util.FlxSave;
 import openfl.system.System;
 
 /** Stats for each player. **/
@@ -33,7 +34,10 @@ abstract class GameState extends FlxState
 	/** The bumper generator for this game. **/
 	private var _bg:BumperGenerator;
 
+	/** Pulls a string from the i18n bank. **/
 	private var _t:I18nFunction;
+
+	private var _gameName = "default";
 
 	public function new()
 	{
@@ -77,6 +81,18 @@ abstract class GameState extends FlxState
 		hudCamera.zoom = hudCamera.width / _hud.width;
 		hudCamera.antialiasing = true;
 		hudCamera.focusOn(new FlxPoint(_hud.width / 2, _hud.height / 2));
+
+		var save = new FlxSave();
+		save.bind(_gameName);
+		trace(save.data);
+		if (save.data.players != null)
+		{
+			trace('save data $_gameName found');
+			// load the data
+		}
+		else
+			trace('no save for $_gameName');
+		save.close();
 
 		super.create();
 	}

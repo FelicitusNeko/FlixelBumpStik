@@ -299,6 +299,7 @@ class APGameState extends ClassicGameState
 		_schedule["booster"].setDelay(7, 20);
 
 		super();
+		_gameName = 'ap-${_ap.seed}-${ap.slotnr}'; // TODO: keep list of seeds so they can be wiped later
 
 		_bg.colors = _startColors;
 		_bg.colorLimit = _endColors;
@@ -324,9 +325,10 @@ class APGameState extends ClassicGameState
 			});
 
 		_hud = new APHud();
-		createLevel(1);
 
 		super.create();
+
+		createLevel(1);
 
 		_generalCamera = FlxG.cameras.add(new FlxCamera(0, 0, FlxG.width, FlxG.height), false);
 		_generalCamera.bgColor = FlxColor.TRANSPARENT;

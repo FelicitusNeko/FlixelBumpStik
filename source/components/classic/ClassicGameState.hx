@@ -34,6 +34,12 @@ class ClassicGameState extends GameState
 	/** The current selected color during a Paint Can event. **/
 	private var _selectedColor:Null<FlxColor> = null;
 
+	public function new()
+	{
+		super();
+		_gameName = "classic";
+	}
+
 	override function create()
 	{
 		if (_players.length == 0)
@@ -57,7 +63,8 @@ class ClassicGameState extends GameState
 
 		var test = new FlxButton(0, 0, "Test", () ->
 		{
-			openSubState(new AllClearSubstate(12345, _boardClassic.center));
+			// openSubState(new AllClearSubstate(12345, _boardClassic.center));
+			_hudClassic.paintCans++;
 		});
 		add(test);
 	}
