@@ -43,8 +43,8 @@ class BumperGenerator
 	public function new(initColors:Int, ?initOpts:Array<FlxColor>)
 	{
 		colorOpts = initOpts != null ? initOpts.copy() : defaultColorOpts.copy();
-		colors = this.initColors = initColors;
 		colorLimit = maxColors;
+		colors = this.initColors = initColors;
 	}
 
 	function set_colors(colors:Int):Int
