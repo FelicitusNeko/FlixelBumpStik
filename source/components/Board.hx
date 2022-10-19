@@ -77,6 +77,8 @@ class Board extends FlxTypedGroup<FlxBasic>
 	/** If this is true, `onAdvanceTurn` will not be called. **/
 	private var _dontAdvanceTurn = false;
 
+	private var _frames = 0;
+
 	/** Event that fires when the game requests that a next bumper be generated. **/
 	public var onRequestGenerate(default, null) = new Event<Void->Void>();
 
@@ -167,7 +169,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 		this.bWidth = bWidth;
 		this.bHeight = bHeight;
 
-		// setupTest(10);
+		// setupTest(11);
 	}
 
 	inline function get_tWidth()
@@ -239,7 +241,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 				makeBumperAt(2, 4, Color.Blue, Right);
 				makeBumperAt(4, 4, Color.Blue, Right);
 				makeBumperAt(2, 0, Color.Green, Down);
-			case 10: // Chain scoring (×3)
+			case 10: // Chain scoring (×3) ✔️
 				makeBumperAt(2, 2, Color.Blue, Down);
 				makeBumperAt(2, 3, Color.Blue, Up);
 				makeBumperAt(0, 2, Color.Green, Left);
@@ -252,15 +254,22 @@ class Board extends FlxTypedGroup<FlxBasic>
 				if (launcher != null)
 					launcher.launchBumper(new Bumper(0, 0, Color.Blue, Up));
 				autoLaunch = false;
+			case 11: // Rear-end collision test ✔️
+				makeBumperAt(4, 0, Color.Blue, Down);
+				makeBumperAt(4, 1, Color.Blue, Down);
+				makeBumperAt(4, 2, Color.Red, Right);
+				makeBumperAt(4, 3, Color.Red, Right);
+				makeBumperAt(4, 4, Color.Red, Right);
+				_csm.currentState = "moving";
 		}
-		if (autoLaunch)
-			_bumpers.forEachAlive(bumper ->
-			{
-				if (bumper.direction != Direction.None)
-					bumper.startMoving(bumper.direction);
-			});
+		// if (autoLaunch)
+		// 	_bumpers.forEachAlive(bumper ->
+		// 	{
+		// 		if (bumper.direction != Direction.None)
+		// 			bumper.startMoving(bumper.direction);
+		// 	});
 
-		_csm.chain("launch");
+		// _csm.chain("launch");
 	}
 
 	/**
@@ -427,6 +436,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 	{
 		super.update(elapsed);
 		_csm.update(elapsed);
+		_frames++;
 	}
 
 	/** State machine call for idle state. **/
@@ -442,9 +452,6 @@ class Board extends FlxTypedGroup<FlxBasic>
 	/** State machine call for moving state. **/
 	private function smMoving(elapsed:Float)
 	{
-		FlxG.overlap(_bumpers, _bumpers, bumperBump);
-		FlxG.overlap(_bumpers, _spaces, bumperToSpace);
-
 		_bumpers.forEachAlive(bumper ->
 		{
 			if (bumper.isMoving)
@@ -470,6 +477,9 @@ class Board extends FlxTypedGroup<FlxBasic>
 				bumper.startMoving();
 			}
 		});
+
+		FlxG.overlap(_bumpers, _bumpers, bumperBump);
+		FlxG.overlap(_bumpers, _spaces, bumperToSpace);
 
 		var isSomethingMoving = false;
 		for (bumper in _bumpers)
@@ -755,17 +765,33 @@ class Board extends FlxTypedGroup<FlxBasic>
 		if (blh == brh || blh == null || brh == null)
 			return;
 
-		if (blh.hasShifted && brh.hasShifted)
+		if (blh.direction == brh.direction && blh.isMoving && brh.isMoving)
+		{
+			// trace('#${_frames} - Transfer of velocity happened');
+			var buf = new FlxPoint().copyFrom(blh.velocity);
+			blh.velocity.copyFrom(brh.velocity);
+			brh.velocity.copyFrom(buf);
+		}
+		else if (blh.hasShifted && brh.hasShifted)
 		{
 			if (blh.frontX == brh.lfFrontX && blh.frontY == brh.lfFrontY)
+			{
+				// trace('#${_frames} - Bumper at ${blh.frontX}, ${blh.frontY} snapped at pos 2 blh');
 				blh.snapToPos();
+			}
 			else
+			{
+				// trace('#${_frames} - Bumper at ${brh.frontX}, ${brh.frontY} snapped at pos 2 brh');
 				brh.snapToPos();
+			}
 		}
 		else
 			for (bumper in [blh, brh])
 				if (bumper.hasShifted)
+				{
+					// trace('#${_frames} - Bumper at ${bumper.frontX}, ${bumper.frontY} snapped at pos 3');
 					bumper.snapToPos();
+				}
 	}
 
 	/**
