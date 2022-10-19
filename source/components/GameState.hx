@@ -121,7 +121,7 @@ abstract class GameState extends FlxState
 
 	override function update(elapsed:Float)
 	{
-		#if (debug && sys)
+		#if (debug && sys && !noescape)
 		if (FlxG.keys.anyJustPressed([ESCAPE]))
 			System.exit(0);
 		#end
