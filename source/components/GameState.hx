@@ -93,7 +93,7 @@ abstract class GameState extends FlxState
 		var save = new FlxSave();
 		save.bind(gameName);
 		trace(save.data);
-		if (save.data.players != null)
+		if (save.data.gameName == gameName)
 		{
 			trace('save data $gameName found');
 			// load the data
@@ -109,6 +109,7 @@ abstract class GameState extends FlxState
 	{
 		var retval:DynamicAccess<Dynamic> = {};
 
+		retval["gameName"] = gameName;
 		retval["players"] = _players.map(p ->
 		{
 			var iretval:DynamicAccess<Dynamic> = {};
