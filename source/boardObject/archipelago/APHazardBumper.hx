@@ -21,7 +21,7 @@ class APHazardBumper extends Bumper
 		super(x, y, null, None, None, owner);
 		_turnsToNormal = turnsToNormal;
 
-		addFlair("hazard", new FlxSprite(0, 0).loadGraphic(AssetPaths.HazardFlair__png));
+		addFlair("activeHazard");
 
 		_resolveColor = resolveColor;
 	}
@@ -46,9 +46,11 @@ class APHazardBumper extends Bumper
 					ease: FlxEase.circOut,
 					onComplete: (_) ->
 					{
-						remove(hazardFlair);
-						add(_flairList["hazard"] = new FlxSprite(0, 0)).makeGraphic(64, 64, FlxColor.TRANSPARENT);
-						hazardFlair.destroy();
+						removeFlair("activeHazard");
+						addFlair("hazard");
+						// remove(hazardFlair);
+						// add(_flairList["hazard"] = new FlxSprite(0, 0)).makeGraphic(64, 64, FlxColor.TRANSPARENT);
+						// hazardFlair.destroy();
 					}
 				});
 				bColor = _resolveColor;

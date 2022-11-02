@@ -719,9 +719,9 @@ class APGameState extends ClassicGameState
 					switch (key)
 					{
 						case "booster":
-							newBumper.addFlair("booster", new FlxSprite(0, 0).loadGraphic(AssetPaths.BoosterFlair__png));
+							newBumper.addFlair("booster");
 						case "treasure":
-							newBumper.addFlair("treasure", new FlxSprite(0, 0).loadGraphic(AssetPaths.TreasureFlair__png));
+							newBumper.addFlair("treasure");
 						case "hazard":
 							var emptyPos = _boardClassic.getRandomSpace(true);
 							if (emptyPos != null)

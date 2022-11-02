@@ -212,9 +212,7 @@ class Bumper extends BoardObject
 	}
 
 	function get_isMoving():Bool
-	{
 		return Math.abs(velocity.x) + Math.abs(velocity.y) > 0 || Math.abs(acceleration.x) + Math.abs(acceleration.y) > 0;
-	}
 
 	function get_frontX():Int
 	{
@@ -281,9 +279,7 @@ class Bumper extends BoardObject
 	}
 
 	function get_hasShifted():Bool
-	{
 		return lfFrontX != frontX || lfFrontY != frontY;
-	}
 
 	inline function get_flairCount()
 	{
@@ -380,8 +376,10 @@ class Bumper extends BoardObject
 		@param name The name of the flair to add.
 		@param sprite The sprite of the flair to add. Should generally be the same size as the bumper.
 	**/
-	public function addFlair(name:String, sprite:FlxSprite)
+	public function addFlair(name:String, ?sprite:FlxSprite)
 	{
+		if (sprite == null)
+			sprite = new FlxSprite('assets/images/flairs/$name.png');
 		sprite.solid = false;
 		insert(group.length - 1, sprite);
 		_flairList.set(name, sprite);
@@ -405,9 +403,7 @@ class Bumper extends BoardObject
 		@return Whether that flair is present.
 	**/
 	public inline function hasFlair(name:String)
-	{
 		return _flairList.exists(name);
-	}
 
 	override function update(elapsed:Float)
 	{
