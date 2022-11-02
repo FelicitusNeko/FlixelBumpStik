@@ -166,37 +166,46 @@ enum abstract APLocation(Int) from Int to Int
 enum abstract APItem(Int) from Int to Int
 {
 	var Nothing = 595000;
-	var BoardWidth;
-	var BoardHeight;
-	var MinColor;
-	var MaxColor;
+	var ScoreBonus;
+	var TaskSkip;
+	var StartingTurner;
+	var Blank004;
 	var StartPaintCan;
 	var BonusBooster;
 	var HazardBumper;
 	var TreasureBumper;
+	var RainbowTrap;
+	var SpinnerTrap;
+	var KillerTrap;
 
 	@:to
 	public inline function toString()
-		switch (this)
+		return "game/ap/" + switch (this)
 		{
-			case BoardWidth:
-				return "game/ap/item/width";
-			case BoardHeight:
-				return "game/ap/item/height";
-			case MinColor:
-				return "game/ap/item/minColor";
-			case MaxColor:
-				return "game/ap/item/maxColor";
+			case ScoreBonus:
+				"item/scoreBonus";
+			case TaskSkip:
+				"item/taskSkip";
+			case StartingTurner:
+				"item/startTurner";
+			case Blank004:
+				"item/default";
 			case StartPaintCan:
-				return "game/ap/item/paintCan";
+				"item/paintCan";
 			case BonusBooster:
-				return "game/ap/item/booster";
+				"item/booster";
 			case HazardBumper:
-				return "game/ap/item/hazard";
+				"item/hazard";
 			case TreasureBumper:
-				return "game/ap/item/treasure";
+				"item/treasure";
+			case RainbowTrap:
+				"trap/rainbow";
+			case SpinnerTrap:
+				"trap/spinner";
+			case KillerTrap:
+				"trap/killer";
 			default:
-				return "game/ap/item/default";
+				"item/default";
 		}
 }
 
@@ -299,7 +308,7 @@ class APGameState extends ClassicGameState
 		_schedule["booster"].setDelay(7, 20);
 
 		super();
-		_gameName = 'ap-${_ap.seed}-${ap.slotnr}'; // TODO: keep list of seeds so they can be wiped later
+		// _gameName = 'ap-${_ap.seed}-${ap.slotnr}'; // TODO: keep list of seeds so they can be wiped later
 
 		_bg.colors = _startColors;
 		_bg.colorLimit = _endColors;
@@ -307,6 +316,9 @@ class APGameState extends ClassicGameState
 		_nextColor = 50;
 		_nextColorEvery = 50;
 	}
+
+	override function get_gameName()
+		return 'ap-${_ap.seed}-${_ap.slotnr}';
 
 	inline function get__hudAP()
 		return cast(_hud, APHud);
@@ -556,14 +568,14 @@ class APGameState extends ClassicGameState
 				pushToast(_t("game/ap/received", ["item" => Std.string(_t(item))]), FlxColor.CYAN);
 				switch (item)
 				{
-					case BoardWidth: // deprecated
-						_curWidth++;
-					case BoardHeight: // deprecated
-						_curHeight++;
-					case MinColor: // deprecated
-						_startColors++;
-					case MaxColor: // deprecated
-						_endColors++;
+					case ScoreBonus:
+					// add score based on level
+					case TaskSkip:
+					// add Task Skip immediately
+					case StartingTurner:
+					// add Turner immediately, as well as +1 starting use
+					// case Blank004:
+					// this shouldn't happen currently
 					case StartPaintCan:
 						_startPaintCans++;
 						_hudClassic.paintCans++;
@@ -573,6 +585,12 @@ class APGameState extends ClassicGameState
 						_schedule["hazard"].inStock++;
 					case TreasureBumper:
 						_schedule["treasure"].inStock++;
+					case RainbowTrap:
+					// set rainbow trap flag
+					case SpinnerTrap:
+					// set spinner trap flag
+					case KillerTrap:
+					// force-end board immediately
 					default:
 						trace("Item ID:" + itemObj.item);
 				}
