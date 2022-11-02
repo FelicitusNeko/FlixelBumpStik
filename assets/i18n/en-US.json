@@ -48,15 +48,19 @@
       "booster": "Booster Up - Now x:value",
       "levelcomplete": "- Level Complete -",
       "item": {
-        "width": "Board Width",
-        "height": "Board Height",
-        "minColor": "Starting Color Up",
-        "maxColor": "Maximum Color Up",
-        "paintCan": "Starting Paint Can",
+        "scoreBonus": "Bonus :bonus Points",
+        "taskSkip": "Task Skip",
+        "startTurner": "Starting Turner (+1 right now!)",
+        "paintCan": "Starting Paint Can (+1 right now!)",
         "booster": "Bonus Booster",
         "hazard": "Hazard Bumper",
         "treasure": "Treasure Bumper",
         "default": "Unknown"
+      },
+      "trap": {
+        "rainbow": "Rainbow Trap!",
+        "spinner": "Spinner Trap!",
+        "killer": "Killer Trap!!"
       },
       "task": {
         "LevelHeader": "- Level :goal -",
