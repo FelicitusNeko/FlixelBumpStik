@@ -5,6 +5,7 @@ import flixel.FlxSprite;
 import flixel.group.FlxSpriteGroup;
 import flixel.math.FlxPoint;
 import flixel.ui.FlxSpriteButton;
+import haxe.DynamicAccess;
 import lime.app.Event;
 
 /** Any of a class of object that composes a Bumper Stickers board. **/
@@ -76,14 +77,10 @@ abstract class BoardObject extends FlxSpriteGroup
 	}
 
 	function get_bOrigin():FlxPoint
-	{
 		return owner != null ? owner.origin : new FlxPoint(0, 0);
-	}
 
 	function get_adjustedX():Float
-	{
 		return x - bOrigin.x;
-	}
 
 	function set_adjustedX(adjustedX:Float):Float
 	{
@@ -92,9 +89,7 @@ abstract class BoardObject extends FlxSpriteGroup
 	}
 
 	function get_adjustedY():Float
-	{
 		return y - bOrigin.y;
-	}
 
 	function set_adjustedY(adjustedY:Float):Float
 	{
@@ -140,16 +135,23 @@ abstract class BoardObject extends FlxSpriteGroup
 	}
 
 	private function onClickF()
-	{
 		onClick.dispatch(this);
-	}
 
 	/**
 		Called when a move has been completed. Does nothing on its own; meant to be overridden.
 		@return Whether a recheck should be performed. If not overridden, always returns `false`.
 	**/
 	public function onAdvanceTurn()
-	{
 		return false;
+
+	public function serialize()
+	{
+		var retval:DynamicAccess<Dynamic> = {};
+
+		retval["type"] = objType;
+		retval["boardX"] = boardX;
+		retval["boardY"] = boardY;
+
+		return retval;
 	}
 }

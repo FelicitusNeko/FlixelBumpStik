@@ -3,6 +3,7 @@ package;
 import boardObject.Bumper;
 import flixel.math.FlxRandom;
 import flixel.util.FlxColor;
+import haxe.DynamicAccess;
 
 /** Generates bumpers for play use. **/
 class BumperGenerator
@@ -162,5 +163,23 @@ class BumperGenerator
 		colors = 0;
 		colors = initColors;
 		colorLimit = maxColors;
+	}
+
+	public function serialize()
+	{
+		var retval:DynamicAccess<Dynamic> = {};
+
+		retval["initColors"] = initColors;
+		retval["colors"] = colors;
+		retval["colorLimit"] = colorLimit;
+		retval["colorOpts"] = colorOpts;
+
+		var dropsDA:DynamicAccess<Int> = {};
+		for (col => drop in _drops)
+			dropsDA[Std.string(col)] = drop;
+
+		retval["drops"] = dropsDA;
+
+		return retval;
 	}
 }

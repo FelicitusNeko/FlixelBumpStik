@@ -7,6 +7,8 @@ import flixel.FlxG;
 import flixel.math.FlxPoint;
 import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
+import haxe.DynamicAccess;
+import haxe.Json;
 
 class ClassicGameState extends GameState
 {
@@ -58,20 +60,21 @@ class ClassicGameState extends GameState
 
 		prepareBoard();
 
-		#if kiosktest
-		var restart = new FlxButton(0, 0, "Restart", () ->
-		{
-			FlxG.switchState(new ClassicGameState());
-		});
-		add(restart);
-		#else
+		// #if kiosktest
+		// var restart = new FlxButton(0, 0, "Restart", () ->
+		// {
+		// 	FlxG.switchState(new ClassicGameState());
+		// });
+		// add(restart);
+		// #else
 		var test = new FlxButton(0, 0, "Test", () ->
 		{
 			// openSubState(new AllClearSubstate(12345, _boardClassic.center));
-			_hudClassic.paintCans++;
+			// _hudClassic.paintCans++;
+			trace(Json.stringify(serialize()));
 		});
-		add(test);
-		#end
+		_hud.add(test);
+		// #end
 	}
 
 	override function prepareBoard()
@@ -247,4 +250,15 @@ class ClassicGameState extends GameState
 	function onGameOver(animDone:Bool)
 		if (!animDone)
 			FlxG.sound.play(AssetPaths.gameover__wav);
+
+	override function serialize():DynamicAccess<Dynamic>
+	{
+		var retval = super.serialize();
+
+		retval["jackpot"] = _jackpot;
+		retval["nextColor"] = _nextColor;
+		retval["nextColorEvery"] = _nextColorEvery;
+
+		return retval;
+	}
 }

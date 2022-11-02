@@ -8,6 +8,7 @@ import flixel.FlxState;
 import flixel.math.FlxPoint;
 import flixel.util.FlxColor;
 import flixel.util.FlxSave;
+import haxe.DynamicAccess;
 import openfl.system.System;
 
 /** Stats for each player. **/
@@ -50,6 +51,9 @@ abstract class GameState extends FlxState
 
 	function get_gameName()
 		return "default";
+
+	function get__player()
+		return _players.length == 0 ? null : _players[0];
 
 	override function create()
 	{
@@ -101,6 +105,26 @@ abstract class GameState extends FlxState
 		super.create();
 	}
 
+	function serialize():DynamicAccess<Dynamic>
+	{
+		var retval:DynamicAccess<Dynamic> = {};
+
+		retval["players"] = _players.map(p ->
+		{
+			var iretval:DynamicAccess<Dynamic> = {};
+
+			iretval["multStack"] = p.multStack;
+			iretval["board"] = p.board.serialize();
+
+			return iretval;
+		});
+
+		retval["hud"] = _hud.serialize();
+		retval["bg"] = _bg.serialize();
+
+		return retval;
+	}
+
 	function prepareBoard()
 	{
 		var mainCamera = FlxG.camera;
@@ -132,11 +156,6 @@ abstract class GameState extends FlxState
 			mult *= factor;
 		var retval = Math.floor(addScore * mult);
 		return retval;
-	}
-
-	function get__player()
-	{
-		return _players.length == 0 ? null : _players[0];
 	}
 
 	override function update(elapsed:Float)

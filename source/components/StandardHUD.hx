@@ -6,6 +6,7 @@ import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.group.FlxSpriteGroup;
 import flixel.util.FlxColor;
+import haxe.DynamicAccess;
 import lime.app.Event;
 
 using StringTools;
@@ -125,5 +126,16 @@ class StandardHUD extends FlxSpriteGroup
 		}
 		score = 0;
 		block = 0;
+	}
+
+	public function serialize()
+	{
+		var retval:DynamicAccess<Dynamic> = {};
+
+		retval["score"] = score;
+		retval["block"] = block;
+		retval["nextBumper"] = nextBumper == null ? null : nextBumper.serialize();
+
+		return retval;
 	}
 }

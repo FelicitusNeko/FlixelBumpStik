@@ -30,7 +30,7 @@ typedef IDeploymentSchedule =
 }
 
 @:forward
-abstract DeploymentSchedule(IDeploymentSchedule) from IDeploymentSchedule
+abstract DeploymentSchedule(IDeploymentSchedule) from IDeploymentSchedule to IDeploymentSchedule
 {
 	/** The number of turns this bumper type has been eligible to spawn. **/
 	public var eligibleTurns(get, never):Int;

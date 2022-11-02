@@ -11,6 +11,7 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRandom;
 import flixel.util.FlxColor;
+import haxe.DynamicAccess;
 import haxe.Timer;
 import lime.app.Event;
 
@@ -176,24 +177,16 @@ class Board extends FlxTypedGroup<FlxBasic>
 	}
 
 	inline function get_tWidth()
-	{
 		return (bWidth + 2) * sWidth;
-	}
 
 	inline function get_tHeight()
-	{
 		return (bHeight + 2) * sHeight;
-	}
 
 	inline function get_center()
-	{
 		return new FlxPoint(bWidth * sWidth / 2, bHeight * sHeight / 2).addPoint(origin);
-	}
 
 	inline function get_bCount()
-	{
 		return _bumpers.countLiving();
-	}
 
 	/**
 		Set up a board state test.
@@ -361,9 +354,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 		@deprecated Currently only to be used for the `Launcher` class.
 	**/
 	public function bumperAt(x, y)
-	{
 		return atGrid(_bumpers, x, y);
-	}
 
 	/**
 		Determines which board object, if any, is located at the given `FlxPoint` coordinates.
@@ -823,5 +814,20 @@ class Board extends FlxTypedGroup<FlxBasic>
 		}
 		else if (space.reservedFor == bumper)
 			space.reservedFor = null;
+	}
+
+	public function serialize()
+	{
+		var retval:DynamicAccess<Dynamic> = {};
+
+		retval["width"] = bWidth;
+		retval["height"] = bHeight;
+		retval["bumpers"] = [];
+		_bumpers.forEachAlive(b ->
+		{
+			retval["bumpers"].push(b.serialize());
+		});
+
+		return retval;
 	}
 }
