@@ -5,6 +5,7 @@ import flixel.FlxSprite;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
+import haxe.DynamicAccess;
 
 /** The current color of the bumper, for matching purposes. **/
 enum abstract Color(FlxColor) from FlxColor to FlxColor
@@ -453,5 +454,18 @@ class Bumper extends BoardObject
 				}
 			});
 		}
+	}
+
+	public override function serialize():DynamicAccess<Dynamic>
+	{
+		var retval = super.serialize();
+
+		retval["bColor"] = bColor;
+		retval["direction"] = direction;
+		retval["flairs"] = [];
+		for (flair in _flairList.keys())
+			retval["flairs"].push(flair);
+
+		return retval;
 	}
 }

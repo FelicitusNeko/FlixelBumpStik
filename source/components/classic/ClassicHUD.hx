@@ -6,6 +6,7 @@ import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
+import haxe.DynamicAccess;
 import lime.app.Event;
 
 class ClassicHUD extends StandardHUD
@@ -119,5 +120,20 @@ class ClassicHUD extends StandardHUD
 		paintCans = 0;
 		_paintCansNext = paintCanStartThreshold;
 		_paintCansIncrement = paintCanStartThreshold + paintCansIncrementStep;
+	}
+
+	public override function serialize():DynamicAccess<Dynamic>
+	{
+		var retval = super.serialize();
+
+		var paintCansDA:DynamicAccess<Int> = {};
+		paintCansDA["count"] = paintCans;
+		paintCansDA["start"] = paintCanStartThreshold;
+		paintCansDA["next"] = _paintCansNext;
+		paintCansDA["inc"] = _paintCansIncrement;
+		paintCansDA["incStep"] = paintCansIncrementStep;
+		retval["paintCans"] = paintCansDA;
+
+		return retval;
 	}
 }

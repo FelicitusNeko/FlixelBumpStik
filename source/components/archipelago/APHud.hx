@@ -4,6 +4,7 @@ import components.archipelago.APTask;
 import components.classic.ClassicHUD;
 import flixel.addons.ui.FlxUIList;
 import flixel.addons.ui.FlxUIText;
+import haxe.DynamicAccess;
 import haxe.Exception;
 import lime.app.Event;
 
@@ -198,12 +199,25 @@ class APHud extends ClassicHUD
 	}
 
 	/** Resets the HUD to its starting values. For Archipelago games, it will also increment `_accruedScore` and `_accruedBlock`. **/
-	override public function resetHUD()
+	public override function resetHUD()
 	{
 		_accruedScoreThisLevel += score;
 		_accruedBlockThisLevel += block;
 		_accruedScore += score;
 		_accruedBlock += block;
 		super.resetHUD();
+	}
+
+	public override function serialize():DynamicAccess<Dynamic>
+	{
+		var retval = super.serialize();
+
+		retval["accScore"] = _accruedScore;
+		retval["accScoreTL"] = _accruedScoreThisLevel;
+		retval["accBlock"] = _accruedBlock;
+		retval["accBlockTL"] = _accruedBlockThisLevel;
+		retval["tasks"] = _taskList.map(t -> t.serialize());
+
+		return retval;
 	}
 }

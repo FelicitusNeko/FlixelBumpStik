@@ -2,6 +2,7 @@ package components.archipelago;
 
 import flixel.addons.ui.FlxUIText;
 import flixel.util.FlxColor;
+import haxe.DynamicAccess;
 
 /** The type of task to be completed. **/
 enum APTaskType
@@ -120,4 +121,16 @@ abstract APTask(IAPTask) from IAPTask
 
 	inline function get_complete()
 		return this.current >= this.goals[goalCount - 1];
+
+	public function serialize()
+	{
+		var retval:DynamicAccess<Dynamic> = {};
+
+		retval["type"] = this.type;
+		retval["goals"] = this.goals;
+		retval["goalIndex"] = this.goalIndex;
+		retval["current"] = this.current;
+
+		return retval;
+	}
 }

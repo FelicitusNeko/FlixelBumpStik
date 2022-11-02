@@ -4,6 +4,7 @@ import components.Board;
 import flixel.FlxSprite;
 import flixel.tweens.FlxEase;
 import flixel.util.FlxColor;
+import haxe.DynamicAccess;
 
 using flixel.tweens.FlxTween;
 
@@ -70,5 +71,20 @@ class APHazardBumper extends Bumper
 			}
 		}
 		super.update(elapsed);
+	}
+
+	public override function serialize():DynamicAccess<Dynamic>
+	{
+		var retval = super.serialize();
+
+		retval.remove("direction");
+		retval["turnsToNormal"] = _turnsToNormal;
+		if (_turnsToNormal > 0)
+		{
+			retval.remove("bColor");
+			retval["resolveColor"] = _resolveColor;
+		}
+
+		return retval;
 	}
 }

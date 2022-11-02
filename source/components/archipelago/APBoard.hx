@@ -3,6 +3,7 @@ package components.archipelago;
 import boardObject.Bumper;
 import components.classic.ClassicBoard;
 import flixel.math.FlxRandom;
+import haxe.DynamicAccess;
 
 class APBoard extends ClassicBoard
 {
@@ -43,5 +44,21 @@ class APBoard extends ClassicBoard
 		}
 		else if (_bumpers.countLiving() <= 0 && _delay <= 0)
 			onGameOver.dispatch(true);
+	}
+
+	public override function serialize():DynamicAccess<Dynamic>
+	{
+		var retval = super.serialize();
+
+		if (_obstacles.getFirstAlive() != null)
+		{
+			retval["obstacles"] = [];
+			_obstacles.forEachAlive(o ->
+			{
+				retval["obstacles"].push(o.serialize());
+			});
+		}
+
+		return retval;
 	}
 }
