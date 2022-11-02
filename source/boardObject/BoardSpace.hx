@@ -21,4 +21,7 @@ class BoardSpace extends BoardObject
 		base.makeGraphic(64, 64, FlxColor.GRAY);
 		newFinally();
 	}
+
+	override function get_objType()
+		return "space";
 }

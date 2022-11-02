@@ -148,6 +148,9 @@ class Bumper extends BoardObject
 		newFinally();
 	}
 
+	override function get_objType()
+		return "bumper";
+
 	function set_bColor(bColor:Null<FlxColor>):Null<FlxColor>
 	{
 		if (direction != Direction.GameOver && !grayedOut)

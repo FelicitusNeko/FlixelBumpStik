@@ -10,6 +10,9 @@ import lime.app.Event;
 /** Any of a class of object that composes a Bumper Stickers board. **/
 abstract class BoardObject extends FlxSpriteGroup
 {
+	/** Read-only. The type of board object. **/
+	public var objType(get, never):String;
+
 	/** The board this bumper belongs to. **/
 	public var owner(default, set):Board;
 
@@ -49,6 +52,9 @@ abstract class BoardObject extends FlxSpriteGroup
 		setSize(width - .0002, height - .0002);
 		offset.set(.0001, .0001);
 	}
+
+	function get_objType()
+		return "generic";
 
 	function set_owner(owner:Board):Board
 	{

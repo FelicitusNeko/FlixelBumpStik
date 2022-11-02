@@ -19,6 +19,9 @@ class APHazardPlaceholder extends BoardObject
 		_resolveColor = resolveColor;
 	}
 
+	override function get_objType()
+		return "hazardPlaceholder";
+
 	override function onAdvanceTurn():Bool
 	{
 		if (owner == null)

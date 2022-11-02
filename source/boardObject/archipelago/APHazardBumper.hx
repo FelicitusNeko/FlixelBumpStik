@@ -25,6 +25,9 @@ class APHazardBumper extends Bumper
 		_resolveColor = resolveColor;
 	}
 
+	override function get_objType()
+		return "hazardBumper";
+
 	override function gameOver()
 	{
 		immovable = false;

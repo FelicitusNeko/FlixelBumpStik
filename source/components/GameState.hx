@@ -37,7 +37,8 @@ abstract class GameState extends FlxState
 	/** Pulls a string from the i18n bank. **/
 	private var _t:I18nFunction;
 
-	private var _gameName = "default";
+	// private var _gameName = "default";
+	public var gameName(get, never):String;
 
 	public function new()
 	{
@@ -46,6 +47,9 @@ abstract class GameState extends FlxState
 		_t = BumpStikGame.g().i18n.tr;
 		super();
 	}
+
+	function get_gameName()
+		return "default";
 
 	override function create()
 	{
@@ -83,15 +87,15 @@ abstract class GameState extends FlxState
 		hudCamera.focusOn(new FlxPoint(_hud.width / 2, _hud.height / 2));
 
 		var save = new FlxSave();
-		save.bind(_gameName);
+		save.bind(gameName);
 		trace(save.data);
 		if (save.data.players != null)
 		{
-			trace('save data $_gameName found');
+			trace('save data $gameName found');
 			// load the data
 		}
 		else
-			trace('no save for $_gameName');
+			trace('no save for $gameName');
 		save.close();
 
 		super.create();

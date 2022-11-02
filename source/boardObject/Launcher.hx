@@ -60,6 +60,9 @@ class Launcher extends BoardObject
 		newFinally();
 	}
 
+	override function get_objType()
+		return "launcher";
+
 	function set_direction(direction:Direction):Direction
 	{
 		switch (direction)

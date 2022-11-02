@@ -34,11 +34,8 @@ class ClassicGameState extends GameState
 	/** The current selected color during a Paint Can event. **/
 	private var _selectedColor:Null<FlxColor> = null;
 
-	public function new()
-	{
-		super();
-		_gameName = "classic";
-	}
+	override function get_gameName()
+		return "classic";
 
 	override function create()
 	{
