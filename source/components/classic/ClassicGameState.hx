@@ -61,12 +61,20 @@ class ClassicGameState extends GameState
 
 		prepareBoard();
 
+		#if kiosktest
+		var restart = new FlxButton(0, 0, "Restart", () ->
+		{
+			FlxG.switchState(new ClassicGameState());
+		});
+		add(restart);
+		#else
 		var test = new FlxButton(0, 0, "Test", () ->
 		{
 			// openSubState(new AllClearSubstate(12345, _boardClassic.center));
 			_hudClassic.paintCans++;
 		});
 		add(test);
+		#end
 	}
 
 	override function prepareBoard()
