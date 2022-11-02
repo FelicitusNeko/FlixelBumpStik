@@ -372,12 +372,15 @@ class APGameState extends ClassicGameState
 		Creates the tasks for a level. Also removes any tasks that currently exist.
 		@param level The level number to set up.
 	**/
-	function createLevel(level:Int)
+	function createLevel(level:Int, dontCreateTasks = false)
 	{
 		_levelClear = false;
-		_hudAP.wipeTasks();
-		if (level > 0)
-			_hudAP.addTask(LevelHeader, [level]);
+		if (!dontCreateTasks)
+		{
+			_hudAP.wipeTasks();
+			if (level > 0)
+				_hudAP.addTask(LevelHeader, [level]);
+		}
 		switch (level)
 		{
 			case 1:
@@ -386,11 +389,14 @@ class APGameState extends ClassicGameState
 				_startColors = 2;
 				_endColors = 3;
 				_levelNextColor = _levelStepColor = 50;
-				_hudAP.addTask(Score, [250, 500, 750, 1000]);
-				_hudAP.addTask(LevelScore, [500, 1000, 1500, 2000]);
-				_hudAP.addTask(Combo, [5]);
-				_hudAP.addTask(Boosters, [1], _schedule["booster"].clear);
-				_hudAP.addTask(Treasures, [8], _schedule["treasure"].clear);
+				if (!dontCreateTasks)
+				{
+					_hudAP.addTask(Score, [250, 500, 750, 1000]);
+					_hudAP.addTask(LevelScore, [500, 1000, 1500, 2000]);
+					_hudAP.addTask(Combo, [5]);
+					_hudAP.addTask(Boosters, [1], _schedule["booster"].clear);
+					_hudAP.addTask(Treasures, [8], _schedule["treasure"].clear);
+				}
 				_schedule["booster"].maxAvailable = 2;
 				_schedule["treasure"].maxAvailable = 9;
 				_schedule["hazard"].maxAvailable = 0;
@@ -401,12 +407,15 @@ class APGameState extends ClassicGameState
 				_endColors = 4;
 				_levelNextColor = 25;
 				_levelStepColor = 50;
-				_hudAP.addTask(Score, [500, 1000, 1500, 2000]);
-				_hudAP.addTask(LevelScore, [1000, 2000, 3000, 4000]);
-				_hudAP.addTask(Combo, [5]);
-				_hudAP.addTask(Chain, [2]);
-				_hudAP.addTask(Boosters, [2], _schedule["booster"].clear);
-				_hudAP.addTask(Treasures, [16], _schedule["treasure"].clear);
+				if (!dontCreateTasks)
+				{
+					_hudAP.addTask(Score, [500, 1000, 1500, 2000]);
+					_hudAP.addTask(LevelScore, [1000, 2000, 3000, 4000]);
+					_hudAP.addTask(Combo, [5]);
+					_hudAP.addTask(Chain, [2]);
+					_hudAP.addTask(Boosters, [2], _schedule["booster"].clear);
+					_hudAP.addTask(Treasures, [16], _schedule["treasure"].clear);
+				}
 				_schedule["booster"].maxAvailable = 3;
 				_schedule["treasure"].maxAvailable = 17;
 				_schedule["hazard"].setDelay(10, 25);
@@ -417,13 +426,16 @@ class APGameState extends ClassicGameState
 				_startColors = 3;
 				_endColors = 5;
 				_levelNextColor = _levelStepColor = 50;
-				_hudAP.addTask(Score, [800, 1600, 2400, 3200]);
-				_hudAP.addTask(LevelScore, [2000, 4000, 6000, 8000]);
-				_hudAP.addTask(Combo, [5, 7]);
-				_hudAP.addTask(Chain, [2]);
-				_hudAP.addTask(AllClear, [3]);
-				_hudAP.addTask(Boosters, [3], _schedule["booster"].clear);
-				_hudAP.addTask(Treasures, [24], _schedule["treasure"].clear);
+				if (!dontCreateTasks)
+				{
+					_hudAP.addTask(Score, [800, 1600, 2400, 3200]);
+					_hudAP.addTask(LevelScore, [2000, 4000, 6000, 8000]);
+					_hudAP.addTask(Combo, [5, 7]);
+					_hudAP.addTask(Chain, [2]);
+					_hudAP.addTask(AllClear, [3]);
+					_hudAP.addTask(Boosters, [3], _schedule["booster"].clear);
+					_hudAP.addTask(Treasures, [24], _schedule["treasure"].clear);
+				}
 				_schedule["booster"].maxAvailable = 4;
 				_schedule["treasure"].maxAvailable = 25;
 				_schedule["hazard"].setDelay(5, 20);
@@ -434,12 +446,15 @@ class APGameState extends ClassicGameState
 				_startColors = 3;
 				_endColors = 6;
 				_levelNextColor = _levelStepColor = 75;
-				_hudAP.addTask(Score, [1500, 3000, 4500, 6000]);
-				_hudAP.addTask(LevelScore, [3000, 6000, 9000, 12000]);
-				_hudAP.addTask(Combo, [5, 7]);
-				_hudAP.addTask(Chain, [2, 3]);
-				_hudAP.addTask(Boosters, [5], _schedule["booster"].clear);
-				_hudAP.addTask(Treasures, [32], _schedule["treasure"].clear);
+				if (!dontCreateTasks)
+				{
+					_hudAP.addTask(Score, [1500, 3000, 4500, 6000]);
+					_hudAP.addTask(LevelScore, [3000, 6000, 9000, 12000]);
+					_hudAP.addTask(Combo, [5, 7]);
+					_hudAP.addTask(Chain, [2, 3]);
+					_hudAP.addTask(Boosters, [5], _schedule["booster"].clear);
+					_hudAP.addTask(Treasures, [32], _schedule["treasure"].clear);
+				}
 				_schedule["booster"].maxAvailable = 5;
 				_schedule["treasure"].maxAvailable = 999;
 				_schedule["hazard"].setDelay(3, 15);
@@ -450,15 +465,18 @@ class APGameState extends ClassicGameState
 				_startColors = 4;
 				_endColors = 6;
 				_levelNextColor = _levelStepColor = 100;
-				_hudAP.addTask(TotalScore, [75000]);
-				_hudAP.addTask(Hazards, [25], _schedule["hazard"].clear);
+				if (!dontCreateTasks)
+				{
+					_hudAP.addTask(TotalScore, [75000]);
+					_hudAP.addTask(Hazards, [25], _schedule["hazard"].clear);
+				}
 				_schedule["hazard"].setDelay(1, 10);
 				for (schedule in _schedule)
 					schedule.maxAvailable = 999;
 			case 6 | -1: // the game is complete in this case; send a goal condition to the server
+				// TODO: show a congratulatory dialog which will resolve into exiting back to the title screen
 				_ap.clientStatus = GOAL;
 				_hudAP.addTask(Score, [99999]);
-			// TODO: show a congratulatory dialog which will resolve into exiting back to the title screen
 			default: // If we don't recognise the level, just default to 99999 score and make it obvious something's wrong
 				_hudAP.addTask(Score, [99999]);
 		}
