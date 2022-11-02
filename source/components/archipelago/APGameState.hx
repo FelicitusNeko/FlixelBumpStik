@@ -784,23 +784,6 @@ class APGameState extends ClassicGameState
 	{
 		var retval = super.serialize();
 
-		/*
-			private var _curWidth = 3;
-			private var _curHeight = 3;
-			private var _startColors = 2;
-			private var _endColors = 3;
-			private var _levelNextColor = 50;
-			private var _levelStepColor = 50;
-			private var _startPaintCans = 0;
-			private var _schedule:Map<String, DeploymentSchedule> = [];
-			private var _allClears = 0;
-		 */
-
-		// retval["curWidth"] = _curWidth;
-		// retval["curHeight"] = _curHeight;
-		// retval["startColors"] = _startColors;
-		// retval["endColors"] = _endColors;
-		// retval["levelNextColor"] = _levelNextColor;
 		retval["level"] = _hudAP.level;
 		retval["startPaintCans"] = _startPaintCans;
 		retval["allClears"] = _allClears;
