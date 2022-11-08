@@ -1,5 +1,6 @@
 package components.archipelago;
 
+import flixel.ui.FlxButton;
 import components.archipelago.APTask;
 import components.classic.ClassicHUD;
 import flixel.addons.ui.FlxUIList;
@@ -29,6 +30,11 @@ class APHud extends ClassicHUD
 	/** The internal list of tasks to clear. **/
 	private var _taskList:Array<APTask> = [];
 
+	private var _turnerButton:FlxButton;
+
+	/** The current number of available Turners. **/
+	public var turners(default, set):Int = 0;
+
 	/** The total number of points obtained through games on this level. **/
 	public var levelScore(get, never):Int;
 
@@ -43,6 +49,9 @@ class APHud extends ClassicHUD
 
 	/** The current task level. **/
 	public var level(get, never):Null<Int>;
+
+	/** Event that fires when the Turner button is clicked. **/
+	public var onTurnerClick(default, null) = new Event<Void->Void>();
 
 	/**
 		Fires when a task has been cleared.
@@ -64,7 +73,26 @@ class APHud extends ClassicHUD
 			_taskListbox = new FlxUIList(10, listy, [], width - 20, height - listy - 69, more);
 
 			add(_taskListbox);
+
+			_turnerButton = new FlxButton(5, 5, "T:0", () ->
+			{
+				if (turners > 0)
+					onTurnerClick.dispatch();
+			});
+			_turnerButton.allowSwiping = false;
+			_turnerButton.y = height - _pcButton.height - _turnerButton.height - 5;
+			add(_pcButton);
 		}
+
+		turners = 0;
+	}
+
+	function set_turners(turners:Int) {
+		var displayTurners = Math.round(Math.min(turners, 9));
+		_turnerButton.text = "P:" + displayTurners;
+		_turnerButton.alive = turners > 0;
+
+		return this.turners = turners;
 	}
 
 	inline function get_levelScore()
@@ -212,6 +240,7 @@ class APHud extends ClassicHUD
 	{
 		var retval = super.serialize();
 
+		retval["turners"] = turners;
 		retval["accScore"] = _accruedScore;
 		retval["accScoreTL"] = _accruedScoreThisLevel;
 		retval["accBlock"] = _accruedBlock;
