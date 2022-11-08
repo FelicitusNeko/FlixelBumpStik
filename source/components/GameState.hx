@@ -9,6 +9,7 @@ import flixel.math.FlxPoint;
 import flixel.util.FlxColor;
 import flixel.util.FlxSave;
 import haxe.DynamicAccess;
+import haxe.Exception;
 import openfl.system.System;
 
 /** Stats for each player. **/
@@ -38,8 +39,11 @@ abstract class GameState extends FlxState
 	/** Pulls a string from the i18n bank. **/
 	private var _t:I18nFunction;
 
-	// private var _gameName = "default";
+	/** Read-only. The internal name for this game. **/
 	public var gameName(get, never):String;
+
+	/** Read-only. The type of game. **/
+	public var gameType(get, never):String;
 
 	public function new()
 	{
@@ -52,25 +56,25 @@ abstract class GameState extends FlxState
 	function get_gameName()
 		return "default";
 
+	function get_gameType()
+		return "generic";
+
 	function get__player()
 		return _players.length == 0 ? null : _players[0];
 
 	override function create()
 	{
-		if (_players.length == 0)
+		var save = new FlxSave();
+		save.bind(gameName);
+		trace(save.data);
+		if (save.data.gameName == gameName)
 		{
-			_players.push({
-				board: new Board(0, 0),
-				multStack: [1]
-			});
+			trace('save data $gameName found');
+			deserialize(save.data);
 		}
-
-		for (player in _players)
-			add(player.board);
-
-		if (_hud == null)
-			_hud = new StandardHUD();
-		add(_hud);
+		else
+			createGame();
+		save.close();
 
 		var mainCamera = FlxG.camera;
 		var hudCamera:FlxCamera;
@@ -90,19 +94,25 @@ abstract class GameState extends FlxState
 		hudCamera.antialiasing = true;
 		hudCamera.focusOn(new FlxPoint(_hud.width / 2, _hud.height / 2));
 
-		var save = new FlxSave();
-		save.bind(gameName);
-		trace(save.data);
-		if (save.data.gameName == gameName)
-		{
-			trace('save data $gameName found');
-			// load the data
-		}
-		else
-			trace('no save for $gameName');
-		save.close();
-
 		super.create();
+	}
+
+	function createGame()
+	{
+		if (_players.length == 0)
+		{
+			_players.push({
+				board: new Board(0, 0),
+				multStack: [1]
+			});
+		}
+
+		for (player in _players)
+			add(player.board);
+
+		if (_hud == null)
+			_hud = new StandardHUD();
+		add(_hud);
 	}
 
 	function serialize():DynamicAccess<Dynamic>
@@ -124,6 +134,24 @@ abstract class GameState extends FlxState
 		retval["bg"] = _bg.serialize();
 
 		return retval;
+	}
+
+	function deserialize(data:DynamicAccess<Dynamic>, ignoreGameName = false)
+	{
+		if (data["gameName"] != gameName && !ignoreGameName)
+			throw new Exception("Game name mismatch");
+
+		// for (player in _players)
+		// 	if (player.board != null)
+		// 		player.board.destroy();
+		// while (_players.pop() != null) {}
+
+		// for (player in data["players"])
+		// {
+		// 	var newBoard = new Board
+
+		// 	player["multStack"]
+		// }
 	}
 
 	function prepareBoard()

@@ -1,18 +1,18 @@
 package components.archipelago;
 
+import haxe.DynamicAccess;
 import ap.Client;
 import ap.PacketTypes.NetworkItem;
 import boardObject.Bumper;
 import boardObject.archipelago.APHazardPlaceholder;
-import components.archipelago.APTask.APTaskType;
-import components.classic.ClassicGameState;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.math.FlxRandom;
 import flixel.util.FlxColor;
-import haxe.DynamicAccess;
 import utilities.DeploymentSchedule;
+import components.archipelago.APTask.APTaskType;
+import components.classic.ClassicGameState;
 
 /** The color of a bumper in Archipelago mode, for matching purposes. **/
 enum abstract APColor(FlxColor) from FlxColor to FlxColor
@@ -296,18 +296,6 @@ class APGameState extends ClassicGameState
 		_ap = ap;
 		_ap._hOnItemsReceived = onItemsReceived;
 
-		for (type in ["booster", "hazard", "treasure"])
-			_schedule.set(type, {
-				inStock: 0,
-				maxAvailable: 0,
-				onBoard: 0,
-				clear: 0,
-				sinceLast: 0,
-				minDelay: 0,
-				maxDelay: 10
-			});
-		_schedule["booster"].setDelay(7, 20);
-
 		super();
 		// _gameName = 'ap-${_ap.seed}-${ap.slotnr}'; // TODO: keep list of seeds so they can be wiped later
 
@@ -321,6 +309,9 @@ class APGameState extends ClassicGameState
 	override function get_gameName()
 		return 'ap-${_ap.seed}-${_ap.slotnr}';
 
+	override function get_gameType()
+		return "archipelago";
+
 	inline function get__hudAP()
 		return cast(_hud, APHud);
 
@@ -329,16 +320,6 @@ class APGameState extends ClassicGameState
 
 	override function create()
 	{
-		// TODO: load the game, if a save file exists
-
-		if (_players.length == 0)
-			_players.push({
-				board: new APBoard(0, 0, _curWidth, _curHeight),
-				multStack: [.8, 1]
-			});
-
-		_hud = new APHud();
-
 		super.create();
 
 		createLevel(1);
@@ -366,6 +347,29 @@ class APGameState extends ClassicGameState
 		// TODO: save the game
 		FlxG.autoPause = true;
 		super.destroy();
+	}
+
+	override function createGame()
+	{
+		if (_players.length == 0)
+			_players.push({
+				board: new APBoard(0, 0, _curWidth, _curHeight),
+				multStack: [.8, 1]
+			});
+
+		_hud = new APHud();
+
+		for (type in ["booster", "hazard", "treasure"])
+			_schedule.set(type, {
+				inStock: 0,
+				maxAvailable: 0,
+				onBoard: 0,
+				clear: 0,
+				sinceLast: 0,
+				minDelay: 0,
+				maxDelay: 10
+			});
+		_schedule["booster"].setDelay(7, 20);
 	}
 
 	/**

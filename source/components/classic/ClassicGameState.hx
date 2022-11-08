@@ -39,7 +39,33 @@ class ClassicGameState extends GameState
 	override function get_gameName()
 		return "classic";
 
+	override function get_gameType()
+		return "classic";
+
 	override function create()
+	{
+		super.create();
+
+		prepareBoard();
+
+		#if kiosktest
+		var restart = new FlxButton(0, 0, "Restart", () ->
+		{
+			FlxG.switchState(new ClassicGameState());
+		});
+		add(restart);
+		#else
+		var test = new FlxButton(0, 0, "Test", () ->
+		{
+			// openSubState(new AllClearSubstate(12345, _boardClassic.center));
+			// _hudClassic.paintCans++;
+			trace(Json.stringify(serialize()));
+		});
+		_hud.add(test);
+		#end
+	}
+
+	override function createGame()
 	{
 		if (_players.length == 0)
 			_players.push({
@@ -55,26 +81,6 @@ class ClassicGameState extends GameState
 			_hudClassic.onPaintCanClick.add(onPaintCanClick);
 			_hudClassic.onNextBumperClick.add(onBumperSelect);
 		}
-
-		super.create();
-
-		prepareBoard();
-
-		// #if kiosktest
-		// var restart = new FlxButton(0, 0, "Restart", () ->
-		// {
-		// 	FlxG.switchState(new ClassicGameState());
-		// });
-		// add(restart);
-		// #else
-		var test = new FlxButton(0, 0, "Test", () ->
-		{
-			// openSubState(new AllClearSubstate(12345, _boardClassic.center));
-			// _hudClassic.paintCans++;
-			trace(Json.stringify(serialize()));
-		});
-		_hud.add(test);
-		// #end
 	}
 
 	override function prepareBoard()
