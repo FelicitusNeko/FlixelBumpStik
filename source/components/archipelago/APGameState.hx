@@ -356,8 +356,9 @@ class APGameState extends ClassicGameState
 				board: new APBoard(0, 0, _curWidth, _curHeight),
 				multStack: [.8, 1]
 			});
+		add(_boardAP);
 
-		_hud = new APHud();
+		add(_hud = new APHud());
 
 		for (type in ["booster", "hazard", "treasure"])
 			_schedule.set(type, {

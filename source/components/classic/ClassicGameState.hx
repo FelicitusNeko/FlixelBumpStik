@@ -72,9 +72,10 @@ class ClassicGameState extends GameState
 				board: new ClassicBoard(0, 0),
 				multStack: [1]
 			});
+		add(_boardClassic);
 
 		if (_hud == null)
-			_hud = new ClassicHUD();
+			add(_hud = new ClassicHUD());
 		if (_hudClassic != null)
 		{
 			_hudClassic.onPaintCanGet.add((_) -> FlxG.sound.play(AssetPaths.paintcan__wav));

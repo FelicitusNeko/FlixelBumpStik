@@ -111,8 +111,7 @@ abstract class GameState extends FlxState
 			add(player.board);
 
 		if (_hud == null)
-			_hud = new StandardHUD();
-		add(_hud);
+			add(_hud = new StandardHUD());
 	}
 
 	function serialize():DynamicAccess<Dynamic>
@@ -158,8 +157,6 @@ abstract class GameState extends FlxState
 	{
 		var mainCamera = FlxG.camera;
 		var hudCamera = FlxG.cameras.list[1];
-
-		add(_player.board);
 
 		if (FlxG.width > FlxG.height)
 		{
