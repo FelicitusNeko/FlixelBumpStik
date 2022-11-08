@@ -1,6 +1,5 @@
 package;
 
-import flixel.FlxGame;
 import openfl.display.Sprite;
 #if debug
 import state.APEntryState;
