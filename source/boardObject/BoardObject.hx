@@ -154,4 +154,8 @@ abstract class BoardObject extends FlxSpriteGroup
 
 		return retval;
 	}
+
+	public function deserialize(data:DynamicAccess<Dynamic>) {
+		
+	}
 }

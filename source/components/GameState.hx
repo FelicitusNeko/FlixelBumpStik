@@ -119,6 +119,7 @@ abstract class GameState extends FlxState
 		var retval:DynamicAccess<Dynamic> = {};
 
 		retval["gameName"] = gameName;
+		retval["gameType"] = gameType;
 		retval["players"] = _players.map(p ->
 		{
 			var iretval:DynamicAccess<Dynamic> = {};

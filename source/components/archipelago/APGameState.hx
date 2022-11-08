@@ -814,4 +814,34 @@ class APGameState extends ClassicGameState
 
 		return retval;
 	}
+
+	override function deserialize(data:DynamicAccess<Dynamic>, ignoreGameName = false)
+	{
+		super.deserialize(data, ignoreGameName);
+
+		if (data["gameType"] == "archipelago")
+		{
+			while (_players.pop() != null) {}
+
+			var playerData:Array<DynamicAccess<Dynamic>> = data["players"];
+			for (player in playerData)
+			{
+				var boardData:DynamicAccess<Dynamic> = player["board"];
+				var board = new APBoard(0, 0, boardData["width"], boardData["height"]);
+				board.deserialize(player["board"]);
+				_players.push({
+					board: board,
+					multStack: player["multStack"]
+				});
+			}
+
+			_hud = new APHud();
+			_hud.deseralize(data["hud"]);
+		}
+
+		createLevel(data["level"], true);
+		_startPaintCans = data["startPaintCans"];
+		_allClears = data["allClears"];
+		_schedule = data["schedule"];
+	}
 }

@@ -27,7 +27,7 @@ class APHazardBumper extends Bumper
 	}
 
 	override function get_objType()
-		return "hazardBumper";
+		return _turnsToNormal == 0 ? "bumper" : "hazardBumper";
 
 	override function gameOver()
 	{
@@ -79,14 +79,25 @@ class APHazardBumper extends Bumper
 	{
 		var retval = super.serialize();
 
-		retval.remove("direction");
-		retval["turnsToNormal"] = _turnsToNormal;
 		if (_turnsToNormal > 0)
 		{
+			retval.remove("direction");
 			retval.remove("bColor");
+			retval["turnsToNormal"] = _turnsToNormal;
 			retval["resolveColor"] = _resolveColor;
 		}
 
 		return retval;
+	}
+
+	// public override function deserialize(data:DynamicAccess<Dynamic>) {
+	// 	super.deserialize(data);
+	//	// Nothing else to do right now (other vars are initialised via the constructor)
+	// }
+
+	public static function fromSaved(data:DynamicAccess<Dynamic>){
+		var bumper = new APHazardBumper(0, 0, data["resolveColor"], null, data["turnsToNormal"]);
+		bumper.deserialize(data);
+		return bumper;
 	}
 }

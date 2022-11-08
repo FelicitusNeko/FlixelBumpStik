@@ -76,12 +76,6 @@ class ClassicGameState extends GameState
 
 		if (_hud == null)
 			add(_hud = new ClassicHUD());
-		if (_hudClassic != null)
-		{
-			_hudClassic.onPaintCanGet.add((_) -> FlxG.sound.play(AssetPaths.paintcan__wav));
-			_hudClassic.onPaintCanClick.add(onPaintCanClick);
-			_hudClassic.onNextBumperClick.add(onBumperSelect);
-		}
 	}
 
 	override function prepareBoard()
@@ -95,6 +89,11 @@ class ClassicGameState extends GameState
 		board.onLaunchBumper.add(onLaunch);
 		board.onBumperSelect.add(onBumperSelect);
 		board.onGameOver.add(onGameOver);
+
+		var hud = _hudClassic;
+		hud.onPaintCanGet.add((_) -> FlxG.sound.play(AssetPaths.paintcan__wav));
+		hud.onPaintCanClick.add(onPaintCanClick);
+		hud.onNextBumperClick.add(onBumperSelect);
 	}
 
 	inline function get__hudClassic()
@@ -267,5 +266,30 @@ class ClassicGameState extends GameState
 		retval["nextColorEvery"] = _nextColorEvery;
 
 		return retval;
+	}
+
+	override function deserialize(data:DynamicAccess<Dynamic>, ignoreGameName = false) {
+		super.deserialize(data, ignoreGameName);
+
+		if (data["gameType"] == "classic") {
+			while (_players.pop() != null) {}
+	
+			var playerData:Array<DynamicAccess<Dynamic>> = data["players"];
+			for (player in playerData) {
+				var board = new ClassicBoard(0, 0);
+				board.deserialize(player["board"]);
+				_players.push({
+					board: board,
+					multStack: player["multStack"]
+				});
+			}
+	
+			_hud = new ClassicHUD();
+			_hud.deseralize(data["hud"]);
+		}
+
+		_jackpot = data["jackpot"];
+		_nextColor = data["nextColor"];
+		_nextColorEvery = data["nextColorEvery"];
 	}
 }

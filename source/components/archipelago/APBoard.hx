@@ -1,5 +1,8 @@
 package components.archipelago;
 
+import haxe.Exception;
+import boardObject.BoardObject;
+import boardObject.archipelago.APHazardPlaceholder;
 import boardObject.Bumper;
 import components.classic.ClassicBoard;
 import flixel.math.FlxRandom;
@@ -60,5 +63,20 @@ class APBoard extends ClassicBoard
 		}
 
 		return retval;
+	}
+
+	public override function deserialize(data:DynamicAccess<Dynamic>) {
+		super.deserialize(data);
+
+		var obstaclesData:Array<DynamicAccess<Dynamic>> = data["obstacles"];
+		for (obstacleData in obstaclesData)
+		{
+			var obstacle:BoardObject = switch (obstacleData["type"])
+			{
+				case "hazardPlaceholder": APHazardPlaceholder.fromSaved(obstacleData);
+				case x: throw new Exception('Unknown board object type $x');
+			}
+			putObstacleAt(obstacleData["boardX"], obstacleData["boardY"], obstacle);
+		}
 	}
 }

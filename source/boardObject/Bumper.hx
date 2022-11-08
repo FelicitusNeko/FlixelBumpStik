@@ -464,4 +464,20 @@ class Bumper extends BoardObject
 
 		return retval;
 	}
+
+	public override function deserialize(data:DynamicAccess<Dynamic>)
+	{
+		super.deserialize(data);
+
+		var flairData:Array<String> = data["flairs"];
+		for (flair in flairData)
+			addFlair(flair);
+	}
+
+	public static function fromSaved(data:DynamicAccess<Dynamic>)
+	{
+		var bumper = new Bumper(0, 0, data["bColor"], data["direction"]);
+		bumper.deserialize(data);
+		return bumper;
+	}
 }

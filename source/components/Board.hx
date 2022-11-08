@@ -1,9 +1,8 @@
 package components;
 
-import boardObject.BoardObject;
-import boardObject.BoardSpace;
-import boardObject.Bumper;
-import boardObject.Launcher;
+import haxe.DynamicAccess;
+import haxe.Exception;
+import haxe.Timer;
 import flixel.FlxBasic;
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -11,9 +10,12 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRandom;
 import flixel.util.FlxColor;
-import haxe.DynamicAccess;
-import haxe.Timer;
 import lime.app.Event;
+import boardObject.archipelago.APHazardBumper;
+import boardObject.BoardObject;
+import boardObject.BoardSpace;
+import boardObject.Bumper;
+import boardObject.Launcher;
 
 typedef BumperCallback = Bumper->Void;
 
@@ -829,5 +831,20 @@ class Board extends FlxTypedGroup<FlxBasic>
 		});
 
 		return retval;
+	}
+
+	public function deserialize(data:DynamicAccess<Dynamic>)
+	{
+		var bumpersData:Array<DynamicAccess<Dynamic>> = data["bumpers"];
+		for (bumperData in bumpersData)
+		{
+			var bumper:Bumper = switch (bumperData["type"])
+			{
+				case "bumper": Bumper.fromSaved(bumperData);
+				case "hazardBumper": APHazardBumper.fromSaved(bumperData);
+				case x: throw new Exception('Unknown bumper type $x');
+			}
+			putBumperAt(bumperData["boardX"], bumperData["boardY"], bumper);
+		}
 	}
 }
