@@ -40,6 +40,9 @@ class StandardHUD extends FlxSpriteGroup
 	/** Event that fires when the cleared bumper value changes.**/
 	public var onBlockChanged(default, null) = new Event<Int->Void>();
 
+	/** Event that fires when the Next Bumper is clicked. **/
+	public var onNextBumperClick(default, null) = new Event<Bumper->Void>();
+
 	/** Retrieve a string based on an i18n key. **/
 	private var _t:I18nFunction;
 
@@ -101,13 +104,18 @@ class StandardHUD extends FlxSpriteGroup
 
 	function set_nextBumper(nextBumper:Bumper):Bumper
 	{
+		function onNextClick(b)
+			onNextBumperClick.dispatch(cast(b, Bumper));
+
 		if (this.nextBumper != null)
 		{
+			this.nextBumper.onClick.remove(onNextClick);
 			remove(this.nextBumper);
 			this.nextBumper.isUIElement = false;
 		}
 		if (nextBumper != null)
 		{
+			nextBumper.onClick.add(onNextClick);
 			nextBumper.isUIElement = true;
 			nextBumper.setPosition(width - nextBumper.width - 5, height - nextBumper.height - 5);
 			add(nextBumper);

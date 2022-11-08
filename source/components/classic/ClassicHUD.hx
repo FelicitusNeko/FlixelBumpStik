@@ -35,9 +35,6 @@ class ClassicHUD extends StandardHUD
 	/** Event that fires when the Paint Can button is clicked. **/
 	public var onPaintCanClick(default, null) = new Event<Void->Void>();
 
-	/** Event that fires when the Next Bumper is clicked. **/
-	public var onNextBumperClick(default, null) = new Event<Bumper->Void>();
-
 	public function new()
 	{
 		super();
@@ -97,20 +94,6 @@ class ClassicHUD extends StandardHUD
 		}
 
 		return this.paintCans = paintCans;
-	}
-
-	override function set_nextBumper(nextBumper:Bumper):Bumper
-	{
-		function onNextClick(b)
-		{
-			onNextBumperClick.dispatch(cast(b, Bumper));
-		}
-
-		if (this.nextBumper != null)
-			this.nextBumper.onClick.remove(onNextClick);
-		if (nextBumper != null)
-			nextBumper.onClick.add(onNextClick);
-		return super.set_nextBumper(nextBumper);
 	}
 
 	/** Resets the HUD to its starting values. **/
