@@ -133,4 +133,27 @@ abstract APTask(IAPTask) from IAPTask
 
 		return retval;
 	}
+
+	@:to
+	public function toBaseData():IAPTask
+	{
+		return {
+			type: this.type,
+			goals: this.goals,
+			goalIndex: this.goalIndex,
+			current: this.current,
+			uiText: null
+		};
+	}
+
+	public static function fromSaved(data:DynamicAccess<Dynamic>, uiText:FlxUIText):APTask
+	{
+		return {
+			type: data["type"],
+			goals: data["goals"],
+			goalIndex: data["goalIndex"],
+			current: data["current"],
+			uiText: uiText
+		};
+	}
 }

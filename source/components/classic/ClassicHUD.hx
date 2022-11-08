@@ -119,4 +119,15 @@ class ClassicHUD extends StandardHUD
 
 		return retval;
 	}
+
+	public override function deseralize(data:DynamicAccess<Dynamic>) {
+		super.deseralize(data);
+
+		var paintCansDA:DynamicAccess<Int> = data["paintCans"];
+		paintCans = paintCansDA["count"];
+		paintCanStartThreshold = paintCansDA["start"];
+		_paintCansNext = paintCansDA["next"];
+		_paintCansIncrement = paintCansDA["inc"];
+		paintCansIncrementStep = paintCansDA["incStep"];
+	}
 }

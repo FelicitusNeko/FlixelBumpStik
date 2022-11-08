@@ -146,4 +146,11 @@ class StandardHUD extends FlxSpriteGroup
 
 		return retval;
 	}
+
+	public function deseralize(data:DynamicAccess<Dynamic>)
+	{
+		score = data["score"];
+		block = data["block"];
+		// nextBumper = Bumper.fromSaved(data["nextBumper"]);
+	}
 }

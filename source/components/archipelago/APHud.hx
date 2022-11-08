@@ -245,8 +245,24 @@ class APHud extends ClassicHUD
 		retval["accScoreTL"] = _accruedScoreThisLevel;
 		retval["accBlock"] = _accruedBlock;
 		retval["accBlockTL"] = _accruedBlockThisLevel;
-		retval["tasks"] = _taskList.map(t -> t.serialize());
+		retval["tasks"] = _taskList.map(t -> t.toBaseData());
 
 		return retval;
+	}
+
+	public override function deseralize(data:DynamicAccess<Dynamic>) {
+		super.deseralize(data);
+
+		turners = data["turners"];
+		_accruedScore = data["accScore"];
+		_accruedScoreThisLevel = data["ScoreTL"];
+		_accruedBlock = data["accBlock"];
+		_accruedBlockThisLevel = data["accBlockTL"];
+
+		var taskData:Array<IAPTask> = data["tasks"];
+		for (task in taskData) {
+			task.uiText = new FlxUIText(0, 0, 0, _t('game/ap/task/${task.type}', ["current" => task.current, "goal" => task.goals[0]]));
+			_taskList.push(task);
+		}
 	}
 }
