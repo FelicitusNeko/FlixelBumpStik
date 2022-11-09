@@ -180,6 +180,23 @@ class BumperGenerator
 
 		retval["drops"] = dropsDA;
 
+		// TODO: maybe save the state of the RNG
+
+		return retval;
+	}
+
+	public function deseralize(data:DynamicAccess<Dynamic>){
+		colorLimit = data["colorLimit"];
+		colors = data["colors"];
+
+		var dropsDA:DynamicAccess<Int> = data["drops"];
+		for (col => drop in dropsDA)
+			_drops[Std.parseInt(col)] = drop;
+	}
+
+	public static function fromSaved(data:DynamicAccess<Dynamic>) {
+		var retval = new BumperGenerator(data["initColors"], data["colorOpts"]);
+		retval.deseralize(data);
 		return retval;
 	}
 }
