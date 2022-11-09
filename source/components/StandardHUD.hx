@@ -151,6 +151,6 @@ class StandardHUD extends FlxSpriteGroup
 	{
 		score = data["score"];
 		block = data["block"];
-		// nextBumper = Bumper.fromSaved(data["nextBumper"]);
+		nextBumper = Bumper.fromSaved(data["nextBumper"]);
 	}
 }
