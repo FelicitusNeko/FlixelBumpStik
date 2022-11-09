@@ -1,5 +1,6 @@
 package components.classic;
 
+import flixel.util.FlxSave;
 import boardObject.Bumper;
 import components.Board;
 import components.classic.ClassicHUD;
@@ -53,13 +54,25 @@ class ClassicGameState extends GameState
 		{
 			FlxG.switchState(new ClassicGameState());
 		});
-		add(restart);
+		_hud.add(restart);
 		#else
 		var test = new FlxButton(0, 0, "Test", () ->
 		{
 			// openSubState(new AllClearSubstate(12345, _boardClassic.center));
 			// _hudClassic.paintCans++;
-			trace(Json.stringify(serialize()));
+			// trace(Json.stringify(serialize()));
+			var load = new FlxSave();
+			load.bind("testFile");
+			if (load.data.gameName == null)
+			{
+				load.destroy();
+				saveGame("testFile");
+			}
+			else
+			{
+				trace(Json.stringify(load.data));
+				_boardClassic.bCount == 0 ? load.erase() : load.destroy();
+			}
 		});
 		_hud.add(test);
 		#end
@@ -72,10 +85,12 @@ class ClassicGameState extends GameState
 				board: new ClassicBoard(0, 0),
 				multStack: [1]
 			});
-		add(_boardClassic);
 
 		if (_hud == null)
-			add(_hud = new ClassicHUD());
+			_hud = new ClassicHUD();
+
+		if (_bg == null)
+			_bg = new BumperGenerator(3);
 	}
 
 	override function prepareBoard()
@@ -118,27 +133,31 @@ class ClassicGameState extends GameState
 			var mJackpot = addScore(_jackpot, _player.multStack);
 			_jackpot = 0;
 			_hud.bonus = mJackpot;
-			trace('Awarding jackpot of $mJackpot');
+			trace('All Clear - Awarding jackpot of $mJackpot');
 
 			var allClearSub = new AllClearSubstate(mJackpot, _boardClassic.center);
 			allClearSub.closeCallback = onRequestGenerate;
 			openSubState(allClearSub);
-			return;
 		}
-		if (_hud.block >= _nextColor && _bg.colors < _bg.colorLimit)
+		else if (_hud.block >= _nextColor && _bg.colors < _bg.colorLimit)
 		{
 			FlxG.sound.play(AssetPaths.levelup__wav);
+			var prevNextColor = _nextColor;
 			_nextColor += _nextColorEvery;
 			_player.multStack[0] += .2;
-			trace('Adding new colour; now at ${_bg.colors}');
+			trace('Threshold hit ${_hud.block}/$prevNextColor blk - adding new colour, now at ${_bg.colors}/${_bg.colorLimit}, next at $_nextColor');
 
 			var newColorSub = new NewColorSubstate(_bg.colorOpts[_bg.colors++], _boardClassic.center);
 			newColorSub.closeCallback = onRequestGenerate;
 			openSubState(newColorSub);
-			return;
 		}
-		if (_hud.nextBumper == null)
-			_hud.nextBumper = _bg.weightedGenerate();
+		else
+		{
+			if (_hud.nextBumper == null)
+				_hud.nextBumper = _bg.weightedGenerate();
+			// TODO: save the game here (do I maybe want to do this in the base class, though?)
+			saveGame();
+		}
 	}
 
 	/** Called when the board is asking for a bumper to launch. **/
@@ -268,14 +287,17 @@ class ClassicGameState extends GameState
 		return retval;
 	}
 
-	override function deserialize(data:DynamicAccess<Dynamic>, ignoreGameName = false) {
+	override function deserialize(data:DynamicAccess<Dynamic>, ignoreGameName = false)
+	{
 		super.deserialize(data, ignoreGameName);
 
-		if (data["gameType"] == "classic") {
+		if (data["gameType"] == "classic")
+		{
 			while (_players.pop() != null) {}
-	
+
 			var playerData:Array<DynamicAccess<Dynamic>> = data["players"];
-			for (player in playerData) {
+			for (player in playerData)
+			{
 				var board = new ClassicBoard(0, 0);
 				board.deserialize(player["board"]);
 				_players.push({
@@ -283,7 +305,7 @@ class ClassicGameState extends GameState
 					multStack: player["multStack"]
 				});
 			}
-	
+
 			_hud = new ClassicHUD();
 			_hud.deseralize(data["hud"]);
 		}
