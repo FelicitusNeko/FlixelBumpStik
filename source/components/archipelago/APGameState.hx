@@ -228,6 +228,9 @@ class APGameState extends ClassicGameState
 	/** The Archipelago client. **/
 	private var _ap:Client;
 
+	/** The index of the last item that has been processed. **/
+	private var _lastProcessed = -1;
+
 	/** The width at which the next game will start. **/
 	private var _curWidth = 3;
 
@@ -283,21 +286,11 @@ class APGameState extends ClassicGameState
 
 	public function new(ap:Client, slotData:Dynamic)
 	{
-		_bg = new BumperGenerator(2, [
-			APColor.Red,
-			APColor.Green,
-			APColor.Rose,
-			APColor.Beige,
-			APColor.Purple,
-			APColor.Yellow
-		]);
-		_bg.shuffleColors();
-
+		// TODO: keep list of seeds so they can be wiped later
 		_ap = ap;
 		_ap._hOnItemsReceived = onItemsReceived;
 
 		super();
-		// _gameName = 'ap-${_ap.seed}-${ap.slotnr}'; // TODO: keep list of seeds so they can be wiped later
 
 		_bg.colors = _startColors;
 		_bg.colorLimit = _endColors;
@@ -344,7 +337,7 @@ class APGameState extends ClassicGameState
 
 	override function destroy()
 	{
-		// TODO: save the game
+		// TODO: close the AP connection
 		FlxG.autoPause = true;
 		super.destroy();
 	}
@@ -356,9 +349,8 @@ class APGameState extends ClassicGameState
 				board: new APBoard(0, 0, _curWidth, _curHeight),
 				multStack: [.8, 1]
 			});
-		add(_boardAP);
 
-		add(_hud = new APHud());
+		_hud = new APHud();
 
 		for (type in ["booster", "hazard", "treasure"])
 			_schedule.set(type, {
@@ -371,6 +363,16 @@ class APGameState extends ClassicGameState
 				maxDelay: 10
 			});
 		_schedule["booster"].setDelay(7, 20);
+
+		_bg = new BumperGenerator(2, [
+			APColor.Red,
+			APColor.Green,
+			APColor.Rose,
+			APColor.Beige,
+			APColor.Purple,
+			APColor.Yellow
+		]);
+		_bg.shuffleColors();
 	}
 
 	/**
@@ -583,42 +585,45 @@ class APGameState extends ClassicGameState
 			_itemBuffer = _itemBuffer.concat(items);
 		else
 			for (itemObj in items)
-			{
-				var item:APItem = itemObj.item;
-				if (item == Nothing)
-					continue;
-
-				// trace("Item received: " + item);
-				pushToast(_t("game/ap/received", ["item" => Std.string(_t(item))]), FlxColor.CYAN);
-				switch (item)
+				if (itemObj.index > _lastProcessed)
 				{
-					case ScoreBonus:
-					// add score based on level
-					case TaskSkip:
-					// add Task Skip immediately
-					case StartingTurner:
-					// add Turner immediately, as well as +1 starting use
-					// case Blank004:
-					// this shouldn't happen currently
-					case StartPaintCan:
-						_startPaintCans++;
-						_hudClassic.paintCans++;
-					case BonusBooster:
-						_schedule["booster"].inStock++;
-					case HazardBumper:
-						_schedule["hazard"].inStock++;
-					case TreasureBumper:
-						_schedule["treasure"].inStock++;
-					case RainbowTrap:
-					// set rainbow trap flag
-					case SpinnerTrap:
-					// set spinner trap flag
-					case KillerTrap:
-					// force-end board immediately
-					default:
-						trace("Item ID:" + itemObj.item);
+					var item:APItem = itemObj.item;
+					if (item == Nothing)
+						continue;
+
+					// trace("Item received: " + item);
+					pushToast(_t("game/ap/received", ["item" => Std.string(_t(item))]), FlxColor.CYAN);
+					switch (item)
+					{
+						case ScoreBonus:
+						// add score based on level
+						case TaskSkip:
+						// add Task Skip immediately
+						case StartingTurner:
+						// add Turner immediately, as well as +1 starting use
+						// case Blank004:
+						// this shouldn't happen currently
+						case StartPaintCan:
+							_startPaintCans++;
+							_hudClassic.paintCans++;
+						case BonusBooster:
+							_schedule["booster"].inStock++;
+						case HazardBumper:
+							_schedule["hazard"].inStock++;
+						case TreasureBumper:
+							_schedule["treasure"].inStock++;
+						case RainbowTrap:
+						// set rainbow trap flag
+						case SpinnerTrap:
+						// set spinner trap flag
+						case KillerTrap:
+						// force-end board immediately
+						default:
+							trace("Item ID:" + itemObj.item);
+					}
+
+					_lastProcessed = itemObj.index;
 				}
-			}
 	}
 
 	/**
@@ -811,6 +816,7 @@ class APGameState extends ClassicGameState
 		retval["startPaintCans"] = _startPaintCans;
 		retval["allClears"] = _allClears;
 		retval["schedule"] = _schedule;
+		retval["lastProcessed"] = _lastProcessed;
 
 		return retval;
 	}
@@ -843,5 +849,6 @@ class APGameState extends ClassicGameState
 		_startPaintCans = data["startPaintCans"];
 		_allClears = data["allClears"];
 		_schedule = data["schedule"];
+		_lastProcessed = data["lastProcessed"];
 	}
 }
