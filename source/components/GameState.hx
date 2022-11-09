@@ -47,8 +47,6 @@ abstract class GameState extends FlxState
 
 	public function new()
 	{
-		if (_bg == null)
-			_bg = new BumperGenerator(3);
 		_t = BumpStikGame.g().i18n.tr;
 		super();
 	}
@@ -100,18 +98,44 @@ abstract class GameState extends FlxState
 	function createGame()
 	{
 		if (_players.length == 0)
-		{
 			_players.push({
 				board: new Board(0, 0),
 				multStack: [1]
 			});
-		}
-
-		for (player in _players)
-			add(player.board);
 
 		if (_hud == null)
-			add(_hud = new StandardHUD());
+			_hud = new StandardHUD();
+
+		if (_bg == null)
+			_bg = new BumperGenerator(3);
+	}
+
+	function saveGame(?file:String)
+	{
+		if (file == null)
+			file = gameName;
+
+		var save = new FlxSave();
+		save.bind(file);
+		save.erase();
+		save.bind(file);
+
+		var data = serialize();
+		for (key in data.keys())
+			Reflect.setField(save.data, key, data[key]);
+		save.data.timestamp = Date.now().getTime();
+
+		save.close();
+	}
+
+	function clearGame(?file:String)
+	{
+		if (file == null)
+			file = gameName;
+
+		var save = new FlxSave();
+		save.bind(file);
+		save.erase();
 	}
 
 	function serialize():DynamicAccess<Dynamic>
@@ -141,21 +165,16 @@ abstract class GameState extends FlxState
 		if (data["gameName"] != gameName && !ignoreGameName)
 			throw new Exception("Game name mismatch");
 
-		// for (player in _players)
-		// 	if (player.board != null)
-		// 		player.board.destroy();
-		// while (_players.pop() != null) {}
-
-		// for (player in data["players"])
-		// {
-		// 	var newBoard = new Board
-
-		// 	player["multStack"]
-		// }
+		if (_bg == null)
+			_bg = BumperGenerator.fromSaved(data);
 	}
 
 	function prepareBoard()
 	{
+		for (player in _players)
+			add(player.board);
+		add(_hud);
+
 		var mainCamera = FlxG.camera;
 		var hudCamera = FlxG.cameras.list[1];
 
