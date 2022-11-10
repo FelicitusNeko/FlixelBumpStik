@@ -52,6 +52,7 @@ class ClassicGameState extends GameState
 		#if kiosktest
 		var restart = new FlxButton(0, 0, "Restart", () ->
 		{
+			clearGame();
 			FlxG.switchState(new ClassicGameState());
 		});
 		_hud.add(restart);
