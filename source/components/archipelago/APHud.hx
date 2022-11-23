@@ -1,13 +1,13 @@
 package components.archipelago;
 
-import flixel.ui.FlxButton;
-import components.archipelago.APTask;
-import components.classic.ClassicHUD;
-import flixel.addons.ui.FlxUIList;
-import flixel.addons.ui.FlxUIText;
 import haxe.DynamicAccess;
 import haxe.Exception;
+import flixel.addons.ui.FlxUIList;
+import flixel.addons.ui.FlxUIText;
+import flixel.ui.FlxButton;
 import lime.app.Event;
+import components.archipelago.APTask;
+import components.classic.ClassicHUD;
 
 /** Adds Archipelago-specific elements to the Classic mode HUD. **/
 class APHud extends ClassicHUD
@@ -30,10 +30,17 @@ class APHud extends ClassicHUD
 	/** The internal list of tasks to clear. **/
 	private var _taskList:Array<APTask> = [];
 
+	/** The button to use a Turner. **/
 	private var _turnerButton:FlxButton;
+
+	/** The button to use a Task Skip. **/
+	private var _skipButton:FlxButton;
 
 	/** The current number of available Turners. **/
 	public var turners(default, set):Int = 0;
+
+	/** The current number of available Task Skips. **/
+	public var taskSkip(default, set):Int = 0;
 
 	/** The total number of points obtained through games on this level. **/
 	public var levelScore(get, never):Int;
@@ -52,6 +59,9 @@ class APHud extends ClassicHUD
 
 	/** Event that fires when the Turner button is clicked. **/
 	public var onTurnerClick(default, null) = new Event<Void->Void>();
+
+	/** Event that fires when the Task Skip button is clicked. **/
+	public var onTaskSkipClick(default, null) = new Event<Void->Void>();
 
 	/**
 		Fires when a task has been cleared.
@@ -72,27 +82,45 @@ class APHud extends ClassicHUD
 			var listy = _blockCounter.y + _blockCounter.height;
 			_taskListbox = new FlxUIList(10, listy, [], width - 20, height - listy - 69, more);
 
-			add(_taskListbox);
-
 			_turnerButton = new FlxButton(5, 5, "T:0", () ->
 			{
 				if (turners > 0)
 					onTurnerClick.dispatch();
 			});
 			_turnerButton.allowSwiping = false;
-			_turnerButton.y = height - _pcButton.height - _turnerButton.height - 5;
-			add(_pcButton);
+			_turnerButton.y = _pcButton.y - _turnerButton.height;
+
+			_skipButton = new FlxButton(5, 5, "S:0", () ->
+			{
+				if (taskSkip > 0)
+					onTaskSkipClick.dispatch();
+			});
+			_skipButton.allowSwiping = false;
+			_skipButton.y = _turnerButton.y - _skipButton.height;
+
+			for (i in [_taskListbox, _turnerButton, _skipButton])
+				add(i);
 		}
 
 		turners = 0;
 	}
 
-	function set_turners(turners:Int) {
+	function set_turners(turners:Int)
+	{
 		var displayTurners = Math.round(Math.min(turners, 9));
-		_turnerButton.text = "P:" + displayTurners;
+		_turnerButton.text = "T:" + displayTurners;
 		_turnerButton.alive = turners > 0;
 
 		return this.turners = turners;
+	}
+
+	function set_taskSkip(taskSkip:Int)
+	{
+		var displaySkips = Math.round(Math.min(taskSkip, 9));
+		_skipButton.text = "S:" + displaySkips;
+		_skipButton.alive = taskSkip > 0;
+
+		return this.taskSkip = taskSkip;
 	}
 
 	inline function get_levelScore()
@@ -241,6 +269,7 @@ class APHud extends ClassicHUD
 		var retval = super.serialize();
 
 		retval["turners"] = turners;
+		retval["taskSkip"] = taskSkip;
 		retval["accScore"] = _accruedScore;
 		retval["accScoreTL"] = _accruedScoreThisLevel;
 		retval["accBlock"] = _accruedBlock;
@@ -250,17 +279,20 @@ class APHud extends ClassicHUD
 		return retval;
 	}
 
-	public override function deseralize(data:DynamicAccess<Dynamic>) {
+	public override function deseralize(data:DynamicAccess<Dynamic>)
+	{
 		super.deseralize(data);
 
 		turners = data["turners"];
+		taskSkip = data["taskSkip"];
 		_accruedScore = data["accScore"];
 		_accruedScoreThisLevel = data["ScoreTL"];
 		_accruedBlock = data["accBlock"];
 		_accruedBlockThisLevel = data["accBlockTL"];
 
 		var taskData:Array<IAPTask> = data["tasks"];
-		for (task in taskData) {
+		for (task in taskData)
+		{
 			task.uiText = new FlxUIText(0, 0, 0, _t('game/ap/task/${task.type}', ["current" => task.current, "goal" => task.goals[0]]));
 			_taskList.push(task);
 		}
