@@ -3,6 +3,11 @@ package components;
 import haxe.DynamicAccess;
 import haxe.Exception;
 import haxe.Timer;
+import boardObject.BoardObject;
+import boardObject.BoardSpace;
+import boardObject.Bumper;
+import boardObject.Launcher;
+import boardObject.archipelago.APHazardBumper;
 import flixel.FlxBasic;
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -11,11 +16,6 @@ import flixel.math.FlxPoint;
 import flixel.math.FlxRandom;
 import flixel.util.FlxColor;
 import lime.app.Event;
-import boardObject.archipelago.APHazardBumper;
-import boardObject.BoardObject;
-import boardObject.BoardSpace;
-import boardObject.Bumper;
-import boardObject.Launcher;
 
 typedef BumperCallback = Bumper->Void;
 
@@ -424,6 +424,13 @@ class Board extends FlxTypedGroup<FlxBasic>
 		return null;
 	}
 
+	public function getRandomBumper()
+	{
+		if (bCount == 0)
+			return null;
+		return cast(_bumpers.getRandom(), Bumper);
+	}
+
 	/**
 		Updates all member objects and runs the state machine.
 		@param elapsed The number of seconds passed since the last frame.
@@ -709,6 +716,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 		}
 	}
 
+	/** State machine call for waiting for the Game Over animation to finish. **/
 	private function smGameOverWait(_:Float)
 	{
 		if (_bumpers.getFirstExisting() == null || _forceGameOver)
