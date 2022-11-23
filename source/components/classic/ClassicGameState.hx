@@ -63,32 +63,32 @@ class ClassicGameState extends GameState
 		});
 		_hud.add(restart);
 		#else
-		var test = new FlxButton(0, 0, "Test", () ->
-		{
-			// openSubState(new AllClearSubstate(12345, _boardClassic.center));
+		// var test = new FlxButton(0, 0, "Test", () ->
+		// {
+		// 	// openSubState(new AllClearSubstate(12345, _boardClassic.center));
 
-			// _hudClassic.paintCans++;
+		// 	// _hudClassic.paintCans++;
 
-			// trace(Json.stringify(serialize()));
+		// 	// trace(Json.stringify(serialize()));
 
-			// var load = new FlxSave();
-			// load.bind("testFile");
-			// if (load.data.gameName == null)
-			// {
-			// 	load.destroy();
-			// 	saveGame("testFile");
-			// }
-			// else
-			// {
-			// 	trace(Json.stringify(load.data));
-			// 	_boardClassic.bCount == 0 ? load.erase() : load.destroy();
-			// }
+		// 	// var load = new FlxSave();
+		// 	// load.bind("testFile");
+		// 	// if (load.data.gameName == null)
+		// 	// {
+		// 	// 	load.destroy();
+		// 	// 	saveGame("testFile");
+		// 	// }
+		// 	// else
+		// 	// {
+		// 	// 	trace(Json.stringify(load.data));
+		// 	// 	_boardClassic.bCount == 0 ? load.erase() : load.destroy();
+		// 	// }
 
-			var bumper = _boardClassic.getRandomBumper();
-			if (bumper != null && bumper.alive)
-				openSubState(new TurnerSubstate(bumper.getPosition(), bumper.direction, bumper.bColor));
-		});
-		_hud.add(test);
+		// 	// var bumper = _boardClassic.getRandomBumper();
+		// 	// if (bumper != null && bumper.alive)
+		// 	// 	openSubState(new TurnerSubstate(bumper.getPosition(), bumper.direction, bumper.bColor));
+		// });
+		// _hud.add(test);
 		#end
 	}
 
@@ -223,7 +223,7 @@ class ClassicGameState extends GameState
 		{
 			FlxG.sound.play(AssetPaths.mselect__wav);
 			_selectedColor = color;
-			_boardClassic.startPaint();
+			_boardClassic.selectMode();
 
 			if (_paintCanBumper == null)
 			{

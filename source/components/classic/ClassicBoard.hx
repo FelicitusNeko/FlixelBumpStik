@@ -14,21 +14,21 @@ class ClassicBoard extends Board
 	{
 		super(x, y, bWidth, bHeight);
 
-		_csm.addState("painting", null);
+		_csm.addState("selecting", null);
 
-		_csm.set("initial", "paint", "painting");
-		_csm.set("painting", "cancel", "initial");
-		_csm.set("painting", "painted", "checking");
+		_csm.set("initial", "selectmode", "selecting");
+		_csm.set("selecting", "cancel", "initial");
+		_csm.set("selecting", "painted", "checking");
 	}
 
-	public function startPaint()
+	public function selectMode()
 	{
 		for (launcher in _launchers)
 			launcher.enabled = false;
-		_csm.chain("paint");
+		_csm.chain("selectmode");
 	}
 
-	inline public function endPaint(cancel = false)
+	public function endPaint(cancel = false)
 	{
 		if (cancel)
 			for (launcher in _launchers)
@@ -40,7 +40,7 @@ class ClassicBoard extends Board
 
 	override function onClickBumper(obj:BoardObject)
 	{
-		if (_csm.is("painting") && Std.isOfType(obj, Bumper))
+		if (_csm.is("selecting") && Std.isOfType(obj, Bumper))
 			onBumperSelect.dispatch(cast(obj, Bumper));
 	}
 }
