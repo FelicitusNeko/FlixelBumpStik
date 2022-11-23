@@ -50,13 +50,13 @@ class PaintCanSubstate extends FlxSubState
 			var bumper = new Bumper(center.x, center.y, color, i < colors ? Up : None);
 			if (bumperHeight < 0)
 				bumperHeight = bumper.height;
-			bumper.x += Math.cos(DegRad(-90 + ((i - 1) * 60))) * (bumperHeight * distanceFactor);
-			bumper.y += Math.sin(DegRad(-90 + ((i - 1) * 60))) * (bumperHeight * distanceFactor);
+			bumper.x += Math.cos(BumpStikGame.DegRad(-90 + ((i - 1) * 60))) * (bumperHeight * distanceFactor);
+			bumper.y += Math.sin(BumpStikGame.DegRad(-90 + ((i - 1) * 60))) * (bumperHeight * distanceFactor);
 			bumper.grayedOut = i >= colors;
 			bumper.angle = (i - 1) * 60;
 			_bumpers.add(bumper);
 
-			vertices.push(new FlxPoint(Math.cos(DegRad((i - 1) * 60)), Math.sin(DegRad((i - 1) * 60))));
+			vertices.push(new FlxPoint(Math.cos(BumpStikGame.DegRad((i - 1) * 60)), Math.sin(BumpStikGame.DegRad((i - 1) * 60))));
 		}
 
 		for (vertex in vertices)
@@ -87,12 +87,5 @@ class PaintCanSubstate extends FlxSubState
 	}
 
 	function onDialogResultF(_:Color)
-	{
 		close();
-	}
-
-	inline function DegRad(deg:Float):Float
-	{
-		return deg * Math.PI / 180;
-	}
 }
