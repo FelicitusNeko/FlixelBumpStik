@@ -1,15 +1,16 @@
 package components.classic;
 
-import flixel.util.FlxSave;
+import haxe.DynamicAccess;
+import haxe.Json;
 import boardObject.Bumper;
-import components.Board;
-import components.classic.ClassicHUD;
 import flixel.FlxG;
 import flixel.math.FlxPoint;
 import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
-import haxe.DynamicAccess;
-import haxe.Json;
+import flixel.util.FlxSave;
+import components.Board;
+import components.archipelago.TurnerSubstate;
+import components.classic.ClassicHUD;
 
 class ClassicGameState extends GameState
 {
@@ -47,6 +48,11 @@ class ClassicGameState extends GameState
 	{
 		super.create();
 
+		var hud = _hudClassic;
+		hud.onPaintCanGet.add((_) -> FlxG.sound.play(AssetPaths.paintcan__wav));
+		hud.onPaintCanClick.add(onPaintCanClick);
+		hud.onNextBumperClick.add(onBumperSelect);
+
 		prepareBoard();
 
 		#if kiosktest
@@ -60,20 +66,27 @@ class ClassicGameState extends GameState
 		var test = new FlxButton(0, 0, "Test", () ->
 		{
 			// openSubState(new AllClearSubstate(12345, _boardClassic.center));
+
 			// _hudClassic.paintCans++;
+
 			// trace(Json.stringify(serialize()));
-			var load = new FlxSave();
-			load.bind("testFile");
-			if (load.data.gameName == null)
-			{
-				load.destroy();
-				saveGame("testFile");
-			}
-			else
-			{
-				trace(Json.stringify(load.data));
-				_boardClassic.bCount == 0 ? load.erase() : load.destroy();
-			}
+
+			// var load = new FlxSave();
+			// load.bind("testFile");
+			// if (load.data.gameName == null)
+			// {
+			// 	load.destroy();
+			// 	saveGame("testFile");
+			// }
+			// else
+			// {
+			// 	trace(Json.stringify(load.data));
+			// 	_boardClassic.bCount == 0 ? load.erase() : load.destroy();
+			// }
+
+			var bumper = _boardClassic.getRandomBumper();
+			if (bumper != null && bumper.alive)
+				openSubState(new TurnerSubstate(bumper.getPosition(), bumper.direction, bumper.bColor));
 		});
 		_hud.add(test);
 		#end
@@ -105,11 +118,6 @@ class ClassicGameState extends GameState
 		board.onLaunchBumper.add(onLaunch);
 		board.onBumperSelect.add(onBumperSelect);
 		board.onGameOver.add(onGameOver);
-
-		var hud = _hudClassic;
-		hud.onPaintCanGet.add((_) -> FlxG.sound.play(AssetPaths.paintcan__wav));
-		hud.onPaintCanClick.add(onPaintCanClick);
-		hud.onNextBumperClick.add(onBumperSelect);
 	}
 
 	inline function get__hudClassic()
