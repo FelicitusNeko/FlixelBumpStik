@@ -1,9 +1,9 @@
 package;
 
+import haxe.DynamicAccess;
 import boardObject.Bumper;
 import flixel.math.FlxRandom;
 import flixel.util.FlxColor;
-import haxe.DynamicAccess;
 
 /** Generates bumpers for play use. **/
 class BumperGenerator
@@ -13,6 +13,9 @@ class BumperGenerator
 
 	/** An array to convert numbers into colors. **/
 	public var colorOpts:Array<FlxColor> = [];
+
+	/** Read-only. An array of the colors currently in play. **/
+	public var colorsInPlay(get, never):Array<FlxColor>;
 
 	/** An array to convert numbers into directions. **/
 	public static final dirOpts:Array<Direction> = [Up, Right, Down, Left];
@@ -47,6 +50,9 @@ class BumperGenerator
 		colorLimit = maxColors;
 		colors = this.initColors = initColors;
 	}
+
+	inline function get_colorsInPlay()
+		return colorOpts.slice(0, colors);
 
 	function set_colors(colors:Int):Int
 	{
@@ -185,7 +191,8 @@ class BumperGenerator
 		return retval;
 	}
 
-	public function deseralize(data:DynamicAccess<Dynamic>){
+	public function deseralize(data:DynamicAccess<Dynamic>)
+	{
 		colorLimit = data["colorLimit"];
 		colors = data["colors"];
 
@@ -194,7 +201,8 @@ class BumperGenerator
 			_drops[Std.parseInt(col)] = drop;
 	}
 
-	public static function fromSaved(data:DynamicAccess<Dynamic>) {
+	public static function fromSaved(data:DynamicAccess<Dynamic>)
+	{
 		var retval = new BumperGenerator(data["initColors"], data["colorOpts"]);
 		retval.deseralize(data);
 		return retval;
