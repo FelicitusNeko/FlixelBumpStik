@@ -31,8 +31,19 @@ class APBoard extends ClassicBoard
 
 		_csm.set("initial", "levelclear", "levelclear");
 		_csm.set("initial", "rainbowtrap", "checking");
-		_csm.set("initial", "spinertrap", "moving");
+		_csm.set("initial", "spinnertrap", "moving");
 		_csm.set("initial", "killertrap", "gameoverwait");
+		_csm.set("selecting", "turned", "moving");
+	}
+
+	public function endTurner(cancel = false)
+	{
+		if (cancel)
+			for (launcher in _launchers)
+				launcher.enabled = true;
+		else
+			_dontAdvanceTurn = true;
+		_csm.chain(cancel ? "cancel" : "turned");
 	}
 
 	public function levelClear()
@@ -128,14 +139,15 @@ class APBoard extends ClassicBoard
 		super.deserialize(data);
 
 		var obstaclesData:Array<DynamicAccess<Dynamic>> = data["obstacles"];
-		for (obstacleData in obstaclesData)
-		{
-			var obstacle:BoardObject = switch (obstacleData["type"])
+		if (obstaclesData != null)
+			for (obstacleData in obstaclesData)
 			{
-				case "hazardPlaceholder": APHazardPlaceholder.fromSaved(obstacleData);
-				case x: throw new Exception('Unknown board object type $x');
+				var obstacle:BoardObject = switch (obstacleData["type"])
+				{
+					case "hazardPlaceholder": APHazardPlaceholder.fromSaved(obstacleData);
+					case x: throw new Exception('Unknown board object type $x');
+				}
+				putObstacleAt(obstacleData["boardX"], obstacleData["boardY"], obstacle);
 			}
-			putObstacleAt(obstacleData["boardX"], obstacleData["boardY"], obstacle);
-		}
 	}
 }
