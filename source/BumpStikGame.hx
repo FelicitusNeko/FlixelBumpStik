@@ -16,7 +16,8 @@ class BumpStikGame extends FlxGame
 	}
 
 	public static inline function g()
-	{
 		return cast(FlxG.game, BumpStikGame);
-	}
+
+	public static inline function DegRad(deg:Float):Float
+		return deg * Math.PI / 180;
 }
