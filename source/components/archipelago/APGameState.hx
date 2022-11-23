@@ -7,8 +7,8 @@ import boardObject.Bumper;
 import boardObject.archipelago.APHazardPlaceholder;
 import flixel.FlxCamera;
 import flixel.FlxG;
-import flixel.FlxSprite;
 import flixel.math.FlxRandom;
+import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
 import utilities.DeploymentSchedule;
 import components.archipelago.APTask.APTaskType;
@@ -252,6 +252,9 @@ class APGameState extends ClassicGameState
 	/** The number of Paint Cans with which the next game will start. **/
 	private var _startPaintCans = 0;
 
+	/** The number of Turners with which the next game will start. **/
+	private var _startTurners = 0;
+
 	/** Scheduling data for special bumpers. **/
 	private var _schedule:Map<String, DeploymentSchedule> = [];
 
@@ -276,6 +279,9 @@ class APGameState extends ClassicGameState
 	/** Stores whether a level has been cleared. The level clear sequence will then be fired when a new bumper is requested. **/
 	private var _levelClear = false;
 
+	/** Whether the user is attempting to use a Turner. **/
+	private var _turnerMode = false;
+
 	// TODO: will need to make this check before game over check (not that it makes much of a difference in this mode, but it could later)
 
 	/** The APBoard instance for the current game. **/
@@ -291,9 +297,6 @@ class APGameState extends ClassicGameState
 		_ap._hOnItemsReceived = onItemsReceived;
 
 		super();
-
-		_bg.colors = _startColors;
-		_bg.colorLimit = _endColors;
 
 		_nextColor = 50;
 		_nextColorEvery = 50;
@@ -323,7 +326,9 @@ class APGameState extends ClassicGameState
 		// _hud.onScoreChanged.add(onScoreChanged);
 		_hudClassic.paintCans = _startPaintCans;
 		_hudClassic.paintCansIncrementStep = 0;
+		_hudAP.turners = _startTurners;
 		_hudAP.onTaskCleared.add(onTaskComplete);
+		_hudAP.onTurnerClick.add(onTurnerClick);
 
 		if (_itemBuffer.length > 0)
 		{
@@ -333,6 +338,12 @@ class APGameState extends ClassicGameState
 		}
 
 		FlxG.autoPause = false;
+
+		var test = new FlxButton(0, 0, "Test", () ->
+		{
+			_boardAP.trapTrigger = Killer;
+		});
+		_hud.add(test);
 	}
 
 	override function destroy()
@@ -373,6 +384,8 @@ class APGameState extends ClassicGameState
 			APColor.Yellow
 		]);
 		_bg.shuffleColors();
+		_bg.colors = _startColors;
+		_bg.colorLimit = _endColors;
 	}
 
 	/**
@@ -560,6 +573,7 @@ class APGameState extends ClassicGameState
 		_hudClassic.paintCanStartThreshold = 1000 + (_startPaintCans * 500);
 		_hudClassic.paintCans = _startPaintCans;
 		_hudClassic.paintCansIncrementStep = (_curWidth + _curHeight - 6) * 500;
+		_hudAP.turners = _startTurners;
 
 		_nextColor = _levelNextColor;
 		_nextColorEvery = _levelStepColor;
@@ -596,11 +610,12 @@ class APGameState extends ClassicGameState
 					switch (item)
 					{
 						case ScoreBonus:
-						// add score based on level
+							_hudAP.score += 200 * Math.round(Math.pow(2, _hudAP.level - 1));
 						case TaskSkip:
 						// add Task Skip immediately
 						case StartingTurner:
-						// add Turner immediately, as well as +1 starting use
+							_startTurners++;
+							_hudAP.turners++;
 						// case Blank004:
 						// this shouldn't happen currently
 						case StartPaintCan:
@@ -613,11 +628,11 @@ class APGameState extends ClassicGameState
 						case TreasureBumper:
 							_schedule["treasure"].inStock++;
 						case RainbowTrap:
-						// set rainbow trap flag
+							_boardAP.trapTrigger = Rainbow(_bg.colorsInPlay);
 						case SpinnerTrap:
-						// set spinner trap flag
+							_boardAP.trapTrigger = Spinner;
 						case KillerTrap:
-						// force-end board immediately
+							_boardAP.trapTrigger = Killer;
 						default:
 							trace("Item ID:" + itemObj.item);
 					}
@@ -793,6 +808,44 @@ class APGameState extends ClassicGameState
 		super.onClear(chain, bumper);
 	}
 
+	override function onPaintCanClick()
+	{
+		if (_turnerMode)
+			return;
+		super.onPaintCanClick();
+	}
+
+	function onTurnerClick()
+	{
+		if (_selectedColor != null)
+			return;
+		_turnerMode = true;
+		_boardAP.selectMode();
+	}
+
+	override function onBumperSelect(bumper:Bumper)
+	{
+		if (_selectedColor != null)
+			super.onBumperSelect(bumper);
+		else if (_turnerMode)
+		{
+			var turnerPicker = new TurnerSubstate(bumper.getPosition(), bumper.direction, bumper.bColor);
+			turnerPicker.onDialogResult.add(dir ->
+			{
+				if (dir == null)
+					_boardAP.endTurner(true);
+				else
+				{
+					_hudAP.turners--;
+					bumper.direction = dir;
+					_boardAP.endTurner();
+				}
+				_turnerMode = false;
+			});
+			openSubState(turnerPicker);
+		}
+	}
+
 	/** Called by the board when the board is jammed and the game is over. **/
 	override function onGameOver(animDone:Bool)
 	{
@@ -817,6 +870,7 @@ class APGameState extends ClassicGameState
 		retval["allClears"] = _allClears;
 		retval["schedule"] = _schedule;
 		retval["lastProcessed"] = _lastProcessed;
+		retval["startTurners"] = _startTurners;
 
 		return retval;
 	}
@@ -848,7 +902,8 @@ class APGameState extends ClassicGameState
 		createLevel(data["level"], true);
 		_startPaintCans = data["startPaintCans"];
 		_allClears = data["allClears"];
-		_schedule = data["schedule"];
+		_schedule = data["schedule"]; // BUG: this is not loading schedules
 		_lastProcessed = data["lastProcessed"];
+		_startTurners = data["startTurners"];
 	}
 }
