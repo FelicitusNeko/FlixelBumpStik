@@ -1,16 +1,16 @@
 package components;
 
+import haxe.DynamicAccess;
+import haxe.Exception;
 import Main.I18nFunction;
-import components.StandardHUD;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxState;
 import flixel.math.FlxPoint;
 import flixel.util.FlxColor;
 import flixel.util.FlxSave;
-import haxe.DynamicAccess;
-import haxe.Exception;
 import openfl.system.System;
+import components.StandardHUD;
 
 /** Stats for each player. **/
 typedef PlayerInstance =
@@ -73,6 +73,8 @@ abstract class GameState extends FlxState
 		else
 			createGame();
 		save.close();
+
+		add(_hud);
 
 		var mainCamera = FlxG.camera;
 		var hudCamera:FlxCamera;
@@ -173,7 +175,6 @@ abstract class GameState extends FlxState
 	{
 		for (player in _players)
 			add(player.board);
-		add(_hud);
 
 		var mainCamera = FlxG.camera;
 		var hudCamera = FlxG.cameras.list[1];
