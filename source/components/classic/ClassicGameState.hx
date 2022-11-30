@@ -285,7 +285,8 @@ class ClassicGameState extends GameState
 		if (!animDone)
 		{
 			FlxG.sound.play(AssetPaths.gameover__wav);
-			clearGame();
+			if (gameType == "classic")
+				clearGame();
 		}
 
 	override function serialize():DynamicAccess<Dynamic>
