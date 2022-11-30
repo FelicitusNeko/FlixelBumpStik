@@ -219,13 +219,11 @@ class APHud extends ClassicHUD
 			if (task.type != type || task.current > current)
 				continue;
 
-			var wasComplete = task.complete;
 			task.current = current;
-			if ((!task.complete && task.current >= task.curGoal) || (!wasComplete && task.complete))
+			while (task.current >= task.curGoal && task.goalIndex < task.goalCount)
 			{
 				onTaskCleared.dispatch(level, task.type, task.curGoal, task.current);
-				if (!task.complete)
-					task.goalIndex++;
+				task.goalIndex++;
 			}
 			task.uiText.text = _t('game/ap/task/$type', ["current" => current, "goal" => task.curGoal]);
 		}
