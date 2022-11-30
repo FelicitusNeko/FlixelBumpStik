@@ -1,8 +1,8 @@
 package components.archipelago;
 
+import haxe.DynamicAccess;
 import flixel.addons.ui.FlxUIText;
 import flixel.util.FlxColor;
-import haxe.DynamicAccess;
 
 /** The type of task to be completed. **/
 enum APTaskType
@@ -92,8 +92,8 @@ abstract APTask(IAPTask) from IAPTask
 	{
 		if (value < 0)
 			value = 0;
-		if (value + 1 >= goalCount)
-			value = goalCount - 1;
+		if (value > goalCount)
+			value = goalCount;
 		return this.goalIndex = value;
 	}
 
@@ -114,7 +114,7 @@ abstract APTask(IAPTask) from IAPTask
 		return this.goals[index];
 
 	inline function get_curGoal()
-		return this.goals[this.goalIndex];
+		return this.goals[this.goalIndex == goalCount ? this.goalIndex - 1 : this.goalIndex];
 
 	inline function get_goalCount()
 		return this.goals.length;
