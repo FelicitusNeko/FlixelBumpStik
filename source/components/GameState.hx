@@ -168,7 +168,7 @@ abstract class GameState extends FlxState
 			throw new Exception("Game name mismatch");
 
 		if (_bg == null)
-			_bg = BumperGenerator.fromSaved(data);
+			_bg = BumperGenerator.fromSaved(data["bg"]);
 	}
 
 	function prepareBoard()
