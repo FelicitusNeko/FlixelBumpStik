@@ -283,7 +283,10 @@ class ClassicGameState extends GameState
 
 	function onGameOver(animDone:Bool)
 		if (!animDone)
+		{
 			FlxG.sound.play(AssetPaths.gameover__wav);
+			clearGame();
+		}
 
 	override function serialize():DynamicAccess<Dynamic>
 	{
