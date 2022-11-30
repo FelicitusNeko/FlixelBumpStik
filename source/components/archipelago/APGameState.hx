@@ -612,7 +612,7 @@ class APGameState extends ClassicGameState
 						case ScoreBonus:
 							_hudAP.score += 200 * Math.round(Math.pow(2, _hudAP.level - 1));
 						case TaskSkip:
-						// add Task Skip immediately
+							_hudAP.taskSkip++;
 						case StartingTurner:
 							_startTurners++;
 							_hudAP.turners++;
