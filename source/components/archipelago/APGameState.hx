@@ -1,6 +1,8 @@
 package components.archipelago;
 
 import haxe.DynamicAccess;
+import haxe.Serializer;
+import haxe.Unserializer;
 import ap.Client;
 import ap.PacketTypes.NetworkItem;
 import boardObject.Bumper;
@@ -341,7 +343,7 @@ class APGameState extends ClassicGameState
 
 		var test = new FlxButton(0, 0, "Test", () ->
 		{
-			_boardAP.trapTrigger = Killer;
+			_hud.score += 500;
 		});
 		_hud.add(test);
 	}
@@ -634,7 +636,7 @@ class APGameState extends ClassicGameState
 						case KillerTrap:
 							_boardAP.trapTrigger = Killer;
 						default:
-							trace("Item ID:" + itemObj.item);
+							trace('Item ID: ${itemObj.item}');
 					}
 
 					_lastProcessed = itemObj.index;
@@ -868,7 +870,8 @@ class APGameState extends ClassicGameState
 		retval["level"] = _hudAP.level;
 		retval["startPaintCans"] = _startPaintCans;
 		retval["allClears"] = _allClears;
-		retval["schedule"] = _schedule;
+		// retval["schedule"] = _schedule;
+		retval["schedule"] = Serializer.run(_schedule);
 		retval["lastProcessed"] = _lastProcessed;
 		retval["startTurners"] = _startTurners;
 
@@ -877,8 +880,6 @@ class APGameState extends ClassicGameState
 
 	override function deserialize(data:DynamicAccess<Dynamic>, ignoreGameName = false)
 	{
-		super.deserialize(data, ignoreGameName);
-
 		if (data["gameType"] == "archipelago")
 		{
 			while (_players.pop() != null) {}
@@ -888,7 +889,7 @@ class APGameState extends ClassicGameState
 			{
 				var boardData:DynamicAccess<Dynamic> = player["board"];
 				var board = new APBoard(0, 0, boardData["width"], boardData["height"]);
-				board.deserialize(player["board"]);
+				board.deserialize(boardData);
 				_players.push({
 					board: board,
 					multStack: player["multStack"]
@@ -899,11 +900,15 @@ class APGameState extends ClassicGameState
 			_hud.deseralize(data["hud"]);
 		}
 
-		createLevel(data["level"], true);
+		// _schedule = data["schedule"]; // BUG: this is not loading schedules
 		_startPaintCans = data["startPaintCans"];
 		_allClears = data["allClears"];
-		_schedule = data["schedule"]; // BUG: this is not loading schedules
 		_lastProcessed = data["lastProcessed"];
 		_startTurners = data["startTurners"];
+		_schedule = Unserializer.run(data["schedule"]);
+
+		super.deserialize(data, ignoreGameName);
+
+		createLevel(_hudAP.level, true);
 	}
 }
