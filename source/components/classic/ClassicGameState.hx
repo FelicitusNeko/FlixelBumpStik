@@ -302,8 +302,6 @@ class ClassicGameState extends GameState
 
 	override function deserialize(data:DynamicAccess<Dynamic>, ignoreGameName = false)
 	{
-		super.deserialize(data, ignoreGameName);
-
 		if (data["gameType"] == "classic")
 		{
 			while (_players.pop() != null) {}
@@ -326,5 +324,7 @@ class ClassicGameState extends GameState
 		_jackpot = data["jackpot"];
 		_nextColor = data["nextColor"];
 		_nextColorEvery = data["nextColorEvery"];
+
+		super.deserialize(data, ignoreGameName);
 	}
 }
