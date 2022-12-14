@@ -347,7 +347,7 @@ class APGameState extends ClassicGameState
 
 	override function destroy()
 	{
-		// TODO: close the AP connection
+		_ap.disconnect_socket();
 		FlxG.autoPause = true;
 		super.destroy();
 	}
@@ -879,13 +879,11 @@ class APGameState extends ClassicGameState
 	{
 		var retval = super.serialize();
 
-		retval["level"] = _hudAP.level;
 		retval["startPaintCans"] = _startPaintCans;
+		retval["startTurners"] = _startTurners;
 		retval["allClears"] = _allClears;
-		// retval["schedule"] = _schedule;
 		retval["schedule"] = Serializer.run(_schedule);
 		retval["lastProcessed"] = _lastProcessed;
-		retval["startTurners"] = _startTurners;
 
 		return retval;
 	}
@@ -912,12 +910,11 @@ class APGameState extends ClassicGameState
 			_hud.deseralize(data["hud"]);
 		}
 
-		// _schedule = data["schedule"]; // BUG: this is not loading schedules
 		_startPaintCans = data["startPaintCans"];
-		_allClears = data["allClears"];
-		_lastProcessed = data["lastProcessed"];
 		_startTurners = data["startTurners"];
+		_allClears = data["allClears"];
 		_schedule = Unserializer.run(data["schedule"]);
+		_lastProcessed = data["lastProcessed"];
 
 		super.deserialize(data, ignoreGameName);
 
