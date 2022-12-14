@@ -296,6 +296,7 @@ class APGameState extends ClassicGameState
 	{
 		// TODO: keep list of seeds so they can be wiped later
 		_ap = ap;
+		_ap.clientStatus = READY;
 		_ap._hOnItemsReceived = onItemsReceived;
 
 		super();
@@ -331,13 +332,6 @@ class APGameState extends ClassicGameState
 		_hudAP.turners = _startTurners;
 		_hudAP.onTaskCleared.add(onTaskComplete);
 		_hudAP.onTurnerClick.add(onTurnerClick);
-
-		if (_itemBuffer.length > 0)
-		{
-			onItemsReceived(_itemBuffer);
-			_itemBuffer = [];
-			restartGame();
-		}
 
 		FlxG.autoPause = false;
 
@@ -597,7 +591,7 @@ class APGameState extends ClassicGameState
 	/** Called by AP client when an item is received. **/
 	private function onItemsReceived(items:Array<NetworkItem>)
 	{
-		if (_players.length == 0)
+		if (_ap.clientStatus != PLAYING)
 			_itemBuffer = _itemBuffer.concat(items);
 		else
 			for (itemObj in items)
@@ -715,6 +709,16 @@ class APGameState extends ClassicGameState
 	/** Called when the board requests a bumper to be generated. Usually when it goes into Idle state. **/
 	override function onRequestGenerate()
 	{
+		if (_ap.clientStatus == READY)
+		{
+			_ap.clientStatus = PLAYING;
+			if (_itemBuffer.length > 0)
+			{
+				onItemsReceived(_itemBuffer);
+				_itemBuffer = [];
+			}
+		}
+
 		if (_boardClassic.bCount <= 0 && _jackpot > 0)
 			_hudAP.updateTask(AllClear, _bg.colors);
 		// if (++_allClears == 1)
