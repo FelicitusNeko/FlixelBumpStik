@@ -1,5 +1,6 @@
 package state;
 
+import haxe.Timer;
 import Main.I18nFunction;
 import ap.Client;
 import components.archipelago.APGameState;
@@ -10,7 +11,6 @@ import flixel.input.FlxInput.FlxInputState;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
-import haxe.Timer;
 
 class APEntryState extends FlxState
 {
@@ -117,6 +117,7 @@ class APEntryState extends FlxState
 
 			ap._hOnSocketDisconnected = () ->
 			{
+				polltimer.stop();
 				trace("Disconnected");
 				closeSubState();
 				openSubState(new APErrorSubState(_t("menu/ap/error/connectionReset")));
