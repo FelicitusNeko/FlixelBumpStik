@@ -278,6 +278,9 @@ class APGameState extends ClassicGameState
 	/** The items have been received from the server which have yet to be processed. **/
 	private var _itemBuffer:Array<NetworkItem> = [];
 
+	/** Any checks that have been marked to be sent in the next Update call. **/
+	private var _checkBuffer:Array<APLocation> = [];
+
 	/** Stores whether a level has been cleared. The level clear sequence will then be fired when a new bumper is requested. **/
 	private var _levelClear = false;
 
@@ -653,28 +656,28 @@ class APGameState extends ClassicGameState
 			_levelClear = true;
 		else
 		{
-			var check = switch ([task, level, goal])
+			var check:Null<Int> = switch ([task, level, goal])
 			{
 				case [Score, 1, x]:
-					L1Score250 + (x / 250 - 1);
+					L1Score250 + Math.round(x / 250 - 1);
 				case [LevelScore, 1, x]:
-					L1LScore500 + (x / 500 - 1);
+					L1LScore500 + Math.round(x / 500 - 1);
 				case [Combo, 1, _]:
 					L1Combo5;
 
 				case [Score, 2, x]:
-					L2Score500 + (x / 500 - 1);
+					L2Score500 + Math.round(x / 500 - 1);
 				case [LevelScore, 2, x]:
-					L2LScore1000 + (x / 1000 - 1);
+					L2LScore1000 + Math.round(x / 1000 - 1);
 				case [Combo, 2, _]:
 					L2Combo5;
 				case [Chain, 2, _]:
 					L2Combo5;
 
 				case [Score, 3, x]:
-					L3Score800 + (x / 800 - 1);
+					L3Score800 + Math.round(x / 800 - 1);
 				case [LevelScore, 3, x]:
-					L3LScore2000 + (x / 2000 - 1);
+					L3LScore2000 + Math.round(x / 2000 - 1);
 				case [Combo, 3, 5]:
 					L3Combo5;
 				case [Combo, 3, 7]:
@@ -685,9 +688,9 @@ class APGameState extends ClassicGameState
 					L3AllClear3Col;
 
 				case [Score, 4, x]:
-					L4Score1500 + (x / 1500 - 1);
+					L4Score1500 + Math.round(x / 1500 - 1);
 				case [LevelScore, 4, x]:
-					L4LScore3000 + (x / 3000 - 1);
+					L4LScore3000 + Math.round(x / 3000 - 1);
 				case [Combo, 4, 5]: L4Combo5;
 				case [Combo, 4, 7]: L4Combo7;
 				case [Chain, 4, 2]: L4Chain2;
@@ -702,7 +705,7 @@ class APGameState extends ClassicGameState
 					null;
 			}
 			if (check != null)
-				_ap.LocationChecks([Math.round(check)]);
+				_checkBuffer.push(check);
 		}
 	}
 
@@ -800,11 +803,11 @@ class APGameState extends ClassicGameState
 					case "treasure":
 						_hudAP.updateTask(Treasures, schedule.clear);
 						if (schedule.clear < 32)
-							_ap.LocationChecks([APLocation.Treasure1 + schedule.clear - 1]);
+							_checkBuffer.push(APLocation.Treasure1 + schedule.clear - 1);
 					case "booster":
 						_hudAP.updateTask(Boosters, schedule.clear);
 						if (schedule.clear < 5)
-							_ap.LocationChecks([APLocation.Booster1 + schedule.clear - 1]);
+							_checkBuffer.push(APLocation.Booster1 + schedule.clear - 1);
 					case "hazard":
 						_hudAP.updateTask(Hazards, schedule.clear);
 				}
@@ -864,6 +867,11 @@ class APGameState extends ClassicGameState
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
+		if (_checkBuffer.length > 0)
+		{
+			_ap.LocationChecks(_checkBuffer);
+			_checkBuffer = [];
+		}
 		_ap.poll();
 	}
 
