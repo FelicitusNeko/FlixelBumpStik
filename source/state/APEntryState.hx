@@ -6,6 +6,7 @@ import components.archipelago.APGameState;
 import flixel.FlxG;
 import flixel.FlxState;
 import flixel.addons.ui.FlxInputText;
+import flixel.input.FlxInput.FlxInputState;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
@@ -20,6 +21,8 @@ class APEntryState extends FlxState
 
 	/** I18n function. **/
 	private var _t:I18nFunction;
+
+	private var _tabOrder:Array<FlxInputText> = [];
 
 	override function create()
 	{
@@ -63,6 +66,8 @@ class APEntryState extends FlxState
 		_pwInput.passwordMode = true;
 		add(pwLabel);
 		add(_pwInput);
+
+		_tabOrder = [_hostInput, _portInput, _slotInput, _pwInput];
 
 		super.create();
 	}
@@ -135,4 +140,37 @@ class APEntryState extends FlxState
 	{
 		FlxG.switchState(new MenuState());
 	}
+
+	// override function update(elapsed:Float)
+	// {
+	// 	super.update(elapsed);
+	// 	if (FlxG.keys.anyJustPressed([TAB, ENTER]))
+	// 	{
+	// 		var curFocus:Null<FlxInputText> = null;
+	// 		for (textbox in _tabOrder)
+	// 			if (textbox.hasFocus)
+	// 				curFocus = textbox;
+	// 		if (curFocus != null)
+	// 		{
+	// 			if (FlxG.keys.anyJustPressed([ENTER]))
+	// 			{
+	// 				// connect to the server
+	// 			}
+	// 			else // it's TAB
+	// 			{
+	// 				var focusIndex = _tabOrder.indexOf(curFocus);
+	// 				trace('Focus found on TAB event at index $focusIndex');
+	// 				if (FlxG.keys.checkStatus(SHIFT, PRESSED))
+	// 					focusIndex += _tabOrder.length - 1;
+	// 				else
+	// 					focusIndex++;
+	// 				curFocus.hasFocus = false;
+	// 				curFocus.text = curFocus.text.substr(0, curFocus.text.length - 1);
+	// 				_tabOrder[focusIndex % _tabOrder.length].hasFocus = true;
+	// 			}
+	// 		}
+	// 		else
+	// 			trace("Focus not found");
+	// 	}
+	// }
 }
