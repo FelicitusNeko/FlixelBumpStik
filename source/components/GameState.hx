@@ -72,7 +72,8 @@ abstract class GameState extends FlxState
 		}
 		else
 			createGame();
-		save.close();
+		// save.close();
+		save.destroy();
 
 		add(_hud);
 
