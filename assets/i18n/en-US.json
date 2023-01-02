@@ -7,7 +7,15 @@
     "block": "BLOCK",
     "gameOver": "Game Over",
     "error": "Error",
-    "close": "Close"
+    "close": "Close",
+    "dlg": {
+      "notice": "Notice",
+      "yes": "Yes",
+      "no": "No",
+      "ok": "OK",
+      "cancel": "Cancel",
+      "close": "Close"
+    }
   },
   "menu": {
     "main": {
@@ -47,6 +55,9 @@
       "received": "Received :item",
       "booster": "Booster Up - Now x:value",
       "levelcomplete": "- Level Complete -",
+      "skiptask": "Skip which task?",
+      "skipnotice": "This will skip one step of this task.",
+      "goal": "Great job! You've completed your goal for this seed.",
       "item": {
         "scoreBonus": "Bonus :bonus Points",
         "taskSkip": "Task Skip",
@@ -75,7 +86,12 @@
         "Treasures": "Treasure Bumpers: :current/:goal",
         "Boosters": "Bonus Boosters: :current/:goal",
         "Hazards": "Hazards cleared: :current/:goal",
-        "AllClear": "All Clear with at least :goal colors"
+        "AllClear": "All Clear with at least :goal colors",
+        "left": {
+          "0": " OK!",
+          "1": "",
+          "_": " [+:_]"
+        }
       }
     }
   }
