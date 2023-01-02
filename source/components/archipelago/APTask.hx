@@ -85,6 +85,9 @@ abstract APTask(IAPTask) from IAPTask
 	/** Whether this task has been completed. **/
 	public var complete(get, never):Bool;
 
+	/** The number of goals left to clear to complete the task. **/
+	public var goalsLeft(get, never):Int;
+
 	inline function get_goalIndex()
 		return this.goalIndex;
 
@@ -122,7 +125,11 @@ abstract APTask(IAPTask) from IAPTask
 	inline function get_complete()
 		return this.current >= this.goals[goalCount - 1];
 
-	public function serialize()
+	inline function get_goalsLeft()
+		return complete ? 0 : goalCount - goalIndex;
+
+	/** Serializes the data. **/
+	public inline function serialize()
 	{
 		var retval:DynamicAccess<Dynamic> = {};
 
@@ -134,9 +141,9 @@ abstract APTask(IAPTask) from IAPTask
 		return retval;
 	}
 
+	/** Converts the task to its base data structure, stripping `uiText` in the process. **/
 	@:to
 	public function toBaseData():IAPTask
-	{
 		return {
 			type: this.type,
 			goals: this.goals,
@@ -144,10 +151,9 @@ abstract APTask(IAPTask) from IAPTask
 			current: this.current,
 			uiText: null
 		};
-	}
 
+	/** Creates a new `APTask` from serialized data. **/
 	public static function fromSaved(data:DynamicAccess<Dynamic>, uiText:FlxUIText):APTask
-	{
 		return {
 			type: data["type"],
 			goals: data["goals"],
@@ -155,5 +161,4 @@ abstract APTask(IAPTask) from IAPTask
 			current: data["current"],
 			uiText: uiText
 		};
-	}
 }
