@@ -64,7 +64,7 @@ abstract class GameState extends FlxState
 	{
 		var save = new FlxSave();
 		save.bind(gameName);
-		trace(save.data);
+		// trace(save.data);
 		if (save.data.gameName == gameName)
 		{
 			trace('save data $gameName found');
