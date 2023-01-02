@@ -190,7 +190,8 @@ class APHud extends ClassicHUD
 			goals: goals,
 			goalIndex: 0,
 			current: 0,
-			uiText: new FlxUIText(0, 0, 0, _t('game/ap/task/$type', ["current" => current, "goal" => goals[0]]))
+			uiText: new FlxUIText(0, 0, 0,
+				_t('game/ap/task/$type', ["current" => current, "goal" => goals[0]]) + _t('game/ap/task/left', ["_" => goals.length - 1]))
 		};
 		if (type == LevelHeader)
 		{
@@ -225,7 +226,7 @@ class APHud extends ClassicHUD
 				onTaskCleared.dispatch(level, task.type, task.curGoal, task.current);
 				task.goalIndex++;
 			}
-			task.uiText.text = _t('game/ap/task/$type', ["current" => current, "goal" => task.curGoal]);
+			task.uiText.text = _t('game/ap/task/$type', ["current" => current, "goal" => task.curGoal]) + _t('game/ap/task/left', ["_" => task.goalsLeft]);
 		}
 
 		var levelTask = _taskList[0];
@@ -288,10 +289,11 @@ class APHud extends ClassicHUD
 		_accruedBlock = data["accBlock"];
 		_accruedBlockThisLevel = data["accBlockTL"];
 
-		var taskData:Array<IAPTask> = data["tasks"];
+		var taskData:Array<APTask> = data["tasks"];
 		for (task in taskData)
 		{
-			task.uiText = new FlxUIText(0, 0, 0, _t('game/ap/task/${task.type}', ["current" => task.current, "goal" => task.goals[0]]));
+			var left = _t('game/ap/task/left', ["_" => task.goalsLeft]);
+			task.uiText = new FlxUIText(0, 0, 0, _t('game/ap/task/${task.type}', ["current" => task.current, "goal" => task.goals[0]]) + left);
 			_taskList.push(task);
 		}
 	}
