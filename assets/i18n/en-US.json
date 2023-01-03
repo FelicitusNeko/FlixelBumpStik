@@ -10,6 +10,7 @@
     "close": "Close",
     "dlg": {
       "notice": "Notice",
+      "back2menu": "Back to menu",
       "yes": "Yes",
       "no": "No",
       "ok": "OK",
