@@ -4,10 +4,10 @@ import haxe.Timer;
 import Main.I18nFunction;
 import ap.Client;
 import components.archipelago.APGameState;
+import components.dialogs.DialogBox;
 import flixel.FlxG;
 import flixel.FlxState;
 import flixel.addons.ui.FlxInputText;
-import flixel.input.FlxInput.FlxInputState;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
@@ -74,17 +74,25 @@ class APEntryState extends FlxState
 
 	function onPlay()
 	{
+		inline function postError(str:String, ?vars:Map<String, Dynamic>)
+			openSubState(new DialogBox(_t('menu/ap/error/$str', vars), {
+				title: _t("base/error"),
+				titleColor: FlxColor.fromRGBFloat(1, .5, .5),
+				defAccept: Close,
+				defCancel: Close
+			}));
+
 		var port = Std.parseInt(_portInput.text);
 		if (_hostInput.text == "")
-			openSubState(new APErrorSubState(_t("menu/ap/error/noHost")));
+			postError('noHost');
 		else if (_portInput.text == "")
-			openSubState(new APErrorSubState(_t("menu/ap/error/noPort")));
+			postError('noPort');
 		else if (!~/^\d+$/.match(_portInput.text))
-			openSubState(new APErrorSubState(_t("menu/ap/error/portNonNumeric")));
+			postError('portNonNumeric');
 		else if (port <= 0 || port > 65535)
-			openSubState(new APErrorSubState(_t("menu/ap/error/portOutOfRange")));
+			postError('portOutOfRange');
 		else if (_slotInput.text == "")
-			openSubState(new APErrorSubState(_t("menu/ap/error/noSlot")));
+			postError('noSlot');
 		else
 		{
 			var connectSubState = new APConnectingSubState();
@@ -95,7 +103,7 @@ class APEntryState extends FlxState
 			ap._hOnRoomInfo = () ->
 			{
 				trace("Got room info - sending connect packet");
-				ap.ConnectSlot(_slotInput.text, _pwInput.text.length > 0 ? _pwInput.text : null, 0x7, ["AP", "Testing"], {major: 0, minor: 3, build: 5});
+				ap.ConnectSlot(_slotInput.text, _pwInput.text.length > 0 ? _pwInput.text : null, 0x7, ["AP", "Testing"], {major: 0, minor: 3, build: 7});
 			};
 
 			var polltimer = new Timer(50);
@@ -104,15 +112,13 @@ class APEntryState extends FlxState
 			ap._hOnSlotRefused = (errors:Array<String>) ->
 			{
 				trace("Slot refused", errors);
-				var error = "An unknown error occurred: ";
+				closeSubState();
 				switch (errors[0])
 				{
-					case "InvalidSlot" | "InvalidGame": error = _t('menu/ap/error/${errors[0]}', ["name" => _slotInput.text]);
-					case "IncompatibleVersion" | "InvalidPassword" | "InvalidItemsHandling": error = _t('menu/ap/error/${errors[0]}');
-					default: error = _t("menu/ap/error/default", ["error" => errors[0]]);
+					case x = "InvalidSlot" | "InvalidGame": postError(x, ["name" => _slotInput.text]);
+					case x = "IncompatibleVersion" | "InvalidPassword" | "InvalidItemsHandling": postError(x);
+					case x: postError("default", ["error" => x]);
 				}
-				closeSubState();
-				openSubState(new APErrorSubState(error));
 			}
 
 			ap._hOnSocketDisconnected = () ->
@@ -120,7 +126,7 @@ class APEntryState extends FlxState
 				polltimer.stop();
 				trace("Disconnected");
 				closeSubState();
-				openSubState(new APErrorSubState(_t("menu/ap/error/connectionReset")));
+				postError("connectionReset");
 			};
 
 			ap._hOnSlotConnected = (slotData:Dynamic) ->
