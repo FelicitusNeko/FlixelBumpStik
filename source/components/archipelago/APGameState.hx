@@ -12,12 +12,14 @@ import flixel.FlxG;
 import flixel.math.FlxRandom;
 import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
+import state.MenuState;
 import utilities.DeploymentSchedule;
 import components.archipelago.APTask.APTaskType;
 import components.classic.ClassicGameState;
+import components.dialogs.DialogBox;
 
 /** The color of a bumper in Archipelago mode, for matching purposes. **/
-enum abstract APColor(FlxColor) from FlxColor to FlxColor
+private enum abstract APColor(FlxColor) from FlxColor to FlxColor
 {
 	var Red = 0xffc57683;
 	var Green = 0xff77c578;
@@ -48,7 +50,7 @@ enum abstract APColor(FlxColor) from FlxColor to FlxColor
 }
 
 /** AP Location definitions. **/
-enum abstract APLocation(Int) from Int to Int
+private enum abstract APLocation(Int) from Int to Int
 {
 	var L1Score250 = 595000;
 	var L1Score500;
@@ -166,7 +168,7 @@ enum abstract APLocation(Int) from Int to Int
 }
 
 /** AP Item definitions. **/
-enum abstract APItem(Int) from Int to Int
+private enum abstract APItem(Int) from Int to Int
 {
 	var Nothing = 595000;
 	var ScoreBonus;
@@ -213,7 +215,7 @@ enum abstract APItem(Int) from Int to Int
 }
 
 /** A queued toast popup message. **/
-typedef QueuedToast =
+private typedef QueuedToast =
 {
 	/** The content of the message. **/
 	var message:String;
@@ -223,6 +225,12 @@ typedef QueuedToast =
 
 	/** The amount of time, in milliseconds, to fully display the message. **/
 	var delay:Int;
+}
+
+private enum QueueTo
+{
+	Main;
+	Classic;
 }
 
 class APGameState extends ClassicGameState
@@ -295,6 +303,8 @@ class APGameState extends ClassicGameState
 	/** The APHud instance for the current game. **/
 	private var _hudAP(get, never):APHud;
 
+	private var _queueTo:Null<QueueTo> = null;
+
 	public function new(ap:Client, slotData:Dynamic)
 	{
 		// TODO: keep list of seeds so they can be wiped later
@@ -338,9 +348,8 @@ class APGameState extends ClassicGameState
 
 		FlxG.autoPause = false;
 
-		var test = new FlxButton(0, 0, "Test", () ->
-		{
-			_hud.score += 500;
+		var test = new FlxButton(0, 0, "Test", () -> {
+			// goes nowhere does nothing
 		});
 		_hud.add(test);
 	}
@@ -493,8 +502,28 @@ class APGameState extends ClassicGameState
 				for (schedule in _schedule)
 					schedule.maxAvailable = 999;
 			case 6 | -1: // the game is complete in this case; send a goal condition to the server
-				// TODO: show a congratulatory dialog which will resolve into exiting back to the title screen
 				_ap.clientStatus = GOAL;
+				openSubState(new DialogBox(_t("game/ap/goal"), {
+					buttons: [
+						{
+							text: _t("base/dlg/back2menu"),
+							result: Custom(() ->
+							{
+								_queueTo = Main;
+								return No;
+							})
+						},
+						{
+							text: _t("menu/main/classic"),
+							result: Custom(() ->
+							{
+								_queueTo = Classic;
+								return Yes;
+							})
+						}
+					],
+					camera: _generalCamera
+				}));
 				_hudAP.addTask(Score, [99999]);
 			default: // If we don't recognise the level, just default to 99999 score and make it obvious something's wrong
 				_hudAP.addTask(Score, [99999]);
@@ -873,6 +902,16 @@ class APGameState extends ClassicGameState
 			_checkBuffer = [];
 		}
 		_ap.poll();
+
+		if (_queueTo != null)
+		{
+			_ap.disconnect_socket();
+			FlxG.switchState(switch (_queueTo)
+			{
+				case Main: new MenuState();
+				case Classic: new ClassicGameState();
+			});
+		}
 	}
 
 	override function serialize():DynamicAccess<Dynamic>
