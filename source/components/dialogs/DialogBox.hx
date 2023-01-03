@@ -1,5 +1,6 @@
 package components.dialogs;
 
+import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxSubState;
@@ -55,6 +56,9 @@ typedef DialogOptions =
 
 	/** The result to resolve if the user presses Escape on a keyboard-enabled platform. If none is specified, the functionality is disabled. **/
 	var ?defCancel:DialogResult;
+
+	/** The camera on which to display the dialog box. Defaults to the primary camera. **/
+	var ?camera:FlxCamera;
 }
 
 /** Provides a configurable all-purpose dialog box. **/
@@ -82,9 +86,12 @@ class DialogBox extends FlxSubState
 
 	override function create()
 	{
+		if (opts.camera != null)
+			camera = opts.camera;
+
 		var _t = BumpStikGame.g().i18n.tr;
 
-		var title = new FlxText(0, 0, 0, this.title == null ? _t("base/dlg/notice") : this.title, 20);
+		var title = new FlxText(0, 0, 0, title, 20);
 		title.color = opts.titleColor != null ? opts.titleColor : FlxColor.WHITE;
 
 		var body = new FlxText(0, 0, 0, message, 12);
@@ -135,7 +142,7 @@ class DialogBox extends FlxSubState
 	}
 
 	function get_title()
-		return opts.title == null ? BumpStikGame.g().i18n.tr('base/notice') : opts.title;
+		return opts.title == null ? BumpStikGame.g().i18n.tr('base/dlg/notice') : opts.title;
 
 	/**
 		Resolves the dialog box.
