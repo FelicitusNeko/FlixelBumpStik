@@ -141,6 +141,32 @@ abstract APTask(IAPTask) from IAPTask
 		return retval;
 	}
 
+	/**
+		Forces completion of the current task step.
+		@return Whether the goal index has advanced. `false` if it was already complete.
+	**/
+	public inline function force()
+		return switch (complete)
+		{
+			case true: false;
+			case false:
+				goalIndex++;
+				true;
+		}
+
+	/**
+		Forces completion of the entire task.
+		@return Whether the goal index has advanced to the end of the task. `false` if it was already complete.
+	**/
+	public inline function forceComplete()
+		return switch (complete)
+		{
+			case true: false;
+			case false:
+				goalIndex = goalCount;
+				true;
+		}
+
 	/** Converts the task to its base data structure, stripping `uiText` in the process. **/
 	@:to
 	public function toBaseData():IAPTask
