@@ -37,6 +37,8 @@ class PaintCanSubstate extends FlxSubState
 	{
 		super.create();
 
+		var t = BumpStikGame.g().i18n.tr;
+
 		var distanceFactor = 1.3;
 		var vertices:Array<FlxPoint> = [];
 		var bumperHeight:Float = -1;
@@ -65,7 +67,7 @@ class PaintCanSubstate extends FlxSubState
 		hexbutton.drawPolygon(vertices, FlxColor.BLACK, {thickness: 3, color: FlxColor.RED}, {smoothing: true});
 		add(hexbutton);
 
-		var cancelText = new FlxText(center.x + (bumperHeight / 2) - 36, center.y + (bumperHeight / 2), 72, "Cancel", 16);
+		var cancelText = new FlxText(center.x + (bumperHeight / 2) - 36, center.y + (bumperHeight / 2), 72, t("base/dlg/cancel"), 16);
 		cancelText.alignment = CENTER;
 		cancelText.y -= cancelText.height / 2;
 		add(cancelText);
