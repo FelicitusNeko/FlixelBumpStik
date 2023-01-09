@@ -263,6 +263,9 @@ class APHud extends ClassicHUD
 		super.resetHUD();
 	}
 
+	public function loadTaskSkip(dlg:TaskSkipSubstate)
+		dlg.loadTasks(_taskList.slice(1).filter(i -> !i.complete));
+
 	public override function serialize():DynamicAccess<Dynamic>
 	{
 		var retval = super.serialize();

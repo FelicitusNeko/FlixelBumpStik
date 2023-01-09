@@ -345,11 +345,14 @@ class APGameState extends ClassicGameState
 		_hudAP.turners = _startTurners;
 		_hudAP.onTaskCleared.add(onTaskComplete);
 		_hudAP.onTurnerClick.add(onTurnerClick);
+		_hudAP.onTaskSkipClick.add(onTaskSkipClick);
 
 		FlxG.autoPause = false;
 
-		var test = new FlxButton(0, 0, "Test", () -> {
+		var test = new FlxButton(0, 0, "Test", () ->
+		{
 			// goes nowhere does nothing
+			_hudAP.taskSkip++;
 		});
 		_hud.add(test);
 	}
@@ -859,6 +862,17 @@ class APGameState extends ClassicGameState
 			return;
 		_turnerMode = true;
 		_boardAP.selectMode();
+	}
+
+	function onTaskSkipClick()
+	{
+		if (!_turnerMode && _selectedColor == null)
+		{
+			var dlg = new TaskSkipSubstate(_boardAP.center);
+			dlg.onTaskSkip.add(task -> _hudAP.updateTask(task.type, task.current));
+			_hudAP.loadTaskSkip(dlg);
+			openSubState(dlg);
+		}
 	}
 
 	override function onBumperSelect(bumper:Bumper)
