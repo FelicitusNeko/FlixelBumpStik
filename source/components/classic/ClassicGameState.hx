@@ -164,8 +164,7 @@ class ClassicGameState extends GameState
 		{
 			if (_hud.nextBumper == null)
 				_hud.nextBumper = _bg.weightedGenerate();
-			// TODO: save the game here (do I maybe want to do this in the base class, though?)
-			saveGame();
+			saveGame(); // NOTE: do I maybe want to do this in the base class, though?
 		}
 	}
 
