@@ -56,7 +56,8 @@
       "received": "Received :item",
       "booster": "Booster Up - Now x:value",
       "levelcomplete": "- Level Complete -",
-      "skiptask": "Skip which task?",
+      "skipprompt": "Skip which task?",
+      "skipconfirm": "Skip this",
       "skipnotice": "This will skip one step of this task.",
       "goal": "Great job! You've completed your goal for this seed.",
       "item": {
