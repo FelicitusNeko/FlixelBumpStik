@@ -89,9 +89,9 @@
         "Boosters": "Bonus Boosters: :current/:goal",
         "Hazards": "Hazards cleared: :current/:goal",
         "AllClear": "All Clear with at least :goal colors",
+        "goalok": " OK!",
         "left": {
-          "0": " OK!",
-          "1": "",
+          "0": "",
           "_": " [+:_]"
         }
       }
