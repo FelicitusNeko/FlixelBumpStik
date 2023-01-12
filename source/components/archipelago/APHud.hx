@@ -5,6 +5,7 @@ import haxe.Exception;
 import flixel.addons.ui.FlxUIList;
 import flixel.addons.ui.FlxUIText;
 import flixel.ui.FlxButton;
+import flixel.util.FlxColor;
 import lime.app.Event;
 import components.archipelago.APTask;
 import components.classic.ClassicHUD;
@@ -226,7 +227,7 @@ class APHud extends ClassicHUD
 				onTaskCleared.dispatch(level, task.type, task.curGoal, task.current);
 				task.goalIndex++;
 			}
-			task.uiText.text = _t('game/ap/task/$type', ["current" => current, "goal" => task.curGoal]) + _t('game/ap/task/left', ["_" => task.goalsLeft]);
+			task.uiText.text = task;
 		}
 
 		var levelTask = _taskList[0];
@@ -295,9 +296,17 @@ class APHud extends ClassicHUD
 		var taskData:Array<APTask> = data["tasks"];
 		for (task in taskData)
 		{
-			var left = _t('game/ap/task/left', ["_" => task.goalsLeft]);
-			task.uiText = new FlxUIText(0, 0, 0, _t('game/ap/task/${task.type}', ["current" => task.current, "goal" => task.goals[0]]) + left);
+			task.uiText = new FlxUIText(0, 0, 0, task);
+			if (task.complete)
+				task.uiText.color = FlxColor.LIME;
 			_taskList.push(task);
+
+			if (task.type == LevelHeader)
+			{
+				task.uiText.size += 4;
+				task.uiText.alignment = CENTER;
+			}
+			_taskListbox.add(task.uiText);
 		}
 	}
 }
