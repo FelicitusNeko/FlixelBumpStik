@@ -334,7 +334,7 @@ class APGameState extends ClassicGameState
 	{
 		super.create();
 
-		createLevel(1);
+		createLevel(1, _hudAP.level != null);
 
 		_generalCamera = FlxG.cameras.add(new FlxCamera(0, 0, FlxG.width, FlxG.height), false);
 		_generalCamera.bgColor = FlxColor.TRANSPARENT;
