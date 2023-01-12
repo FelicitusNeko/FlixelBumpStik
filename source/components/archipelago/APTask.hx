@@ -105,10 +105,12 @@ abstract APTask(IAPTask) from IAPTask
 
 	function set_current(value)
 	{
-		var wasComplete = complete;
-		this.current = value;
-		if (wasComplete != complete)
-			this.uiText.color = complete ? FlxColor.LIME : FlxColor.WHITE;
+		if (value > this.current)
+		{
+			this.current = value;
+			if (this.uiText != null)
+				this.uiText.color = complete ? FlxColor.LIME : FlxColor.WHITE;
+		}
 		return this.current;
 	}
 
@@ -117,13 +119,13 @@ abstract APTask(IAPTask) from IAPTask
 		return this.goals[index];
 
 	inline function get_curGoal()
-		return this.goals[this.goalIndex == goalCount ? this.goalIndex - 1 : this.goalIndex];
+		return this.goals[complete ? goalCount - 1 : this.goalIndex];
 
 	inline function get_goalCount()
 		return this.goals.length;
 
 	inline function get_complete()
-		return this.current >= this.goals[goalCount - 1];
+		return this.goalIndex == this.goals.length;
 
 	inline function get_goalsLeft()
 		return complete ? 0 : goalCount - goalIndex;
@@ -176,6 +178,14 @@ abstract APTask(IAPTask) from IAPTask
 			goalIndex: this.goalIndex,
 			current: this.current,
 			uiText: null
+		};
+
+	@:to
+	public function toString()
+		return BumpStikGame.g().i18n.tr('game/ap/task/${this.type}', ["current" => current, "goal" => curGoal]) + switch (goalsLeft)
+		{
+			case 0: BumpStikGame.g().i18n.tr('game/ap/task/goalok');
+			case x: BumpStikGame.g().i18n.tr('game/ap/task/left', ["_" => x - 1]);
 		};
 
 	/** Creates a new `APTask` from serialized data. **/
