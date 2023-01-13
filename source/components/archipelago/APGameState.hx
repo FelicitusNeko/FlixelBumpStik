@@ -13,6 +13,7 @@ import flixel.FlxState;
 import flixel.math.FlxRandom;
 import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
+import flixel.util.FlxSave;
 import state.MenuState;
 import utilities.DeploymentSchedule;
 import components.archipelago.APTask.APTaskType;
@@ -303,7 +304,6 @@ class APGameState extends ClassicGameState
 
 	public function new(ap:Client, slotData:Dynamic)
 	{
-		// TODO: keep list of seeds so they can be wiped later
 		_ap = ap;
 		_ap.clientStatus = READY;
 		_ap._hOnItemsReceived = onItemsReceived;
@@ -329,6 +329,16 @@ class APGameState extends ClassicGameState
 	override function create()
 	{
 		super.create();
+
+		{
+			var apGames = new FlxSave();
+			apGames.bind("apGames");
+			var list:Map<String, Float> = apGames.data.list;
+			if (list == null)
+				list = apGames.data.list = new Map<String, Float>();
+			list[gameName] = Date.now().getTime();
+			apGames.close();
+		}
 
 		if (_hudAP.level == null)
 			createLevel(1);
