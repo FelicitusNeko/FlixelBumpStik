@@ -9,6 +9,7 @@ import boardObject.Bumper;
 import boardObject.archipelago.APHazardPlaceholder;
 import flixel.FlxCamera;
 import flixel.FlxG;
+import flixel.FlxState;
 import flixel.math.FlxRandom;
 import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
@@ -227,12 +228,6 @@ private typedef QueuedToast =
 	var delay:Int;
 }
 
-private enum QueueTo
-{
-	Main;
-	Classic;
-}
-
 class APGameState extends ClassicGameState
 {
 	/** The Archipelago client. **/
@@ -303,7 +298,8 @@ class APGameState extends ClassicGameState
 	/** The APHud instance for the current game. **/
 	private var _hudAP(get, never):APHud;
 
-	private var _queueTo:Null<QueueTo> = null;
+	/** If this is set, the game will transition to a different scene on the next call to `update`. **/
+	private var _queueTo:Null<FlxState> = null;
 
 	public function new(ap:Client, slotData:Dynamic)
 	{
@@ -513,7 +509,7 @@ class APGameState extends ClassicGameState
 							text: _t("base/dlg/back2menu"),
 							result: Custom(() ->
 							{
-								_queueTo = Main;
+								_queueTo = new MenuState();
 								return No;
 							})
 						},
@@ -521,7 +517,7 @@ class APGameState extends ClassicGameState
 							text: _t("menu/main/classic"),
 							result: Custom(() ->
 							{
-								_queueTo = Classic;
+								_queueTo = new ClassicGameState();
 								return Yes;
 							})
 						}
@@ -921,11 +917,7 @@ class APGameState extends ClassicGameState
 		if (_queueTo != null)
 		{
 			_ap.disconnect_socket();
-			FlxG.switchState(switch (_queueTo)
-			{
-				case Main: new MenuState();
-				case Classic: new ClassicGameState();
-			});
+			FlxG.switchState(_queueTo);
 		}
 	}
 
