@@ -1,10 +1,9 @@
 package boardObject.archipelago;
 
+import haxe.DynamicAccess;
 import components.Board;
-import flixel.FlxSprite;
 import flixel.tweens.FlxEase;
 import flixel.util.FlxColor;
-import haxe.DynamicAccess;
 
 using flixel.tweens.FlxTween;
 
@@ -41,16 +40,13 @@ class APHazardBumper extends Bumper
 		{
 			if (--_turnsToNormal <= 0)
 			{
-				var hazardFlair = _flairList["hazard"];
+				var hazardFlair = _flairList["activeHazard"];
 				hazardFlair.tween({alpha: 0, "scale.x": 1.25, "scale.y": 1.25}, .5, {
 					ease: FlxEase.circOut,
 					onComplete: (_) ->
 					{
 						removeFlair("activeHazard");
 						addFlair("hazard");
-						// remove(hazardFlair);
-						// add(_flairList["hazard"] = new FlxSprite(0, 0)).makeGraphic(64, 64, FlxColor.TRANSPARENT);
-						// hazardFlair.destroy();
 					}
 				});
 				bColor = _resolveColor;
@@ -95,7 +91,8 @@ class APHazardBumper extends Bumper
 	//	// Nothing else to do right now (other vars are initialised via the constructor)
 	// }
 
-	public static function fromSaved(data:DynamicAccess<Dynamic>){
+	public static function fromSaved(data:DynamicAccess<Dynamic>)
+	{
 		var bumper = new APHazardBumper(0, 0, data["resolveColor"], null, data["turnsToNormal"]);
 		bumper.deserialize(data);
 		return bumper;
