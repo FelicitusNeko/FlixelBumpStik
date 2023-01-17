@@ -109,7 +109,7 @@ abstract APTask(IAPTask) from IAPTask
 		{
 			this.current = value;
 			if (this.uiText != null)
-				this.uiText.color = complete ? FlxColor.LIME : FlxColor.WHITE;
+				this.uiText.color = value >= this.goals[goalCount - 1] ? FlxColor.LIME : FlxColor.WHITE;
 		}
 		return this.current;
 	}
