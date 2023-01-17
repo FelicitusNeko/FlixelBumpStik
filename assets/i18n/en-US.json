@@ -68,7 +68,7 @@
         "booster": "Bonus Booster",
         "hazard": "Hazard Bumper",
         "treasure": "Treasure Bumper",
-        "default": "Unknown"
+        "default": "Unknown ID :id"
       },
       "trap": {
         "rainbow": "Rainbow Trap!",
