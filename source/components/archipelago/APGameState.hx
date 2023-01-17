@@ -644,11 +644,13 @@ class APGameState extends ClassicGameState
 						continue;
 
 					// trace("Item received: " + item);
-					pushToast(_t("game/ap/received", ["item" => Std.string(_t(item))]), FlxColor.CYAN);
+					var substitutes:Map<String, Dynamic> = [];
 					switch (item)
 					{
 						case ScoreBonus:
-							_hudAP.score += 200 * Math.round(Math.pow(2, _hudAP.level - 1));
+							var bonus = 200 * Math.round(Math.pow(2, _hudAP.level - 1));
+							_hudAP.score += bonus;
+							substitutes.set("bonus", bonus);
 						case TaskSkip:
 							_hudAP.taskSkip++;
 						case StartingTurner:
@@ -671,9 +673,12 @@ class APGameState extends ClassicGameState
 							_boardAP.trapTrigger = Spinner;
 						case KillerTrap:
 							_boardAP.trapTrigger = Killer;
-						default:
-							trace('Item ID: ${itemObj.item}');
+						case x:
+							substitutes.set("id", x);
+							trace('Unknown item ID received: ${itemObj.item}');
 					}
+					pushToast(_t("game/ap/received", ["item" => Std.string(_t(item, substitutes))]),
+						[RainbowTrap, SpinnerTrap, KillerTrap].contains(item) ? FlxColor.ORANGE : FlxColor.CYAN);
 
 					_lastProcessed = itemObj.index;
 				}
@@ -840,12 +845,13 @@ class APGameState extends ClassicGameState
 				switch (key)
 				{
 					case "treasure":
+						chain++; // This will double the value of the bumper
 						_hudAP.updateTask(Treasures, schedule.clear);
-						if (schedule.clear < 32)
+						if (schedule.clear <= 32)
 							_checkBuffer.push(APLocation.Treasure1 + schedule.clear - 1);
 					case "booster":
 						_hudAP.updateTask(Boosters, schedule.clear);
-						if (schedule.clear < 5)
+						if (schedule.clear <= 5)
 							_checkBuffer.push(APLocation.Booster1 + schedule.clear - 1);
 					case "hazard":
 						_hudAP.updateTask(Hazards, schedule.clear);
