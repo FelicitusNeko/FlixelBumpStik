@@ -700,7 +700,7 @@ class APGameState extends ClassicGameState
 			_levelClear = true;
 		else
 		{
-			var check:Null<Int> = switch ([task, level, goal])
+			var check:Null<Int> = switch ([task, _hudAP.level, goal])
 			{
 				case [Score, 1, x]:
 					L1Score250 + Math.round(x / 250 - 1);
@@ -716,7 +716,7 @@ class APGameState extends ClassicGameState
 				case [Combo, 2, _]:
 					L2Combo5;
 				case [Chain, 2, _]:
-					L2Combo5;
+					L2Chain2;
 
 				case [Score, 3, x]:
 					L3Score800 + Math.round(x / 800 - 1);
@@ -883,6 +883,11 @@ class APGameState extends ClassicGameState
 		{
 			var dlg = new TaskSkipSubstate(_boardAP.center);
 			dlg.onTaskSkip.add(task -> _hudAP.updateTask(task.type, task.current));
+			dlg.onTaskSkip.add(task ->
+			{
+				if (![Treasures, Boosters].contains(task.type))
+					onTaskComplete(_hudAP.level, task.type, task.goals[task.goalIndex - 1], task.current);
+			});
 			_hudAP.loadTaskSkip(dlg);
 			openSubState(dlg);
 		}

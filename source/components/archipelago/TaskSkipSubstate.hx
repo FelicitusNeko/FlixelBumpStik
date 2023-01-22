@@ -53,7 +53,6 @@ class TaskSkipSubstate extends FlxSubState
 
 		var accept = new FlxUIButton(0, 0, _t("game/ap/skipconfirm"), () ->
 		{
-			// skip the selected task
 			var selTask = _tasks[list.scrollIndex];
 			selTask.force();
 			onTaskSkip.dispatch(selTask);
