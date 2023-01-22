@@ -882,11 +882,13 @@ class APGameState extends ClassicGameState
 		if (!_turnerMode && _selectedColor == null)
 		{
 			var dlg = new TaskSkipSubstate(_boardAP.center);
-			dlg.onTaskSkip.add(task -> _hudAP.updateTask(task.type, task.current));
 			dlg.onTaskSkip.add(task ->
 			{
+				_hudAP.updateTask(task.type, task.current);
 				if (![Treasures, Boosters].contains(task.type))
 					onTaskComplete(_hudAP.level, task.type, task.goals[task.goalIndex - 1], task.current);
+				if (_levelClear)
+					onRequestGenerate();
 			});
 			_hudAP.loadTaskSkip(dlg);
 			openSubState(dlg);
