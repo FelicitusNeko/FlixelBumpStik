@@ -175,7 +175,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 		this.bWidth = bWidth;
 		this.bHeight = bHeight;
 
-		// setupTest(11);
+		setupTest(13);
 	}
 
 	inline function get_tWidth()
@@ -258,6 +258,20 @@ class Board extends FlxTypedGroup<FlxBasic>
 				makeBumperAt(4, 2, Color.Red, Right);
 				makeBumperAt(4, 3, Color.Red, Right);
 				makeBumperAt(4, 4, Color.Red, Right);
+				_csm.currentState = "moving";
+			case 12: // Cornering collision race-condition test
+				// Confirmed and replicated
+				// A bumper attempting to enter a space that another bumper has just left is liable to cause the bumper entering to stop incorrectly
+				makeBumperAt(1, 2, Blue, Left);
+				makeBumperAt(1, 0, Red, Down);
+				_csm.currentState = "moving";
+			case 13: // Same-direction resting overlap test
+				// Confirmed, not replicated
+				// It is possible for bumpers moving in the same direction to end up overlapping each other
+				// Not sure exactly when this happens, though...
+				makeBumperAt(3, 2, Blue, Left);
+				makeBumperAt(2, 2, Green, Right);
+				makeBumperAt(1, 2, Red, Right);
 				_csm.currentState = "moving";
 		}
 		// if (autoLaunch)
@@ -763,6 +777,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 	**/
 	private function bumperBump(lh:FlxSprite, rh:FlxSprite)
 	{
+		// BUG: apparently collision is broken again? potential of overlapping bumpers, but not enough information about how this happens
 		if (!lh.alive || !rh.alive)
 			return;
 
