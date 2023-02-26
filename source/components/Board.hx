@@ -175,7 +175,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 		this.bWidth = bWidth;
 		this.bHeight = bHeight;
 
-		setupTest(13);
+		// setupTest(12);
 	}
 
 	inline function get_tWidth()
@@ -253,19 +253,21 @@ class Board extends FlxTypedGroup<FlxBasic>
 					launcher.launchBumper(new Bumper(0, 0, Color.Blue, Up));
 				autoLaunch = false;
 			case 11: // Rear-end collision test ✔️
+				// Two bumpers moving in the same direction at the same speed which start adjacent should remain adjacent throughout the move
 				makeBumperAt(4, 0, Color.Blue, Down);
 				makeBumperAt(4, 1, Color.Blue, Down);
 				makeBumperAt(4, 2, Color.Red, Right);
 				makeBumperAt(4, 3, Color.Red, Right);
 				makeBumperAt(4, 4, Color.Red, Right);
 				_csm.currentState = "moving";
-			case 12: // Cornering collision race-condition test
+			case 12: // Cornering collision race-condition test ½✔️
 				// Confirmed and replicated
 				// A bumper attempting to enter a space that another bumper has just left is liable to cause the bumper entering to stop incorrectly
+				// Partially fixed; it still stops, but at least it keeps going afterward
 				makeBumperAt(1, 2, Blue, Left);
 				makeBumperAt(1, 0, Red, Down);
 				_csm.currentState = "moving";
-			case 13: // Same-direction resting overlap test
+			case 13: // Same-direction resting overlap test ✔️
 				// Confirmed and replicated
 				// It is possible for bumpers moving in the same direction to end up overlapping each other
 				makeBumperAt(3, 2, Blue, Left);
@@ -502,6 +504,17 @@ class Board extends FlxTypedGroup<FlxBasic>
 			for (bumper in _bumpers)
 				if (isSomethingMoving = bumper.isMoving)
 					break;
+		if (!isSomethingMoving)
+			for (bumper in _bumpers)
+			{
+				var fpX = bumper.forwardX, fpY = bumper.forwardY;
+				if (fpX < 0 || fpY < 0 || fpX >= bWidth || fpY >= bHeight)
+					continue;
+				if (atGrid(_bumpers, fpX, fpY) != null)
+					continue;
+				isSomethingMoving = true;
+				break;
+			}
 		if (!isSomethingMoving)
 		{
 			var dirOpts = BumperGenerator.dirOpts;
@@ -776,7 +789,6 @@ class Board extends FlxTypedGroup<FlxBasic>
 	**/
 	private function bumperBump(lh:FlxSprite, rh:FlxSprite)
 	{
-		// BUG: test 13 (same-direction overlap) failing
 		if (!lh.alive || !rh.alive)
 			return;
 
@@ -784,12 +796,19 @@ class Board extends FlxTypedGroup<FlxBasic>
 		if (blh == brh || blh == null || brh == null)
 			return;
 
-		if (blh.direction == brh.direction && blh.isMoving && brh.isMoving)
+		if (blh.activeDirection == brh.activeDirection)
 		{
-			// trace('#${_frames} - Transfer of velocity happened');
-			var buf = new FlxPoint().copyFrom(blh.velocity);
-			blh.velocity.copyFrom(brh.velocity);
-			brh.velocity.copyFrom(buf);
+			if (blh.isMoving && brh.isMoving)
+			{
+				var buf = new FlxPoint().copyFrom(blh.velocity);
+				blh.velocity.copyFrom(brh.velocity);
+				brh.velocity.copyFrom(buf);
+			}
+			else
+			{
+				blh.snapToPos();
+				brh.snapToPos();
+			}
 		}
 		else if (blh.hasShifted && brh.hasShifted)
 		{
