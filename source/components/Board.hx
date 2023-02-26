@@ -266,13 +266,12 @@ class Board extends FlxTypedGroup<FlxBasic>
 				makeBumperAt(1, 0, Red, Down);
 				_csm.currentState = "moving";
 			case 13: // Same-direction resting overlap test
-				// Confirmed, not replicated
+				// Confirmed and replicated
 				// It is possible for bumpers moving in the same direction to end up overlapping each other
-				// Not sure exactly when this happens, though...
 				makeBumperAt(3, 2, Blue, Left);
-				makeBumperAt(2, 2, Green, Right);
-				makeBumperAt(1, 2, Red, Right);
-				_csm.currentState = "moving";
+				makeBumperAt(1, 2, Green, Right);
+				makeBumperAt(0, 2, Red, Right);
+				// _csm.currentState = "moving";
 		}
 		// if (autoLaunch)
 		// 	_bumpers.forEachAlive(bumper ->
@@ -777,7 +776,7 @@ class Board extends FlxTypedGroup<FlxBasic>
 	**/
 	private function bumperBump(lh:FlxSprite, rh:FlxSprite)
 	{
-		// BUG: apparently collision is broken again? potential of overlapping bumpers, but not enough information about how this happens
+		// BUG: test 13 (same-direction overlap) failing
 		if (!lh.alive || !rh.alive)
 			return;
 
