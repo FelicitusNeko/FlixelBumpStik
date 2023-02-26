@@ -2,6 +2,7 @@ package;
 
 import flixel.FlxG;
 import flixel.FlxGame;
+import flixel.FlxState;
 
 /** The Bumper Stickers base game instance. **/
 class BumpStikGame extends FlxGame
@@ -9,10 +10,11 @@ class BumpStikGame extends FlxGame
 	/** Read-only. The internationalization/strings manager for the game. **/
 	public var i18n(default, null):I18nManager;
 
-	public function new(GameWidth:Int = 0, GameHeight:Int = 0, ?InitialState:Class<flixel.FlxState>, Zoom:Float = 1, UpdateFramerate:Int = 60,
+	public function new(GameWidth:Int = 0, GameHeight:Int = 0, ?InitialState:Class<FlxState>, Zoom:Float = 1, UpdateFramerate:Int = 60,
 			DrawFramerate:Int = 60, SkipSplash:Bool = false, StartFullscreen:Bool = false)
 	{
-		super(GameWidth, GameHeight, InitialState, Zoom, UpdateFramerate, DrawFramerate, SkipSplash, StartFullscreen);
+		// super(GameWidth, GameHeight, InitialState, Zoom, UpdateFramerate, DrawFramerate, SkipSplash, StartFullscreen);
+		super(GameWidth, GameHeight, InitialState);
 
 		i18n = new I18nManager();
 	}
