@@ -83,7 +83,7 @@ class APHud extends ClassicHUD
 			var listy = _blockCounter.y + _blockCounter.height;
 			_taskListbox = new FlxUIList(10, listy, [], width - 20, height - listy - 69, more);
 
-			_turnerButton = new FlxButton(5, 5, "T:0", () ->
+			_turnerButton = new FlxButton(5, 5, _t("game/ap/turner/count", ["_" => 0]), () ->
 			{
 				if (turners > 0)
 					onTurnerClick.dispatch();
@@ -91,7 +91,7 @@ class APHud extends ClassicHUD
 			_turnerButton.allowSwiping = false;
 			_turnerButton.y = _pcButton.y - _turnerButton.height;
 
-			_skipButton = new FlxButton(5, 5, "S:0", () ->
+			_skipButton = new FlxButton(5, 5, _t("game/ap/skip/count", ["_" => 0]), () ->
 			{
 				if (taskSkip > 0)
 					onTaskSkipClick.dispatch();
@@ -108,18 +108,26 @@ class APHud extends ClassicHUD
 
 	function set_turners(turners:Int)
 	{
-		var displayTurners = Math.round(Math.min(turners, 9));
-		_turnerButton.text = "T:" + displayTurners;
+		// var displayTurners = Math.round(Math.min(turners, 10));
+		_turnerButton.text = _t("game/ap/turner/count", ["_" => turners]);
 		_turnerButton.alive = turners > 0;
+
+		var diff = turners - this.turners;
+		if (diff > 0)
+			makeFlyout('+$diff', _turnerButton);
 
 		return this.turners = turners;
 	}
 
 	function set_taskSkip(taskSkip:Int)
 	{
-		var displaySkips = Math.round(Math.min(taskSkip, 9));
-		_skipButton.text = "S:" + displaySkips;
+		// var displaySkips = Math.round(Math.min(taskSkip, 10));
+		_skipButton.text = _t("game/ap/skip/count", ["_" => taskSkip]);
 		_skipButton.alive = taskSkip > 0;
+
+		var diff = taskSkip - this.taskSkip;
+		if (diff > 0)
+			makeFlyout('+$diff', _skipButton);
 
 		return this.taskSkip = taskSkip;
 	}

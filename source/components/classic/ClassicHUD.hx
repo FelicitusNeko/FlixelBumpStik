@@ -1,12 +1,13 @@
 package components.classic;
 
+import haxe.DynamicAccess;
 import boardObject.Bumper;
+import flixel.FlxSprite;
 import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
-import haxe.DynamicAccess;
 import lime.app.Event;
 
 class ClassicHUD extends StandardHUD
@@ -41,7 +42,7 @@ class ClassicHUD extends StandardHUD
 
 		if (_rightSide)
 		{
-			_pcButton = new FlxButton(5, 5, "P:0", () ->
+			_pcButton = new FlxButton(5, 5, _t("game/classic/paint/count", ["_" => 0]), () ->
 			{
 				if (paintCans > 0)
 					onPaintCanClick.dispatch();
@@ -77,23 +78,24 @@ class ClassicHUD extends StandardHUD
 
 	function set_paintCans(paintCans:Int):Int
 	{
-		var displayPaintCans = Math.round(Math.min(paintCans, 9));
-		_pcButton.text = "P:" + displayPaintCans;
+		// var displayPaintCans = Math.round(Math.min(paintCans, 10));
+		_pcButton.text = _t("game/classic/paint/count", ["_" => paintCans]);
 		_pcButton.alive = paintCans > 0;
 
 		var diff = paintCans - this.paintCans;
 		if (diff > 0)
-		{
-			// trace("Displaying diff of " + diff);
-			var plustext = new FlxText(0, 0, 0, "+" + diff, 12);
-			plustext.color = FlxColor.YELLOW;
-			add(plustext);
-			plustext.setPosition(_pcButton.x + (_pcButton.width * Math.random()) - (plustext.width / 2), _pcButton.y);
-			FlxTween.tween(plustext, {alpha: 0, y: plustext.y - (plustext.height * 1.5)}, 1, {ease: FlxEase.circOut, onComplete: (_) -> plustext.kill()});
-			// trace(plustext);
-		}
+			makeFlyout('+$diff', _pcButton);
 
 		return this.paintCans = paintCans;
+	}
+
+	function makeFlyout(text:String, from:FlxSprite, foColor = FlxColor.YELLOW)
+	{
+		var flyout = new FlxText(0, 0, 0, text, 12);
+		flyout.color = foColor;
+		add(flyout);
+		flyout.setPosition(from.x + (from.width * Math.random()) - (flyout.width / 2), from.y);
+		FlxTween.tween(flyout, {alpha: 0, y: flyout.y - (flyout.height * 1.5)}, 1, {ease: FlxEase.circOut, onComplete: (_) -> flyout.kill()});
 	}
 
 	/** Resets the HUD to its starting values. **/
@@ -120,7 +122,8 @@ class ClassicHUD extends StandardHUD
 		return retval;
 	}
 
-	public override function deseralize(data:DynamicAccess<Dynamic>) {
+	public override function deseralize(data:DynamicAccess<Dynamic>)
+	{
 		super.deseralize(data);
 
 		var paintCansDA:DynamicAccess<Int> = data["paintCans"];
