@@ -62,6 +62,9 @@ private enum abstract APLocation(Int) from Int to Int
 	var L1LScore1000;
 	var L1LScore1500;
 	var L1LScore2000;
+	var L1LBumpers25;
+	var L1LBumpers50;
+	var L1LBumpers75;
 	var L1Combo5;
 	var L2Score500;
 	var L2Score1000;
@@ -71,6 +74,10 @@ private enum abstract APLocation(Int) from Int to Int
 	var L2LScore2000;
 	var L2LScore3000;
 	var L2LScore4000;
+	var L2LBumpers25;
+	var L2LBumpers50;
+	var L2LBumpers75;
+	var L2LBumpers100;
 	var L2Combo5;
 	var L2Chain2;
 	var L3Score800;
@@ -81,6 +88,11 @@ private enum abstract APLocation(Int) from Int to Int
 	var L3LScore4000;
 	var L3LScore6000;
 	var L3LScore8000;
+	var L3LBumpers25;
+	var L3LBumpers50;
+	var L3LBumpers75;
+	var L3LBumpers100;
+	var L3LBumpers125;
 	var L3Combo5;
 	var L3Combo7;
 	var L3Chain2;
@@ -93,6 +105,12 @@ private enum abstract APLocation(Int) from Int to Int
 	var L4LScore6000;
 	var L4LScore9000;
 	var L4LScore12000;
+	var L4LBumpers25;
+	var L4LBumpers50;
+	var L4LBumpers75;
+	var L4LBumpers100;
+	var L4LBumpers125;
+	var L4LBumpers150;
 	var L4Combo5;
 	var L4Combo7;
 	var L4Chain2;
@@ -431,6 +449,7 @@ class APGameState extends ClassicGameState
 				{
 					_hudAP.addTask(Score, [250, 500, 750, 1000]);
 					_hudAP.addTask(LevelScore, [500, 1000, 1500, 2000]);
+					_hudAP.addTask(LevelCleared, [for (x in 1...4) x * 25]);
 					_hudAP.addTask(Combo, [5]);
 					_hudAP.addTask(Boosters, [1], _schedule["booster"].clear);
 					_hudAP.addTask(Treasures, [8], _schedule["treasure"].clear);
@@ -449,6 +468,7 @@ class APGameState extends ClassicGameState
 				{
 					_hudAP.addTask(Score, [500, 1000, 1500, 2000]);
 					_hudAP.addTask(LevelScore, [1000, 2000, 3000, 4000]);
+					_hudAP.addTask(LevelCleared, [for (x in 1...5) x * 25]);
 					_hudAP.addTask(Combo, [5]);
 					_hudAP.addTask(Chain, [2]);
 					_hudAP.addTask(Boosters, [2], _schedule["booster"].clear);
@@ -468,6 +488,7 @@ class APGameState extends ClassicGameState
 				{
 					_hudAP.addTask(Score, [800, 1600, 2400, 3200]);
 					_hudAP.addTask(LevelScore, [2000, 4000, 6000, 8000]);
+					_hudAP.addTask(LevelCleared, [for (x in 1...6) x * 25]);
 					_hudAP.addTask(Combo, [5, 7]);
 					_hudAP.addTask(Chain, [2]);
 					_hudAP.addTask(AllClear, [3]);
@@ -488,6 +509,7 @@ class APGameState extends ClassicGameState
 				{
 					_hudAP.addTask(Score, [1500, 3000, 4500, 6000]);
 					_hudAP.addTask(LevelScore, [3000, 6000, 9000, 12000]);
+					_hudAP.addTask(LevelCleared, [for (x in 1...7) x * 25]);
 					_hudAP.addTask(Combo, [5, 7]);
 					_hudAP.addTask(Chain, [2, 3]);
 					_hudAP.addTask(Boosters, [5], _schedule["booster"].clear);
@@ -706,6 +728,8 @@ class APGameState extends ClassicGameState
 					L1Score250 + Math.round(x / 250 - 1);
 				case [LevelScore, 1, x]:
 					L1LScore500 + Math.round(x / 500 - 1);
+				case [LevelCleared, 1, x]:
+					L1LBumpers25 + Math.round(x / 25 - 1);
 				case [Combo, 1, _]:
 					L1Combo5;
 
@@ -713,6 +737,8 @@ class APGameState extends ClassicGameState
 					L2Score500 + Math.round(x / 500 - 1);
 				case [LevelScore, 2, x]:
 					L2LScore1000 + Math.round(x / 1000 - 1);
+				case [LevelCleared, 2, x]:
+					L2LBumpers25 + Math.round(x / 25 - 1);
 				case [Combo, 2, _]:
 					L2Combo5;
 				case [Chain, 2, _]:
@@ -722,6 +748,8 @@ class APGameState extends ClassicGameState
 					L3Score800 + Math.round(x / 800 - 1);
 				case [LevelScore, 3, x]:
 					L3LScore2000 + Math.round(x / 2000 - 1);
+				case [LevelCleared, 3, x]:
+					L3LBumpers25 + Math.round(x / 25 - 1);
 				case [Combo, 3, 5]:
 					L3Combo5;
 				case [Combo, 3, 7]:
@@ -735,6 +763,8 @@ class APGameState extends ClassicGameState
 					L4Score1500 + Math.round(x / 1500 - 1);
 				case [LevelScore, 4, x]:
 					L4LScore3000 + Math.round(x / 3000 - 1);
+				case [LevelCleared, 4, x]:
+					L4LBumpers25 + Math.round(x / 25 - 1);
 				case [Combo, 4, 5]: L4Combo5;
 				case [Combo, 4, 7]: L4Combo7;
 				case [Chain, 4, 2]: L4Chain2;
