@@ -558,6 +558,20 @@ class APGameState extends ClassicGameState
 				}));
 				_hudAP.addTask(Score, [99999]);
 			default: // If we don't recognise the level, just default to 99999 score and make it obvious something's wrong
+				openSubState(new DialogBox(_t("game/ap/error/levelgen", ["level" => level]), {
+					title: _t("base/error"),
+					titleColor: FlxColor.fromRGB(255, 127, 127),
+					defAccept: Custom(() ->
+					{
+						_queueTo = new MenuState();
+						return Close;
+					}),
+					defCancel: Custom(() ->
+					{
+						_queueTo = new MenuState();
+						return Close;
+					})
+				}));
 				_hudAP.addTask(Score, [99999]);
 		}
 	}
