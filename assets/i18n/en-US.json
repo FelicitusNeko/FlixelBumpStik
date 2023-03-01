@@ -49,6 +49,15 @@
     "classic": {
       "newCol": "New\nColor",
       "allClear": "All Clear",
+      "paint": {
+        "col": "Select a color",
+        "bump": "Select a bumper",
+        "count": {
+          "0": "No Paint Cans",
+          "1": "1 Paint Can",
+          "_": ":_ Paint Cans"
+        }
+      },
       "paintCol": "Select a color",
       "paintBump": "Select a bumper"
     },
@@ -56,10 +65,27 @@
       "received": "Received :item",
       "booster": "Booster Up - Now x:value",
       "levelcomplete": "- Level Complete -",
-      "skipprompt": "Advance which task?",
-      "skipconfirm": "Advance",
-      "skipnotice": "This will advance this task by one step.",
+      "skip": {
+        "prompt": "Advance which task?",
+        "confirm": "Advance",
+        "notice": "This will advance this task by one step.",
+        "count": {
+          "0": "No Advances",
+          "1": "1 Advance",
+          "_": ":_ Advances"
+        }
+      },
+      "turner": {
+        "count": {
+          "0": "No Turners",
+          "1": "1 Turner",
+          "_": ":_ Turners"
+        }
+      },
       "goal": "Great job! You've completed your goal for this seed.",
+      "error": {
+        "levelgen": "The game called to generate Level :level, which is not a valid level number."
+      },
       "item": {
         "scoreBonus": "Bonus :bonus Points",
         "taskSkip": "Task Advance",

@@ -40,18 +40,18 @@ class TaskSkipSubstate extends FlxSubState
 			if (task.width > widest)
 				widest = task.width;
 
-		var text = new FlxText(0, 0, 0, BumpStikGame.g().i18n.tr("game/ap/skipprompt"), 24);
+		var text = new FlxText(0, 0, 0, BumpStikGame.g().i18n.tr("game/ap/skip/prompt"), 24);
 		text.autoSize = false;
 		text.alignment = CENTER;
 
 		var more = "+<X>";
 		var list = new FlxUIList(0, 0, cast taskLabels, widest, taskLabels[0].height, more);
 
-		var notice = new FlxUIText(0, 0, 0, _t("game/ap/skipnotice"), 12);
+		var notice = new FlxUIText(0, 0, 0, _t("game/ap/skip/notice"), 12);
 		notice.autoSize = false;
 		notice.alignment = CENTER;
 
-		var accept = new FlxUIButton(0, 0, _t("game/ap/skipconfirm"), () ->
+		var accept = new FlxUIButton(0, 0, _t("game/ap/skip/confirm"), () ->
 		{
 			var selTask = _tasks[list.scrollIndex];
 			selTask.force();
