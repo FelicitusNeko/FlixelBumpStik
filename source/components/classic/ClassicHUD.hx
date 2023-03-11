@@ -89,6 +89,12 @@ class ClassicHUD extends StandardHUD
 		return this.paintCans = paintCans;
 	}
 
+	/**
+		Creates an `FlxText` that is animated as to emanate from a given sprite.
+		@param text The text to create as a flyout.
+		@param from The sprite to emanate from.
+		@param foColor *Optional.* The color of the text. Defaults to `FlxColor.YELLOW`.
+	**/
 	function makeFlyout(text:String, from:FlxSprite, foColor = FlxColor.YELLOW)
 	{
 		var flyout = new FlxText(0, 0, 0, text, 12);
