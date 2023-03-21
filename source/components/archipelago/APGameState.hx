@@ -374,6 +374,7 @@ class APGameState extends ClassicGameState
 
 		FlxG.autoPause = false;
 
+		// TODO: Restart Board button
 		var test = new FlxButton(0, 0, "Test", () ->
 		{
 			// goes nowhere does nothing
@@ -915,6 +916,7 @@ class APGameState extends ClassicGameState
 
 	function onTurnerClick()
 	{
+		// TODO: show cancel button
 		if (_selectedColor != null)
 			return;
 		_turnerMode = true;
@@ -928,6 +930,7 @@ class APGameState extends ClassicGameState
 			var dlg = new TaskSkipSubstate(_boardAP.center);
 			dlg.onTaskSkip.add(task ->
 			{
+				_hudAP.taskSkip--;
 				_hudAP.updateTask(task.type, task.current);
 				if (![Treasures, Boosters].contains(task.type))
 					onTaskComplete(_hudAP.level, task.type, task.goals[task.goalIndex - 1], task.current);
@@ -945,6 +948,7 @@ class APGameState extends ClassicGameState
 			super.onBumperSelect(bumper);
 		else if (_turnerMode)
 		{
+			// BUG: selecting next bumper softlocks game
 			var turnerPicker = new TurnerSubstate(bumper.getPosition(), bumper.direction, bumper.bColor);
 			turnerPicker.onDialogResult.add(dir ->
 			{
@@ -952,6 +956,7 @@ class APGameState extends ClassicGameState
 					_boardAP.endTurner(true);
 				else
 				{
+					// BUG: this code is executing on cancel
 					_hudAP.turners--;
 					bumper.direction = dir;
 					_boardAP.endTurner();
