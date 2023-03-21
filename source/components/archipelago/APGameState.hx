@@ -115,7 +115,7 @@ private enum abstract APLocation(Int) from Int to Int
 	var L4Combo7;
 	var L4Chain2;
 	var L4Chain3;
-	var L5TScore75k;
+	var L5TScore50k;
 	var L5AllHazards;
 	var Booster1;
 	var Booster2;
@@ -786,7 +786,7 @@ class APGameState extends ClassicGameState
 				case [Chain, 4, 3]: L4Chain3;
 
 				case [TotalScore, 5, _]:
-					L5TScore75k;
+					L5TScore50k;
 				case [Hazards, 5, _]:
 					L5AllHazards;
 
@@ -919,8 +919,37 @@ class APGameState extends ClassicGameState
 		// TODO: show cancel button
 		if (_selectedColor != null)
 			return;
+
+		if (_paintCanCancelButton == null)
+		{
+			_paintCanCancelButton = new FlxButton(_boardClassic.center.x
+				+ (_boardClassic.bWidth * _boardClassic.sWidth / 2)
+				+ 20,
+				_boardClassic.center.y
+				+ (_boardClassic.bHeight * _boardClassic.sHeight / 2)
+				+ 20, "X", onFieldCancel);
+			_paintCanCancelButton.loadGraphic(AssetPaths.button__png, true, 20, 20);
+			_paintCanCancelButton.scale.set(2, 2);
+			_paintCanCancelButton.scrollFactor.set(1, 1);
+			add(_paintCanCancelButton);
+		}
+		else
+			_paintCanCancelButton.revive();
+
 		_turnerMode = true;
 		_boardAP.selectMode();
+	}
+
+	override function onFieldCancel()
+	{
+		if (_turnerMode)
+		{
+			_paintCanCancelButton.kill();
+			_turnerMode = false;
+			_boardAP.endTurner(true);
+		}
+		else
+			super.onFieldCancel();
 	}
 
 	function onTaskSkipClick()
@@ -945,9 +974,13 @@ class APGameState extends ClassicGameState
 	override function onBumperSelect(bumper:Bumper)
 	{
 		if (_selectedColor != null)
+		{
+			_paintCanCancelButton.kill();
 			super.onBumperSelect(bumper);
+		}
 		else if (_turnerMode && bumper != _hud.nextBumper)
 		{
+			_paintCanCancelButton.kill();
 			// TODO: allow picking next bumper (probably would require a rework, which is more or less planned)
 			var turnerPicker = new TurnerSubstate(bumper.getPosition(), bumper.direction, bumper.bColor);
 			turnerPicker.onDialogResult.add(dir ->
