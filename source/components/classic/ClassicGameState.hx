@@ -244,7 +244,7 @@ class ClassicGameState extends GameState
 					+ 20,
 					_boardClassic.center.y
 					+ (_boardClassic.bHeight * _boardClassic.sHeight / 2)
-					+ 20, "X", () -> onBumperSelect(null));
+					+ 20, "X", () -> onFieldCancel);
 				_paintCanCancelButton.loadGraphic(AssetPaths.button__png, true, 20, 20);
 				_paintCanCancelButton.scale.set(2, 2);
 				_paintCanCancelButton.scrollFactor.set(1, 1);
@@ -256,6 +256,10 @@ class ClassicGameState extends GameState
 		else
 			FlxG.sound.play(AssetPaths.mback__wav);
 	}
+
+	function onFieldCancel()
+		if (_selectedColor != null)
+			onBumperSelect(null);
 
 	/** Called when a bumper is selected, or the bumper selection is cancelled. **/
 	function onBumperSelect(bumper:Bumper)
