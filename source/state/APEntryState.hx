@@ -28,6 +28,8 @@ class APEntryState extends FlxState
 	{
 		_t = BumpStikGame.g().i18n.tr;
 
+		// TODO: save last game's settings as default; Reset button to return to base default
+
 		var titleText = new FlxText(20, 0, 0, "Archipelago", 22);
 		titleText.alignment = CENTER;
 		titleText.screenCenter(X);
@@ -45,7 +47,7 @@ class APEntryState extends FlxState
 		add(backButton);
 
 		var hostLabel = new FlxText(FlxG.width / 2 - 100, 80, 0, _t("menu/ap/host"), 12);
-		_hostInput = new FlxInputText(FlxG.width / 2, 80, 150, "localhost", 12, FlxColor.WHITE, FlxColor.GRAY);
+		_hostInput = new FlxInputText(FlxG.width / 2, 80, 150, "archipelago.gg", 12, FlxColor.WHITE, FlxColor.GRAY);
 		add(hostLabel);
 		add(_hostInput);
 
