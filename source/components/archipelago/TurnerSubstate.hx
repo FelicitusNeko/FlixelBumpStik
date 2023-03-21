@@ -42,9 +42,9 @@ class TurnerSubstate extends FlxSubState
 		var distanceFactor = .8;
 		var bumperHeight:Float = -1;
 
-		var hexbutton = new FlxSpriteButton(center.x, center.y, null, () -> onDialogResult.dispatch(null));
-		hexbutton.scrollFactor.set(1, 1);
-		hexbutton.makeGraphic(64, 64, FlxColor.TRANSPARENT);
+		var cancelButton = new FlxSpriteButton(center.x, center.y, null, () -> onDialogResult.dispatch(null));
+		cancelButton.scrollFactor.set(1, 1);
+		cancelButton.makeGraphic(64, 64, FlxColor.TRANSPARENT);
 
 		for (i => dir in _dirs)
 		{
@@ -58,9 +58,9 @@ class TurnerSubstate extends FlxSubState
 			_bumpers.add(bumper);
 		}
 
-		hexbutton.drawCircle(32, 32, 30, FlxColor.BLACK, {thickness: 3, color: FlxColor.RED}, {smoothing: true});
-		hexbutton.alpha = .75;
-		add(hexbutton);
+		cancelButton.drawCircle(32, 32, 30, FlxColor.BLACK, {thickness: 3, color: FlxColor.RED}, {smoothing: true});
+		cancelButton.alpha = .75;
+		add(cancelButton);
 
 		var cancelText = new FlxText(center.x + (bumperHeight / 2) - 36, center.y + (bumperHeight / 2), 72, "Cancel", 14);
 		cancelText.alignment = CENTER;
