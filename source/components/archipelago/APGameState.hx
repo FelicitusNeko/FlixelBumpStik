@@ -946,9 +946,9 @@ class APGameState extends ClassicGameState
 	{
 		if (_selectedColor != null)
 			super.onBumperSelect(bumper);
-		else if (_turnerMode)
+		else if (_turnerMode && bumper != _hud.nextBumper)
 		{
-			// BUG: selecting next bumper softlocks game
+			// TODO: allow picking next bumper (probably would require a rework, which is more or less planned)
 			var turnerPicker = new TurnerSubstate(bumper.getPosition(), bumper.direction, bumper.bColor);
 			turnerPicker.onDialogResult.add(dir ->
 			{
@@ -956,7 +956,7 @@ class APGameState extends ClassicGameState
 					_boardAP.endTurner(true);
 				else
 				{
-					// BUG: this code is executing on cancel
+					// ???: this code is executing on cancel (could not replicate)
 					_hudAP.turners--;
 					bumper.direction = dir;
 					_boardAP.endTurner();
