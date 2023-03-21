@@ -97,6 +97,8 @@ abstract APTask(IAPTask) from IAPTask
 			value = 0;
 		if (value > goalCount)
 			value = goalCount;
+		if (this.uiText != null)
+			this.uiText.color = value >= goalCount ? FlxColor.LIME : FlxColor.WHITE;
 		return this.goalIndex = value;
 	}
 
@@ -106,11 +108,8 @@ abstract APTask(IAPTask) from IAPTask
 	function set_current(value)
 	{
 		if (value > this.current)
-		{
 			this.current = value;
-			if (this.uiText != null)
-				this.uiText.color = value >= this.goals[goalCount - 1] ? FlxColor.LIME : FlxColor.WHITE;
-		}
+
 		return this.current;
 	}
 
