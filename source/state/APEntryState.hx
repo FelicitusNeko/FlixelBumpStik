@@ -14,6 +14,8 @@ import flixel.util.FlxColor;
 
 class APEntryState extends FlxState
 {
+	static final wsCheck = ~/^wss?:\/\//;
+
 	private var _hostInput:FlxInputText;
 	private var _portInput:FlxInputText;
 	private var _slotInput:FlxInputText;
@@ -98,9 +100,13 @@ class APEntryState extends FlxState
 		else
 		{
 			var connectSubState = new APConnectingSubState();
+			var uri = '${_hostInput.text}:${_portInput.text}';
+			if (!wsCheck.match(uri))
+				uri = 'ws://$uri';
+
 			openSubState(connectSubState);
 
-			var ap = new Client("BumpStik", "Bumper Stickers", 'ws://${_hostInput.text}:${_portInput.text}');
+			var ap = new Client("BumpStik", "Bumper Stickers", uri);
 
 			ap._hOnRoomInfo = () ->
 			{
