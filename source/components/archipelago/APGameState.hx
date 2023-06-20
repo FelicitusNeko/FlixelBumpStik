@@ -528,7 +528,7 @@ class APGameState extends ClassicGameState
 				_levelNextColor = _levelStepColor = 100;
 				if (!dontCreateTasks)
 				{
-					_hudAP.addTask(TotalScore, [50000]);
+					_hudAP.addTask(TotalScore, [Math.round(Math.max(50000, _hud.score + 5000))]);
 					_hudAP.addTask(Hazards, [25], _schedule["hazard"].clear);
 				}
 				_schedule["hazard"].setDelay(1, 10);
