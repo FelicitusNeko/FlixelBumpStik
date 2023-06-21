@@ -106,7 +106,7 @@ class APEntryState extends FlxState
 
 			openSubState(connectSubState);
 
-			var ap = new Client("BumpStik", "Bumper Stickers", uri);
+			var ap = new Client('BumpStik-${_slotInput.text}', "Bumper Stickers", uri);
 
 			ap._hOnRoomInfo = () ->
 			{
