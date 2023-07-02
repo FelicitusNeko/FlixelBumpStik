@@ -528,7 +528,7 @@ class APGameState extends ClassicGameState
 				_levelNextColor = _levelStepColor = 100;
 				if (!dontCreateTasks)
 				{
-					_hudAP.addTask(TotalScore, [Math.round(Math.max(50000, _hud.score + 5000))]);
+					_hudAP.addTask(TotalScore, [Math.round(Math.max(50000, _hudAP.totalScore + 5000))]);
 					_hudAP.addTask(Hazards, [25], _schedule["hazard"].clear);
 				}
 				_schedule["hazard"].setDelay(1, 10);
@@ -536,12 +536,19 @@ class APGameState extends ClassicGameState
 					schedule.maxAvailable = 999;
 			case 6 | -1: // the game is complete in this case; send a goal condition to the server
 				_ap.clientStatus = GOAL;
+				function collectAndRelease()
+				{
+					_ap.Say("!release");
+					_ap.Say("!collect");
+					_ap.poll();
+				}
 				openSubState(new DialogBox(_t("game/ap/goal"), {
 					buttons: [
 						{
 							text: _t("base/dlg/back2menu"),
 							result: Custom(() ->
 							{
+								collectAndRelease();
 								_queueTo = new MenuState();
 								return No;
 							})
@@ -550,6 +557,7 @@ class APGameState extends ClassicGameState
 							text: _t("menu/main/classic"),
 							result: Custom(() ->
 							{
+								collectAndRelease();
 								_queueTo = new ClassicGameState();
 								return Yes;
 							})
