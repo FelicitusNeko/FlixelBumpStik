@@ -1,5 +1,6 @@
 package state;
 
+import haxe.DynamicAccess;
 import haxe.Timer;
 import Main.I18nFunction;
 import ap.Client;
@@ -11,6 +12,7 @@ import flixel.addons.ui.FlxInputText;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
+import flixel.util.FlxSave;
 
 class APEntryState extends FlxState
 {
@@ -31,6 +33,16 @@ class APEntryState extends FlxState
 		_t = BumpStikGame.g().i18n.tr;
 
 		// TODO: save last game's settings as default; Reset button to return to base default
+		var apGames = new FlxSave();
+		apGames.bind("apGames");
+		var lastGame:DynamicAccess<String> = apGames.data.lastGame;
+		if (lastGame == null)
+			lastGame = {
+				server: "archipelago.gg",
+				port: "38281",
+				slot: ""
+			};
+		apGames.destroy();
 
 		var titleText = new FlxText(20, 0, 0, "Archipelago", 22);
 		titleText.alignment = CENTER;
@@ -49,19 +61,19 @@ class APEntryState extends FlxState
 		add(backButton);
 
 		var hostLabel = new FlxText(FlxG.width / 2 - 100, 80, 0, _t("menu/ap/host"), 12);
-		_hostInput = new FlxInputText(FlxG.width / 2, 80, 150, "archipelago.gg", 12, FlxColor.WHITE, FlxColor.GRAY);
+		_hostInput = new FlxInputText(FlxG.width / 2, 80, 150, lastGame["server"], 12, FlxColor.WHITE, FlxColor.GRAY);
 		add(hostLabel);
 		add(_hostInput);
 
 		var portLabel = new FlxText(FlxG.width / 2 - 100, 100, 0, _t("menu/ap/port"), 12);
-		_portInput = new FlxInputText(FlxG.width / 2, 100, 150, "38281", 12, FlxColor.WHITE, FlxColor.GRAY);
+		_portInput = new FlxInputText(FlxG.width / 2, 100, 150, lastGame["port"], 12, FlxColor.WHITE, FlxColor.GRAY);
 		_portInput.filterMode = FlxInputText.ONLY_NUMERIC;
 		_portInput.maxLength = 6;
 		add(portLabel);
 		add(_portInput);
 
 		var slotLabel = new FlxText(FlxG.width / 2 - 100, 120, 0, _t("menu/ap/slot"), 12);
-		_slotInput = new FlxInputText(FlxG.width / 2, 120, 150, "", 12, FlxColor.WHITE, FlxColor.GRAY);
+		_slotInput = new FlxInputText(FlxG.width / 2, 120, 150, lastGame["slot"], 12, FlxColor.WHITE, FlxColor.GRAY);
 		add(slotLabel);
 		add(_slotInput);
 
@@ -105,6 +117,7 @@ class APEntryState extends FlxState
 				uri = 'ws://$uri';
 
 			openSubState(connectSubState);
+			connectSubState.closeCallback = () -> trace("Close callback test");
 
 			var ap = new Client('BumpStik-${_slotInput.text}', "Bumper Stickers", uri);
 
@@ -120,16 +133,6 @@ class APEntryState extends FlxState
 				ap.ConnectSlot(_slotInput.text, _pwInput.text.length > 0 ? _pwInput.text : null, 0x7, tags, {major: 0, minor: 3, build: 8});
 			};
 
-			var polltimer = new Timer(50);
-			polltimer.run = ap.poll;
-
-			connectSubState.onCancel.add(() ->
-			{
-				polltimer.stop();
-				ap._hOnSlotConnected = (_) -> {};
-				ap.disconnect_socket();
-			});
-
 			ap._hOnSlotRefused = (errors:Array<String>) ->
 			{
 				trace("Slot refused", errors);
@@ -141,6 +144,9 @@ class APEntryState extends FlxState
 					case x: postError("default", ["error" => x]);
 				}
 			}
+
+			var polltimer = new Timer(50);
+			polltimer.run = ap.poll;
 
 			ap._hOnSocketDisconnected = () ->
 			{
@@ -159,8 +165,25 @@ class APEntryState extends FlxState
 				ap._hOnSocketDisconnected = null;
 				ap._hOnSlotConnected = null;
 				closeSubState();
+
+				var apGames = new FlxSave();
+				apGames.bind("apGames");
+				apGames.data.lastGame = {
+					server: _hostInput.text,
+					port: _portInput.text,
+					slot: _slotInput.text
+				};
+				apGames.close();
+
 				FlxG.switchState(new APGameState(ap, slotData));
 			}
+
+			connectSubState.onCancel.add(() ->
+			{
+				polltimer.stop();
+				ap._hOnSlotConnected = null;
+				ap.disconnect_socket();
+			});
 		}
 	}
 
