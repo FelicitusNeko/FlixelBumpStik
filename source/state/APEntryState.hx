@@ -123,6 +123,13 @@ class APEntryState extends FlxState
 			var polltimer = new Timer(50);
 			polltimer.run = ap.poll;
 
+			connectSubState.onCancel.add(() ->
+			{
+				polltimer.stop();
+				ap._hOnSlotConnected = (_) -> {};
+				ap.disconnect_socket();
+			});
+
 			ap._hOnSlotRefused = (errors:Array<String>) ->
 			{
 				trace("Slot refused", errors);
