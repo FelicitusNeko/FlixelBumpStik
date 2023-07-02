@@ -925,7 +925,7 @@ class APGameState extends ClassicGameState
 	function onTurnerClick()
 	{
 		// TODO: show cancel button
-		if (_selectedColor != null)
+		if (_boardAP.state != "idle" || _selectedColor != null)
 			return;
 
 		if (_paintCanCancelButton == null)
@@ -962,7 +962,7 @@ class APGameState extends ClassicGameState
 
 	function onTaskSkipClick()
 	{
-		if (!_turnerMode && _selectedColor == null)
+		if (_boardAP.state == "idle" && !_turnerMode && _selectedColor == null)
 		{
 			var dlg = new TaskSkipSubstate(_boardAP.center);
 			dlg.onTaskSkip.add(task ->
