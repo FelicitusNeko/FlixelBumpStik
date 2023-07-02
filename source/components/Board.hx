@@ -65,13 +65,16 @@ class Board extends FlxTypedGroup<FlxBasic>
 	/** The state machine for this board. **/
 	private var _csm:CSM;
 
+	/** _Read-only._ The board's current state label. **/
+	public var state(get, never):String;
+
 	/** The currently selected launcher. **/
 	private var _selectedLauncher:Launcher = null;
 
 	/** The current chain progression in steps. **/
 	public var curChain(default, null):Int = 0;
 
-	/** The current count of bumpers on the field. **/
+	/** _Read-only._ The current count of bumpers on the field. **/
 	public var bCount(get, never):Int;
 
 	/** When Game Over hits, as a preventative measure, the game over sequence will be forced to progress after five seconds. **/
@@ -186,6 +189,9 @@ class Board extends FlxTypedGroup<FlxBasic>
 
 	inline function get_center()
 		return new FlxPoint(bWidth * sWidth / 2, bHeight * sHeight / 2).addPoint(origin);
+
+	inline function get_state()
+		return _csm.currentState;
 
 	inline function get_bCount()
 		return _bumpers.countLiving();
