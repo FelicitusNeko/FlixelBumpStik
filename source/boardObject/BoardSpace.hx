@@ -1,9 +1,9 @@
 package boardObject;
 
-import boardObject.Bumper;
-import components.Board;
+import components.common.Board;
 import flixel.FlxSprite;
 import flixel.util.FlxColor;
+import boardObject.Bumper;
 
 /**
 	Board spaces may seem like a background detail, but they do assist in preventing mid-space collisions

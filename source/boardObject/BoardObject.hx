@@ -1,11 +1,11 @@
 package boardObject;
 
-import components.Board;
+import haxe.DynamicAccess;
+import components.common.Board;
 import flixel.FlxSprite;
 import flixel.group.FlxSpriteGroup;
 import flixel.math.FlxPoint;
 import flixel.ui.FlxSpriteButton;
-import haxe.DynamicAccess;
 import lime.app.Event;
 
 /** Any of a class of object that composes a Bumper Stickers board. **/
@@ -155,7 +155,5 @@ abstract class BoardObject extends FlxSpriteGroup
 		return retval;
 	}
 
-	public function deserialize(data:DynamicAccess<Dynamic>) {
-		
-	}
+	public function deserialize(data:DynamicAccess<Dynamic>) {}
 }

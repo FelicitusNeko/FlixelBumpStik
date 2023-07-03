@@ -3,6 +3,7 @@ package components.classic;
 import boardObject.BoardObject;
 import boardObject.Bumper;
 import lime.app.Event;
+import components.common.Board;
 
 class ClassicBoard extends Board
 {

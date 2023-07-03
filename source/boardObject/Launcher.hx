@@ -1,10 +1,10 @@
 package boardObject;
 
-import boardObject.Bumper.Direction;
-import components.Board;
+import components.common.Board;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.util.FlxColor;
+import boardObject.Bumper.Direction;
 
 enum LState
 {

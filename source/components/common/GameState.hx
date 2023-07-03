@@ -1,4 +1,4 @@
-package components;
+package components.common;
 
 import haxe.DynamicAccess;
 import haxe.Exception;
@@ -10,7 +10,7 @@ import flixel.math.FlxPoint;
 import flixel.util.FlxColor;
 import flixel.util.FlxSave;
 import openfl.system.System;
-import components.StandardHUD;
+import components.common.StandardHUD;
 
 /** Stats for each player. **/
 typedef PlayerInstance =

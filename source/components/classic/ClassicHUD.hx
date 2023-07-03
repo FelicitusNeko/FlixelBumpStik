@@ -9,6 +9,7 @@ import flixel.tweens.FlxTween;
 import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
 import lime.app.Event;
+import components.common.StandardHUD;
 
 class ClassicHUD extends StandardHUD
 {

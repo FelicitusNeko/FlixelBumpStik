@@ -8,9 +8,10 @@ import flixel.math.FlxPoint;
 import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
 import flixel.util.FlxSave;
-import components.Board;
 import components.archipelago.TurnerSubstate;
 import components.classic.ClassicHUD;
+import components.common.Board;
+import components.common.GameState;
 
 class ClassicGameState extends GameState
 {

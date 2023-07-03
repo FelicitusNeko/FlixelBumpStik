@@ -1,7 +1,7 @@
 package boardObject.archipelago;
 
 import haxe.DynamicAccess;
-import components.Board;
+import components.common.Board;
 import flixel.util.FlxColor;
 
 class APHazardPlaceholder extends BoardObject
@@ -47,7 +47,8 @@ class APHazardPlaceholder extends BoardObject
 		return false;
 	}
 
-	public override function serialize():DynamicAccess<Dynamic> {
+	public override function serialize():DynamicAccess<Dynamic>
+	{
 		var retval = super.serialize();
 
 		retval["resolveColor"] = _resolveColor;
@@ -55,7 +56,8 @@ class APHazardPlaceholder extends BoardObject
 		return retval;
 	}
 
-	public static function fromSaved(data:DynamicAccess<Dynamic>) {
+	public static function fromSaved(data:DynamicAccess<Dynamic>)
+	{
 		var obstacle = new APHazardPlaceholder(0, 0, data["resolveColor"]);
 		obstacle.deserialize(data);
 		return obstacle;

@@ -1,4 +1,4 @@
-package components;
+package components.common;
 
 import haxe.DynamicAccess;
 import Main.I18nFunction;

@@ -1,11 +1,11 @@
 package boardObject;
 
-import components.Board;
+import haxe.DynamicAccess;
+import components.common.Board;
 import flixel.FlxSprite;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
-import haxe.DynamicAccess;
 
 /** The current color of the bumper, for matching purposes. **/
 enum abstract Color(FlxColor) from FlxColor to FlxColor

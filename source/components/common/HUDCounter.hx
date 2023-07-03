@@ -1,4 +1,4 @@
-package components;
+package components.common;
 
 import flixel.FlxSprite;
 import flixel.graphics.frames.FlxBitmapFont;

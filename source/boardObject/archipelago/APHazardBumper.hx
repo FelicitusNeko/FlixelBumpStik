@@ -1,7 +1,7 @@
 package boardObject.archipelago;
 
 import haxe.DynamicAccess;
-import components.Board;
+import components.common.Board;
 import flixel.tweens.FlxEase;
 import flixel.util.FlxColor;
 
