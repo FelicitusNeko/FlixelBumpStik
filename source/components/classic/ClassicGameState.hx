@@ -202,7 +202,7 @@ class ClassicGameState extends GameState
 	/** Called when the Paint Can button is clicked. **/
 	function onPaintCanClick()
 	{
-		if (_boardClassic.state == "idle" && _selectedColor == null)
+		if (_boardClassic.state == "initial" && _selectedColor == null)
 		{
 			FlxG.sound.play(AssetPaths.mselect__wav);
 			var bumperSize = new FlxPoint(_hud.nextBumper.width, _hud.nextBumper.height).scale(.5);
