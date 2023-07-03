@@ -1,12 +1,12 @@
 package components;
 
+import haxe.DynamicAccess;
 import Main.I18nFunction;
 import boardObject.Bumper;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.group.FlxSpriteGroup;
 import flixel.util.FlxColor;
-import haxe.DynamicAccess;
 import lime.app.Event;
 
 using StringTools;
@@ -147,7 +147,7 @@ class StandardHUD extends FlxSpriteGroup
 		return retval;
 	}
 
-	public function deseralize(data:DynamicAccess<Dynamic>)
+	public function deserialize(data:DynamicAccess<Dynamic>)
 	{
 		score = data["score"];
 		block = data["block"];

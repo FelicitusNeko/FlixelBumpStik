@@ -128,9 +128,9 @@ class ClassicHUD extends StandardHUD
 		return retval;
 	}
 
-	public override function deseralize(data:DynamicAccess<Dynamic>)
+	public override function deserialize(data:DynamicAccess<Dynamic>)
 	{
-		super.deseralize(data);
+		super.deserialize(data);
 
 		var paintCansDA:DynamicAccess<Int> = data["paintCans"];
 		paintCans = paintCansDA["count"];

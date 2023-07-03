@@ -1066,7 +1066,7 @@ class APGameState extends ClassicGameState
 			}
 
 			_hud = new APHud();
-			_hud.deseralize(data["hud"]);
+			_hud.deserialize(data["hud"]);
 		}
 
 		_startPaintCans = data["startPaintCans"];

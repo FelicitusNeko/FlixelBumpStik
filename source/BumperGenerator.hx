@@ -191,7 +191,7 @@ class BumperGenerator
 		return retval;
 	}
 
-	public function deseralize(data:DynamicAccess<Dynamic>)
+	public function deserialize(data:DynamicAccess<Dynamic>)
 	{
 		colorLimit = data["colorLimit"];
 		colors = data["colors"];
@@ -204,7 +204,7 @@ class BumperGenerator
 	public static function fromSaved(data:DynamicAccess<Dynamic>)
 	{
 		var retval = new BumperGenerator(data["initColors"], data["colorOpts"]);
-		retval.deseralize(data);
+		retval.deserialize(data);
 		return retval;
 	}
 }

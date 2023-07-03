@@ -321,7 +321,7 @@ class ClassicGameState extends GameState
 			}
 
 			_hud = new ClassicHUD();
-			_hud.deseralize(data["hud"]);
+			_hud.deserialize(data["hud"]);
 		}
 
 		_jackpot = data["jackpot"];
