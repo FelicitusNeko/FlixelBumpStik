@@ -1,6 +1,6 @@
 package boardObject;
 
-import components.common.Board;
+import components.common.CommonBoard;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.util.FlxColor;
@@ -39,7 +39,7 @@ class Launcher extends BoardObject
 	/** Whether this launcher is currently enabled. **/
 	public var enabled(default, set):Bool = true;
 
-	public function new(x:Float, y:Float, direction:Direction, owner:Board = null)
+	public function new(x:Float, y:Float, direction:Direction, owner:CommonBoard = null)
 	{
 		super(x, y, owner);
 

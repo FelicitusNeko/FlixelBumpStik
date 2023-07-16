@@ -9,9 +9,9 @@ import flixel.tweens.FlxTween;
 import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
 import lime.app.Event;
-import components.common.StandardHUD;
+import components.common.CommonHUD;
 
-class ClassicHUD extends StandardHUD
+class ClassicHUD extends CommonHUD
 {
 	/** The button to use a Paint Can. **/
 	private var _pcButton:FlxButton;

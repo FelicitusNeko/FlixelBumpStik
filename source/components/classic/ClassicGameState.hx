@@ -10,10 +10,10 @@ import flixel.util.FlxColor;
 import flixel.util.FlxSave;
 import components.archipelago.TurnerSubstate;
 import components.classic.ClassicHUD;
-import components.common.Board;
-import components.common.GameState;
+import components.common.CommonBoard;
+import components.common.CommonGameState;
 
-class ClassicGameState extends GameState
+class ClassicGameState extends CommonGameState
 {
 	/** The value of the All Clear jackpot. **/
 	private var _jackpot:Int = 0;

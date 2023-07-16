@@ -1,7 +1,7 @@
 package boardObject.archipelago;
 
 import haxe.DynamicAccess;
-import components.common.Board;
+import components.common.CommonBoard;
 import flixel.tweens.FlxEase;
 import flixel.util.FlxColor;
 
@@ -15,7 +15,7 @@ class APHazardBumper extends Bumper
 
 	private var _turnsToNormal:Int;
 
-	public function new(x:Float, y:Float, resolveColor:FlxColor, ?owner:Board, turnsToNormal = 5)
+	public function new(x:Float, y:Float, resolveColor:FlxColor, ?owner:CommonBoard, turnsToNormal = 5)
 	{
 		super(x, y, null, None, None, owner);
 		_turnsToNormal = turnsToNormal;

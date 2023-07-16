@@ -3,9 +3,9 @@ package components.classic;
 import boardObject.BoardObject;
 import boardObject.Bumper;
 import lime.app.Event;
-import components.common.Board;
+import components.common.CommonBoard;
 
-class ClassicBoard extends Board
+class ClassicBoard extends CommonBoard
 {
 	public var onBumperSelect(default, null) = new Event<Bumper->Void>();
 

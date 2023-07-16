@@ -10,25 +10,25 @@ import flixel.math.FlxPoint;
 import flixel.util.FlxColor;
 import flixel.util.FlxSave;
 import openfl.system.System;
-import components.common.StandardHUD;
+import components.common.CommonHUD;
 
 /** Stats for each player. **/
 typedef PlayerInstance =
 {
 	/** The board to be used for this player. **/
-	var board:Board;
+	var board:CommonBoard;
 
 	/** The player's current score multiplier stack. **/
 	var multStack:Array<Float>;
 }
 
-abstract class GameState extends FlxState
+abstract class CommonGameState extends FlxState
 {
 	/** The list of players for this game. **/
 	private var _players:Array<PlayerInstance> = [];
 
 	/** The GUI for this game. **/
-	private var _hud:StandardHUD;
+	private var _hud:CommonHUD;
 
 	/** A shortcut to the first player on the list. **/
 	private var _player(get, never):PlayerInstance;
@@ -102,12 +102,12 @@ abstract class GameState extends FlxState
 	{
 		if (_players.length == 0)
 			_players.push({
-				board: new Board(0, 0),
+				board: new CommonBoard(0, 0),
 				multStack: [1]
 			});
 
 		if (_hud == null)
-			_hud = new StandardHUD();
+			_hud = new CommonHUD();
 
 		if (_bg == null)
 			_bg = new BumperGenerator(3);

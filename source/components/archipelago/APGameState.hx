@@ -314,8 +314,8 @@ class APGameState extends ClassicGameState
 	/** The APBoard instance for the current game. **/
 	private var _boardAP(get, never):APBoard;
 
-	/** The APHud instance for the current game. **/
-	private var _hudAP(get, never):APHud;
+	/** The APHUD instance for the current game. **/
+	private var _hudAP(get, never):APHUD;
 
 	/** If this is set, the game will transition to a different scene on the next call to `update`. **/
 	private var _queueTo:Null<FlxState> = null;
@@ -339,7 +339,7 @@ class APGameState extends ClassicGameState
 		return "archipelago";
 
 	inline function get__hudAP()
-		return cast(_hud, APHud);
+		return cast(_hud, APHUD);
 
 	inline function get__boardAP()
 		return cast(_player.board, APBoard);
@@ -398,7 +398,7 @@ class APGameState extends ClassicGameState
 				multStack: [.8, 1]
 			});
 
-		_hud = new APHud();
+		_hud = new APHUD();
 
 		for (type in ["booster", "hazard", "treasure"])
 			_schedule.set(type, {
@@ -1065,7 +1065,7 @@ class APGameState extends ClassicGameState
 				});
 			}
 
-			_hud = new APHud();
+			_hud = new APHUD();
 			_hud.deserialize(data["hud"]);
 		}
 

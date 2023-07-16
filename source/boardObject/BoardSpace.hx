@@ -1,6 +1,6 @@
 package boardObject;
 
-import components.common.Board;
+import components.common.CommonBoard;
 import flixel.FlxSprite;
 import flixel.util.FlxColor;
 import boardObject.Bumper;
@@ -14,7 +14,7 @@ class BoardSpace extends BoardObject
 	/** The bumper for which this space is reserved. This is to prevent mid-space collision. **/
 	public var reservedFor:Bumper = null;
 
-	public function new(x:Float, y:Float, owner:Board)
+	public function new(x:Float, y:Float, owner:CommonBoard)
 	{
 		super(x, y, owner);
 

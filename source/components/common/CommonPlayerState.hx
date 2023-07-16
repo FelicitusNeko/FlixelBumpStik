@@ -7,13 +7,15 @@ import boardObject.Launcher;
 import flixel.util.FlxColor;
 import lime.app.Event;
 
-class PlayerState
+/** Base class to keep the state of a player. **/
+class CommonPlayerState
 {
-	public var onScoreChanged(default, null) = new Event<Int->Void>();
-	public var onBlockChanged(default, null) = new Event<Int->Void>();
-	public var onLaunch(default, null) = new Event<Bumper->Void>();
-	public var onNextChanged(default, null) = new Event<Bumper->Void>();
+	public var onScoreChanged(default, null):Event<(Int, Int) -> Void>;
+	public var onBlockChanged(default, null):Event<(Int, Int) -> Void>;
+	public var onLaunch(default, null):Event<(Int, Bumper) -> Void>;
+	public var onNextChanged(default, null):Event<(Int, Bumper) -> Void>;
 
+	public var id(default, null) = 0;
 	public var score(default, set) = 0;
 	public var block(default, set) = 0;
 	public var next(default, set):Bumper = null;
@@ -22,23 +24,36 @@ class PlayerState
 	private var _bg:BumperGenerator;
 	private var _bgColorShuffle = false;
 
-	public function new() {}
+	public function new(id:Int)
+	{
+		init();
+		this.id = id;
+	}
+
+	/** Initializes things like event handlers. **/
+	private function init()
+	{
+		onScoreChanged = new Event<(Int, Int) -> Void>();
+		onBlockChanged = new Event<(Int, Int) -> Void>();
+		onLaunch = new Event<(Int, Bumper) -> Void>();
+		onNextChanged = new Event<(Int, Bumper) -> Void>();
+	}
 
 	private function set_score(score)
 	{
-		onScoreChanged.dispatch(this.score = score);
+		onScoreChanged.dispatch(id, this.score = score);
 		return this.score;
 	}
 
 	private function set_block(block)
 	{
-		onBlockChanged.dispatch(this.block = block);
+		onBlockChanged.dispatch(id, this.block = block);
 		return this.block;
 	}
 
 	private function set_next(next)
 	{
-		onNextChanged.dispatch(this.next = next);
+		onNextChanged.dispatch(id, this.next = next);
 		return this.next;
 	}
 
@@ -52,7 +67,7 @@ class PlayerState
 	public function launch(l:Launcher)
 	{
 		l.launchBumper(next);
-		onLaunch.dispatch(next);
+		onLaunch.dispatch(id, next);
 		next = null;
 	}
 
@@ -108,6 +123,7 @@ class PlayerState
 	@:keep
 	private function hxSerialize(s:Serializer)
 	{
+		s.serialize(id);
 		s.serialize(score);
 		s.serialize(block);
 		s.serialize(next == null);
@@ -121,6 +137,8 @@ class PlayerState
 	@:keep
 	private function hxUnserialize(u:Unserializer)
 	{
+		init();
+		this.id = u.unserialize();
 		this.score = u.unserialize();
 		this.block = u.unserialize();
 		if (cast(u.unserialize(), Bool))

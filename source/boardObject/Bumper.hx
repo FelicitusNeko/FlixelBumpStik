@@ -1,7 +1,7 @@
 package boardObject;
 
 import haxe.DynamicAccess;
-import components.common.Board;
+import components.common.CommonBoard;
 import flixel.FlxSprite;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
@@ -124,7 +124,7 @@ class Bumper extends BoardObject
 	public var flairCount(get, never):Int;
 
 	public function new(x:Float, y:Float, color:Null<FlxColor>, direction:Direction = Direction.None, launchDirection:Direction = Direction.None,
-			owner:Board = null)
+			owner:CommonBoard = null)
 	{
 		super(x, y, owner);
 
