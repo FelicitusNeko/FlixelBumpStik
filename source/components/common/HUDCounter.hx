@@ -57,13 +57,9 @@ class HUDCounter extends FlxSpriteGroup
 		return maxLength;
 	}
 
-	function get_counterColor()
-	{
+	inline function get_counterColor()
 		return _counterText.color;
-	}
 
 	function set_counterColor(counterColor:FlxColor)
-	{
 		return _counterText.color = counterColor;
-	}
 }
