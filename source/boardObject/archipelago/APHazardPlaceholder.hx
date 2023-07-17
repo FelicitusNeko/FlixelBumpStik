@@ -1,14 +1,14 @@
 package boardObject.archipelago;
 
 import haxe.DynamicAccess;
-import components.common.Board;
+import components.common.CommonBoard;
 import flixel.util.FlxColor;
 
 class APHazardPlaceholder extends BoardObject
 {
 	private var _resolveColor:FlxColor;
 
-	public function new(x:Float, y:Float, resolveColor:FlxColor, owner:Board = null)
+	public function new(x:Float, y:Float, resolveColor:FlxColor, owner:CommonBoard = null)
 	{
 		super(x, y, owner);
 
