@@ -8,10 +8,11 @@ import flixel.util.FlxColor;
 import lime.app.Event;
 
 /** Base class to keep the state of a player. **/
-class CommonPlayerState
+abstract class CommonPlayerState
 {
 	public var onScoreChanged(default, null):Event<(Int, Int) -> Void>;
 	public var onBlockChanged(default, null):Event<(Int, Int) -> Void>;
+	public var onBonus(default, null):Event<(Int, Int) -> Void>;
 	public var onLaunch(default, null):Event<(Int, Bumper) -> Void>;
 	public var onNextChanged(default, null):Event<(Int, Bumper) -> Void>;
 
@@ -35,6 +36,7 @@ class CommonPlayerState
 	{
 		onScoreChanged = new Event<(Int, Int) -> Void>();
 		onBlockChanged = new Event<(Int, Int) -> Void>();
+		onBonus = new Event<(Int, Int) -> Void>();
 		onLaunch = new Event<(Int, Bumper) -> Void>();
 		onNextChanged = new Event<(Int, Bumper) -> Void>();
 	}
@@ -83,13 +85,16 @@ class CommonPlayerState
 	/**
 		Adds to the score based on the multiplier stack.
 		@param add The amount of points to be multiplied and added.
+		@param isBonus _Optional._ Whether the score being added is a bonus. Default `false`.
 		@return The new current score.
 	**/
-	public function addScore(add:Int)
+	public function addScore(add:Int, isBonus = false)
 	{
 		var addF:Float = add;
 		for (x in multiStack)
 			addF *= x;
+		if (isBonus)
+			onBonus.dispatch(id, Math.round(addF));
 		return score += Math.round(addF);
 	}
 
@@ -118,6 +123,18 @@ class CommonPlayerState
 		if (next == null || force)
 			next = _bg.weightedGenerate();
 		return next;
+	}
+
+	public function reset()
+	{
+		score = 0;
+		block = 0;
+		next = null;
+		multiStack = [1.0];
+
+		_bg.reset();
+		if (_bgColorShuffle)
+			_bg.shuffleColors();
 	}
 
 	@:keep
