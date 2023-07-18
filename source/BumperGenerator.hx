@@ -171,6 +171,7 @@ class BumperGenerator
 		colors = 0;
 		colors = initColors;
 		colorLimit = maxColors;
+		_rng = new FlxRandom();
 	}
 
 	public function serialize()
