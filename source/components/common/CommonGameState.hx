@@ -101,13 +101,15 @@ abstract class CommonGameState extends FlxState
 	function createGame()
 	{
 		if (_players.length == 0)
-			_players.push({
-				board: new CommonBoard(0, 0),
-				multStack: [1]
-			});
+			throw "No player was created";
+		// _players.push({
+		// 	board: new CommonBoard(0, 0),
+		// 	multStack: [1]
+		// });
 
 		if (_hud == null)
-			_hud = new CommonHUD();
+			throw "No HUD was created";
+		// _hud = new CommonHUD();
 
 		if (_bg == null)
 			_bg = new BumperGenerator(3);

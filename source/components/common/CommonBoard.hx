@@ -19,7 +19,7 @@ import lime.app.Event;
 
 typedef BumperCallback = Bumper->Void;
 
-class CommonBoard extends FlxTypedGroup<FlxBasic>
+abstract class CommonBoard extends FlxTypedGroup<FlxBasic>
 {
 	/** The board's top-left corner, excluding Launchers. **/
 	public var origin(default, null):FlxPoint;

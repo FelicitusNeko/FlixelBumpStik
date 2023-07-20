@@ -11,7 +11,7 @@ import lime.app.Event;
 
 using StringTools;
 
-class CommonHUD extends FlxSpriteGroup
+abstract class CommonHUD extends FlxSpriteGroup
 {
 	/** The counter for the current score. **/
 	var _scoreCounter:HUDCounter;
