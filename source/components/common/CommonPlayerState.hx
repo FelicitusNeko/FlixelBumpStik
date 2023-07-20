@@ -16,13 +16,25 @@ abstract class CommonPlayerState
 	public var onLaunch(default, null):Event<(String, Bumper) -> Void>;
 	public var onNextChanged(default, null):Event<(String, Bumper) -> Void>;
 
+	/** _Read-only._ The ID for this player.**/
 	public var id(default, null):String;
+
+	/** The player's current score. **/
 	public var score(default, set) = 0;
+
+	/** The player's current bumpers cleared. **/
 	public var block(default, set) = 0;
+
+	/** The player's current next bumper. **/
 	public var next(default, set):Bumper = null;
+
+	/** The player's current multiplier stack. Points added via `addScore()` will have these values multiplied to it. If empty or `null`, points will be added as-is. **/
 	public var multiStack(get, default) = [1.0];
 
+	/** The player's bumper generator. **/
 	private var _bg:BumperGenerator;
+
+	/** Determines whether colors will be shuffled when `reset()` is called. **/
 	private var _bgColorShuffle = false;
 
 	public function new(id:String)
@@ -60,7 +72,11 @@ abstract class CommonPlayerState
 	}
 
 	private inline function get_multiStack()
+	{
+		if (multiStack == null)
+			return [];
 		return multiStack.slice(0);
+	}
 
 	/**
 		Launches the current bumper in stock.
@@ -90,12 +106,19 @@ abstract class CommonPlayerState
 	**/
 	public function addScore(add:Int, isBonus = false)
 	{
-		var addF:Float = add;
-		for (x in multiStack)
-			addF *= x;
+		var newAdd = add;
+
+		if (add > 0 && multiStack != null && multiStack.length > 0)
+		{
+			var addF:Float = add;
+			for (x in multiStack)
+				addF *= x;
+			newAdd = Math.round(addF);
+		}
+
 		if (isBonus)
-			onBonus.dispatch(id, Math.round(addF));
-		return score += Math.round(addF);
+			onBonus.dispatch(id, add);
+		return score += newAdd;
 	}
 
 	/**
@@ -125,6 +148,7 @@ abstract class CommonPlayerState
 		return next;
 	}
 
+	/** Resets the player state. **/
 	public function reset()
 	{
 		score = 0;
@@ -137,6 +161,7 @@ abstract class CommonPlayerState
 			_bg.shuffleColors();
 	}
 
+	/** Saves the player state to text via Haxe's `Serializer`. **/
 	@:keep
 	private function hxSerialize(s:Serializer)
 	{
@@ -151,6 +176,7 @@ abstract class CommonPlayerState
 		s.serialize(_bgColorShuffle);
 	}
 
+	/** Restores the player state from text via Haxe's `Unserializer`. **/
 	@:keep
 	private function hxUnserialize(u:Unserializer)
 	{
