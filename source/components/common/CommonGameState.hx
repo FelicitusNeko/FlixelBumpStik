@@ -51,11 +51,9 @@ abstract class CommonGameState extends FlxState
 		super();
 	}
 
-	function get_gameName()
-		return "default";
+	abstract function get_gameName();
 
-	function get_gameType()
-		return "generic";
+	abstract function get_gameType();
 
 	function get__player()
 		return _players.length == 0 ? null : _players[0];
@@ -64,16 +62,23 @@ abstract class CommonGameState extends FlxState
 	{
 		var save = new FlxSave();
 		save.bind(gameName);
-		// trace(save.data);
-		if (save.data.gameName == gameName)
+
+		if (save.data.version != BumpStikGame.curSaveVer || // if the save is outdated
+			BumpStikGame.curSaveVer < 0) // or if we're in unstable testing mode
+		{
+			// potentially upgrade save data
+			// for now, just discard it
+			createGame();
+		}
+		else if (save.data.gameName != gameName)
+			createGame();
+		else
 		{
 			trace('save data $gameName found');
 			deserialize(save.data);
 		}
-		else
-			createGame();
-		// save.close();
-		save.destroy();
+
+		save.destroy(); // we're not outputting save data here, so just dispose the save object
 
 		add(_hud);
 
@@ -98,22 +103,7 @@ abstract class CommonGameState extends FlxState
 		super.create();
 	}
 
-	function createGame()
-	{
-		if (_players.length == 0)
-			throw "No player was created";
-		// _players.push({
-		// 	board: new CommonBoard(0, 0),
-		// 	multStack: [1]
-		// });
-
-		if (_hud == null)
-			throw "No HUD was created";
-		// _hud = new CommonHUD();
-
-		if (_bg == null)
-			_bg = new BumperGenerator(3);
-	}
+	abstract function createGame():Void;
 
 	function saveGame(?file:String)
 	{
@@ -147,6 +137,7 @@ abstract class CommonGameState extends FlxState
 	{
 		var retval:DynamicAccess<Dynamic> = {};
 
+		retval["version"] = BumpStikGame.curSaveVer;
 		retval["gameName"] = gameName;
 		retval["gameType"] = gameType;
 		retval["players"] = _players.map(p ->

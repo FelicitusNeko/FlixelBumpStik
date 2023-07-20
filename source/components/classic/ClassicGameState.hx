@@ -39,10 +39,10 @@ class ClassicGameState extends CommonGameState
 	/** The current selected color during a Paint Can event. **/
 	private var _selectedColor:Null<FlxColor> = null;
 
-	override function get_gameName()
+	function get_gameName()
 		return "classic";
 
-	override function get_gameType()
+	function get_gameType()
 		return "classic";
 
 	override function create()
@@ -63,37 +63,39 @@ class ClassicGameState extends CommonGameState
 			FlxG.switchState(new ClassicGameState());
 		});
 		_hud.add(restart);
-		#else
-		// var test = new FlxButton(0, 0, "Test", () ->
-		// {
-		// 	// openSubState(new AllClearSubstate(12345, _boardClassic.center));
+		#elseif debug
+		if (gameType == "classic")
+		{
+			var test = new FlxButton(0, 0, "Test", () -> {
+				// openSubState(new AllClearSubstate(12345, _boardClassic.center));
 
-		// 	// _hudClassic.paintCans++;
+				// _hudClassic.paintCans++;
 
-		// 	// trace(Json.stringify(serialize()));
+				// trace(Json.stringify(serialize()));
 
-		// 	// var load = new FlxSave();
-		// 	// load.bind("testFile");
-		// 	// if (load.data.gameName == null)
-		// 	// {
-		// 	// 	load.destroy();
-		// 	// 	saveGame("testFile");
-		// 	// }
-		// 	// else
-		// 	// {
-		// 	// 	trace(Json.stringify(load.data));
-		// 	// 	_boardClassic.bCount == 0 ? load.erase() : load.destroy();
-		// 	// }
+				// var load = new FlxSave();
+				// load.bind("testFile");
+				// if (load.data.gameName == null)
+				// {
+				// 	load.destroy();
+				// 	saveGame("testFile");
+				// }
+				// else
+				// {
+				// 	trace(Json.stringify(load.data));
+				// 	_boardClassic.bCount == 0 ? load.erase() : load.destroy();
+				// }
 
-		// 	// var bumper = _boardClassic.getRandomBumper();
-		// 	// if (bumper != null && bumper.alive)
-		// 	// 	openSubState(new TurnerSubstate(bumper.getPosition(), bumper.direction, bumper.bColor));
-		// });
-		// _hud.add(test);
+				// var bumper = _boardClassic.getRandomBumper();
+				// if (bumper != null && bumper.alive)
+				// 	openSubState(new TurnerSubstate(bumper.getPosition(), bumper.direction, bumper.bColor));
+			});
+			_hud.add(test);
+		}
 		#end
 	}
 
-	override function createGame()
+	function createGame()
 	{
 		if (_players.length == 0)
 			_players.push({
