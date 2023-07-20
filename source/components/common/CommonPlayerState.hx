@@ -10,13 +10,13 @@ import lime.app.Event;
 /** Base class to keep the state of a player. **/
 abstract class CommonPlayerState
 {
-	public var onScoreChanged(default, null):Event<(Int, Int) -> Void>;
-	public var onBlockChanged(default, null):Event<(Int, Int) -> Void>;
-	public var onBonus(default, null):Event<(Int, Int) -> Void>;
-	public var onLaunch(default, null):Event<(Int, Bumper) -> Void>;
-	public var onNextChanged(default, null):Event<(Int, Bumper) -> Void>;
+	public var onScoreChanged(default, null):Event<(String, Int) -> Void>;
+	public var onBlockChanged(default, null):Event<(String, Int) -> Void>;
+	public var onBonus(default, null):Event<(String, Int) -> Void>;
+	public var onLaunch(default, null):Event<(String, Bumper) -> Void>;
+	public var onNextChanged(default, null):Event<(String, Bumper) -> Void>;
 
-	public var id(default, null) = 0;
+	public var id(default, null):String;
 	public var score(default, set) = 0;
 	public var block(default, set) = 0;
 	public var next(default, set):Bumper = null;
@@ -25,7 +25,7 @@ abstract class CommonPlayerState
 	private var _bg:BumperGenerator;
 	private var _bgColorShuffle = false;
 
-	public function new(id:Int)
+	public function new(id:String)
 	{
 		init();
 		this.id = id;
@@ -34,11 +34,11 @@ abstract class CommonPlayerState
 	/** Initializes things like event handlers. **/
 	private function init()
 	{
-		onScoreChanged = new Event<(Int, Int) -> Void>();
-		onBlockChanged = new Event<(Int, Int) -> Void>();
-		onBonus = new Event<(Int, Int) -> Void>();
-		onLaunch = new Event<(Int, Bumper) -> Void>();
-		onNextChanged = new Event<(Int, Bumper) -> Void>();
+		onScoreChanged = new Event<(String, Int) -> Void>();
+		onBlockChanged = new Event<(String, Int) -> Void>();
+		onBonus = new Event<(String, Int) -> Void>();
+		onLaunch = new Event<(String, Bumper) -> Void>();
+		onNextChanged = new Event<(String, Bumper) -> Void>();
 	}
 
 	private function set_score(score)
