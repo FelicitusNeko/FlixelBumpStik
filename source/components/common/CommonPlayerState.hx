@@ -1,5 +1,6 @@
 package components.common;
 
+import haxe.DynamicAccess;
 import haxe.Serializer;
 import haxe.Unserializer;
 import boardObject.Bumper;
@@ -10,11 +11,24 @@ import lime.app.Event;
 /** Base class to keep the state of a player. **/
 abstract class CommonPlayerState
 {
+	//-------- EVENTS
+
+	/** Event that fires when score changes. **/
 	public var onScoreChanged(default, null):Event<(String, Int) -> Void>;
+
+	/** Event that fires when bumpers sticked count changes. **/
 	public var onBlockChanged(default, null):Event<(String, Int) -> Void>;
+
+	/** Event that fires when a bonus is awarded. **/
 	public var onBonus(default, null):Event<(String, Int) -> Void>;
+
+	/** Event that fires when a bumper is launched. **/
 	public var onLaunch(default, null):Event<(String, Bumper) -> Void>;
+
+	/** Event that fires when the next bumper changes. **/
 	public var onNextChanged(default, null):Event<(String, Bumper) -> Void>;
+
+	//-------- PROPERTIES
 
 	/** _Read-only._ The ID for this player.**/
 	public var id(default, null):String;
@@ -24,6 +38,9 @@ abstract class CommonPlayerState
 
 	/** The player's current bumpers cleared. **/
 	public var block(default, set) = 0;
+
+	/** The player's count of launched bumpers. **/
+	public var launched(default, null) = 0;
 
 	/** The player's current next bumper. **/
 	public var next(default, set):Bumper = null;
@@ -37,10 +54,16 @@ abstract class CommonPlayerState
 	/** Determines whether colors will be shuffled when `reset()` is called. **/
 	private var _bgColorShuffle = false;
 
+	/** Registry of values. **/
+	private var _reg:DynamicAccess<Int>;
+
+	//-------- CODE
+
 	public function new(id:String)
 	{
 		init();
 		this.id = id;
+		_reg = {};
 	}
 
 	/** Initializes things like event handlers. **/
@@ -87,6 +110,7 @@ abstract class CommonPlayerState
 		l.launchBumper(next);
 		onLaunch.dispatch(id, next);
 		next = null;
+		launched++;
 	}
 
 	/**
@@ -168,12 +192,14 @@ abstract class CommonPlayerState
 		s.serialize(id);
 		s.serialize(score);
 		s.serialize(block);
+		s.serialize(launched);
 		s.serialize(next == null);
 		if (next != null)
 			s.serialize(next.serialize());
 		s.serialize(multiStack);
 		s.serialize(_bg);
 		s.serialize(_bgColorShuffle);
+		s.serialize(_reg);
 	}
 
 	/** Restores the player state from text via Haxe's `Unserializer`. **/
@@ -184,10 +210,12 @@ abstract class CommonPlayerState
 		this.id = u.unserialize();
 		this.score = u.unserialize();
 		this.block = u.unserialize();
+		this.launched = u.unserialize();
 		if (cast(u.unserialize(), Bool))
 			this.next = Bumper.fromSaved(u.unserialize());
 		this.multiStack = u.unserialize();
 		_bg = u.unserialize();
 		_bgColorShuffle = u.unserialize();
+		_reg = u.unserialize();
 	}
 }
