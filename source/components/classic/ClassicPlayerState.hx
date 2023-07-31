@@ -13,11 +13,26 @@ class ClassicPlayerState extends CommonPlayerState
 	/** The player's current count of Paint Cans. **/
 	public var paint(default, set) = 0;
 
+	public function new(id:String)
+	{
+		super(id);
+		initReg();
+	}
+
 	/** Initializes things like event handlers. **/
 	override function init()
 	{
 		super.init();
 		onPaintChanged = new Event<(String, Int) -> Void>();
+	}
+
+	/** Initializes the value registry. **/
+	private function initReg()
+	{
+		_reg["color.next"] = 100;
+		_reg["color.inc"] = 150;
+		_reg["paint.next"] = 1000;
+		_reg["paint.inc"] = 1500;
 	}
 
 	private function set_paint(paint)

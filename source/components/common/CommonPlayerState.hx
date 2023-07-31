@@ -54,6 +54,9 @@ abstract class CommonPlayerState
 	/** Determines whether colors will be shuffled when `reset()` is called. **/
 	private var _bgColorShuffle = false;
 
+	/** The default multiplier stack. The multiplier stack will be set to this when `reset()` is called. **/
+	private var _dfltMultiStack = [1.0];
+
 	/** Registry of values. **/
 	private var _reg:DynamicAccess<Int>;
 
@@ -178,12 +181,29 @@ abstract class CommonPlayerState
 		score = 0;
 		block = 0;
 		next = null;
-		multiStack = [1.0];
+		multiStack = _dfltMultiStack.slice(0);
 
 		_bg.reset();
 		if (_bgColorShuffle)
 			_bg.shuffleColors();
 	}
+
+	/**
+		Sets a registry value.
+		@param key The value to be set.
+		@param val The value to store.
+		@return The given value.
+	**/
+	inline public function setreg(key, val)
+		return _reg.set(key, val);
+
+	/**
+		Gets a registry value.
+		@param key The value to retrieve.
+		@return The requested value.
+	**/
+	inline public function getreg(key)
+		return _reg.get(key);
 
 	/** Saves the player state to text via Haxe's `Serializer`. **/
 	@:keep
