@@ -375,12 +375,14 @@ class APGameState extends ClassicGameState
 		FlxG.autoPause = false;
 
 		// TODO: Restart Board button
+		#if debug
 		var test = new FlxButton(0, 0, "Test", () ->
 		{
 			// goes nowhere does nothing
 			_hudAP.taskSkip++;
 		});
 		_hud.add(test);
+		#end
 	}
 
 	override function destroy()
