@@ -1,6 +1,7 @@
 package utilities;
 
 /** Keeps track of special bumpers. **/
+@:noCompletion
 typedef IDeploymentSchedule =
 {
 	/** This many are queued to be deployed. **/
