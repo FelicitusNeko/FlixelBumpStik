@@ -16,7 +16,7 @@ import flixel.util.FlxColor;
 import flixel.util.FlxSave;
 import state.MenuState;
 import utilities.DeploymentSchedule;
-import components.archipelago.APTask.APTaskType;
+import components.archipelago.APTaskType;
 import components.classic.ClassicGameState;
 import components.dialogs.DialogBox;
 
