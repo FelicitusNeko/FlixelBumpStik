@@ -31,6 +31,8 @@ class ClassicPlayerState extends CommonPlayerState
 	{
 		_reg["color.next"] = 100;
 		_reg["color.inc"] = 150;
+		_reg["color.start"] = 3;
+		_reg["color.max"] = 6;
 		_reg["paint.next"] = 1000;
 		_reg["paint.inc"] = 1500;
 	}
