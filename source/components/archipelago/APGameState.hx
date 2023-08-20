@@ -538,19 +538,12 @@ class APGameState extends ClassicGameState
 					schedule.maxAvailable = 999;
 			case 6 | -1: // the game is complete in this case; send a goal condition to the server
 				_ap.clientStatus = GOAL;
-				function collectAndRelease()
-				{
-					_ap.Say("!release");
-					_ap.Say("!collect");
-					_ap.poll();
-				}
-				openSubState(new DialogBox(_t("game/ap/goal"), {
+				var dlg = new DialogBox(_t("game/ap/goal"), {
 					buttons: [
 						{
 							text: _t("base/dlg/back2menu"),
 							result: Custom(() ->
 							{
-								collectAndRelease();
 								_queueTo = new MenuState();
 								return No;
 							})
@@ -559,14 +552,19 @@ class APGameState extends ClassicGameState
 							text: _t("menu/main/classic"),
 							result: Custom(() ->
 							{
-								collectAndRelease();
 								_queueTo = new ClassicGameState();
 								return Yes;
 							})
 						}
 					],
 					camera: _generalCamera
-				}));
+				});
+				dlg.closeCallback = () ->
+				{
+					_ap.Say("!release");
+					_ap.Say("!collect");
+				}
+				openSubState(dlg);
 				_hudAP.addTask(Score, [99999]);
 			default: // If we don't recognise the level, just default to 99999 score and make it obvious something's wrong
 				openSubState(new DialogBox(_t("game/ap/error/levelgen", ["level" => level]), {
