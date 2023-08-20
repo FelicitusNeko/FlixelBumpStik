@@ -33,12 +33,21 @@ class APPlayerState extends ClassicPlayerState
 
 	/**
 		Event that fires when a task has been cleared.
+		@param id The sending player's identity string.
 		@param level The level number related to the cleared task.
 		@param type The type of task.
 		@param goal The goal achieved.
 		@param current The current value for the goal.
 	**/
-	public var onTaskCleared(default, null) = new Event<(Null<Int>, APTaskType, Int, Int) -> Void>();
+	public var onTaskCleared(default, null):Event<(String, Null<Int>, APTaskType, Int, Int) -> Void>;
+
+	/**
+		Event that fires when a Hazard Bumper needs to be deployed.
+		@param id The sending player's identity string.
+	**/
+	public var onDeployHazard(default, null):Event<String->Void>;
+
+	public var boardSize(get, never):{w:Int, h:Int};
 
 	/** The player's current count of Task Advances. **/
 	public var taskSkip(default, set) = 0;
@@ -79,17 +88,27 @@ class APPlayerState extends ClassicPlayerState
 		_bgColorShuffle = true;
 	}
 
+	/** Initializes things like event handlers. **/
 	override function init()
 	{
 		super.init();
 		onTaskSkipChanged = new Event<(String, Int) -> Void>();
 		onTurnerChanged = new Event<(String, Int) -> Void>();
 		onLevelChanged = new Event<(String, Int, Array<APTaskV2>) -> Void>();
-		onTaskCleared = new Event<(Null<Int>, APTaskType, Int, Int) -> Void>();
+		onTaskCleared = new Event<(String, Null<Int>, APTaskType, Int, Int) -> Void>();
+		onDeployHazard = new Event<String->Void>();
 	}
 
+	/** Initializes the value registry. **/
 	override function initReg()
 	{
+		super.initReg();
+		_reg["board.w"] = 3;
+		_reg["board.h"] = 3;
+		_reg["color.next"] = 50;
+		_reg["color.step"] = 50;
+		_reg["color.start"] = 2;
+		_reg["color.max"] = 3;
 		_reg["paint.next"] = 1000;
 		_reg["paint.inc"] = 1500;
 		_reg["paint.starting"] = 0;
@@ -99,6 +118,12 @@ class APPlayerState extends ClassicPlayerState
 		_reg["block.accrued.level"] = 0;
 		_reg["block.accrued.game"] = 0;
 	}
+
+	inline private function get_boardSize()
+		return {
+			w: _reg["board.w"],
+			h: _reg["board.h"]
+		};
 
 	private function set_taskSkip(taskSkip)
 	{
@@ -127,13 +152,107 @@ class APPlayerState extends ClassicPlayerState
 	private function set_level(level)
 	{
 		_levelPopulating = true;
-		// TODO: set tasks
+		_reg["score.accrued.game"] += _reg["score.accrued.level"];
+		_reg["block.accrued.game"] += _reg["block.accrued.level"];
+		_reg["score.accrued.level"] = _reg["block.accrued.level"] = 0;
+
+		this.tasks = [];
+		if (level > 0)
+			addTask(LevelHeader, [level]);
+
 		switch (this.level = level)
 		{
+			case 1:
+				_reg["board.w"] = _reg["board.h"] = 3;
+				_reg["color.start"] = 2;
+				_reg["color.max"] = 3;
+				_reg["color.next"] = _reg["color.step"] = 50;
+				addTask(Score, [250, 500, 750, 1000]);
+				addTask(LevelScore, [500, 1000, 1500, 2000]);
+				addTask(LevelCleared, [for (x in 1...4) x * 25]);
+				addTask(Combo, [5]);
+				addTask(Boosters, [1], _sched["booster"].clear);
+				addTask(Treasures, [8], _sched["treasure"].clear);
+				_sched["booster"].maxAvailable = 2;
+				_sched["treasure"].maxAvailable = 9;
+				_sched["hazard"].maxAvailable = 0;
+
+			case 2:
+				_reg["board.w"] = _reg["board.h"] = 4;
+				_reg["color.start"] = 2;
+				_reg["color.max"] = 4;
+				_reg["color.next"] = 25;
+				_reg["color.step"] = 50;
+				addTask(Score, [500, 1000, 1500, 2000]);
+				addTask(LevelScore, [1000, 2000, 3000, 4000]);
+				addTask(LevelCleared, [for (x in 1...5) x * 25]);
+				addTask(Combo, [5]);
+				addTask(Chain, [2]);
+				addTask(Boosters, [2], _sched["booster"].clear);
+				addTask(Treasures, [16], _sched["treasure"].clear);
+				_sched["booster"].maxAvailable = 3;
+				_sched["treasure"].maxAvailable = 17;
+				_sched["hazard"].setDelay(10, 25);
+				_sched["hazard"].maxAvailable = 3;
+
+			case 3:
+				_reg["board.w"] = 5;
+				_reg["board.h"] = 4;
+				_reg["color.start"] = 3;
+				_reg["color.max"] = 5;
+				_reg["color.next"] = _reg["color.step"] = 50;
+				addTask(Score, [800, 1600, 2400, 3200]);
+				addTask(LevelScore, [2000, 4000, 6000, 8000]);
+				addTask(LevelCleared, [for (x in 1...6) x * 25]);
+				addTask(Combo, [5, 7]);
+				addTask(Chain, [2]);
+				addTask(AllClear, [3]);
+				addTask(Boosters, [3], _sched["booster"].clear);
+				addTask(Treasures, [24], _sched["treasure"].clear);
+				_sched["booster"].maxAvailable = 4;
+				_sched["treasure"].maxAvailable = 25;
+				_sched["hazard"].setDelay(5, 20);
+				_sched["hazard"].maxAvailable = 8;
+
+			case 4:
+				_reg["board.w"] = _reg["board.h"] = 5;
+				_reg["color.start"] = 3;
+				_reg["color.max"] = 6;
+				_reg["color.next"] = _reg["color.step"] = 75;
+				addTask(Score, [1500, 3000, 4500, 6000]);
+				addTask(LevelScore, [3000, 6000, 9000, 12000]);
+				addTask(LevelCleared, [for (x in 1...7) x * 25]);
+				addTask(Combo, [5, 7]);
+				addTask(Chain, [2, 3]);
+				addTask(Boosters, [5], _sched["booster"].clear);
+				addTask(Treasures, [32], _sched["treasure"].clear);
+				_sched["booster"].maxAvailable = 5;
+				_sched["treasure"].maxAvailable = 999;
+				_sched["hazard"].setDelay(3, 15);
+				_sched["hazard"].maxAvailable = 15;
+
+			case 5:
+				_reg["board.w"] = _reg["board.h"] = 6;
+				_reg["color.start"] = 4;
+				_reg["color.max"] = 6;
+				_reg["color.next"] = _reg["color.step"] = 100;
+				addTask(TotalScore, [Math.round(Math.max(50000, totalScore + 5000))]);
+				addTask(Hazards, [25], _sched["hazard"].clear);
+				_sched["hazard"].setDelay(1, 10);
+				for (s in _sched)
+					s.maxAvailable = 999;
+
+			case 6 | -1:
+			// this will finish the game
+			// game state will handle this when onLevelChanged is called
+			// just handling the state so it doesn't fall through into throw
+
 			case x:
 				throw 'Invalid level generated (#$x)';
 		}
+
 		onLevelChanged.dispatch(id, level, tasks);
+
 		_levelPopulating = false;
 		return level;
 	}
@@ -196,10 +315,10 @@ class APPlayerState extends ClassicPlayerState
 			task.current = current;
 			while (task.current >= task.curGoal && task.goalIndex < task.goalCount)
 			{
-				onTaskCleared.dispatch(level, task.type, task.curGoal, task.current);
+				onTaskCleared.dispatch(id, level, task.type, task.curGoal, task.current);
 				task.goalIndex++;
 			}
-			// TODO: this is still handled by the HUD
+			// TODO: this is still to be handled by the HUD
 			// task.uiText.text = task;
 		}
 
@@ -214,12 +333,23 @@ class APPlayerState extends ClassicPlayerState
 				if (allTasksCleared)
 				{
 					levelTask.current = levelTask.curGoal;
-					onTaskCleared.dispatch(level, LevelHeader, levelTask.curGoal, levelTask.curGoal);
+					onTaskCleared.dispatch(id, level, LevelHeader, levelTask.curGoal, levelTask.curGoal);
 				}
 			}
 		}
 	}
 
+	/** Resets the player state. **/
+	override function reset()
+	{
+		_reg["score.accrued.level"] += score;
+		_reg["block.accrued.level"] += block;
+		super.reset();
+		for (sch in _sched)
+			sch.reset();
+	}
+
+	/** Saves the player state to text via Haxe's `Serializer`. **/
 	@:keep
 	override function hxSerialize(s:Serializer)
 	{
@@ -230,6 +360,7 @@ class APPlayerState extends ClassicPlayerState
 		s.serialize(tasks);
 	}
 
+	/** Restores the player state from text via Haxe's `Unserializer`. **/
 	@:keep
 	override function hxUnserialize(u:Unserializer)
 	{
