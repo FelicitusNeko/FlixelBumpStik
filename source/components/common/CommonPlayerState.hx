@@ -171,9 +171,17 @@ abstract class CommonPlayerState
 		if (_bg == null)
 			throw "Attempted to generate bumper without generator";
 		if (next == null || force)
-			next = _bg.weightedGenerate();
+			next = modifyBumper(_bg.weightedGenerate());
 		return next;
 	}
+
+	/**
+		Modifies a bumper. Does nothing on its own; needs to be overridden.
+		@param b The bumper to modify.
+		@return The modified bumper. If not overridden, `b` is returned as-is.
+	**/
+	public function modifyBumper(b:Bumper)
+		return b;
 
 	/** Resets the player state. **/
 	public function reset()
