@@ -4,6 +4,7 @@ import haxe.DynamicAccess;
 import haxe.Serializer;
 import haxe.Unserializer;
 import ap.Client;
+import ap.PacketTypes.ClientStatus;
 import ap.PacketTypes.NetworkItem;
 import boardObject.Bumper;
 import boardObject.archipelago.APHazardPlaceholder;
@@ -323,7 +324,7 @@ class APGameState extends ClassicGameState
 	public function new(ap:Client, slotData:Dynamic)
 	{
 		_ap = ap;
-		_ap.clientStatus = READY;
+		_ap.clientStatus = ClientStatus.READY;
 		_ap._hOnItemsReceived = onItemsReceived;
 
 		super();
@@ -537,7 +538,7 @@ class APGameState extends ClassicGameState
 				for (schedule in _schedule)
 					schedule.maxAvailable = 999;
 			case 6 | -1: // the game is complete in this case; send a goal condition to the server
-				_ap.clientStatus = GOAL;
+				_ap.clientStatus = ClientStatus.GOAL;
 				var dlg = new DialogBox(_t("game/ap/goal"), {
 					buttons: [
 						{
@@ -678,7 +679,7 @@ class APGameState extends ClassicGameState
 	/** Called by AP client when an item is received. **/
 	private function onItemsReceived(items:Array<NetworkItem>)
 	{
-		if (_ap.clientStatus != PLAYING)
+		if (_ap.clientStatus != ClientStatus.PLAYING)
 			_itemBuffer = _itemBuffer.concat(items);
 		else
 			for (itemObj in items)
@@ -809,9 +810,9 @@ class APGameState extends ClassicGameState
 	/** Called when the board requests a bumper to be generated. Usually when it goes into Idle state. **/
 	override function onRequestGenerate()
 	{
-		if (_ap.clientStatus == READY)
+		if (_ap.clientStatus == ClientStatus.READY)
 		{
-			_ap.clientStatus = PLAYING;
+			_ap.clientStatus = ClientStatus.PLAYING;
 			if (_itemBuffer.length > 0)
 			{
 				onItemsReceived(_itemBuffer);
