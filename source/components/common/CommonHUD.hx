@@ -1,4 +1,4 @@
-package components;
+package components.common;
 
 import haxe.DynamicAccess;
 import Main.I18nFunction;
@@ -11,7 +11,7 @@ import lime.app.Event;
 
 using StringTools;
 
-class StandardHUD extends FlxSpriteGroup
+abstract class CommonHUD extends FlxSpriteGroup
 {
 	/** The counter for the current score. **/
 	var _scoreCounter:HUDCounter;

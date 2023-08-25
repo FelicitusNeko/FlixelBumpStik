@@ -14,6 +14,13 @@ import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
 import flixel.util.FlxSave;
 
+private enum APConnState
+{
+	Entry;
+	Connecting;
+	Ready(ap:Client, slotData:Dynamic);
+}
+
 class APEntryState extends FlxState
 {
 	static final wsCheck = ~/^wss?:\/\//;
@@ -27,6 +34,8 @@ class APEntryState extends FlxState
 	private var _t:I18nFunction;
 
 	private var _tabOrder:Array<FlxInputText> = [];
+
+	private var _state = Entry;
 
 	override function create()
 	{
@@ -111,15 +120,23 @@ class APEntryState extends FlxState
 			postError('noSlot');
 		else
 		{
-			var connectSubState = new APConnectingSubState();
+			// TODO: auto-switch between wss/ws as needed
 			var uri = '${_hostInput.text}:${_portInput.text}';
 			if (!wsCheck.match(uri))
 				uri = 'ws://$uri';
 
-			openSubState(connectSubState);
-			connectSubState.closeCallback = () -> trace("Close callback test");
-
 			var ap = new Client('BumpStik-${_slotInput.text}', "Bumper Stickers", uri);
+			_state = Connecting;
+
+			var connectSubState = new APConnectingSubState(ap);
+			connectSubState.closeCallback = () ->
+			{
+				trace("Connecting substate is closing; dropping listeners");
+				ap._hOnRoomInfo = null;
+				ap._hOnSlotRefused = null;
+				ap._hOnSocketDisconnected = null;
+				ap._hOnSlotConnected = null;
+			};
 
 			ap._hOnRoomInfo = () ->
 			{
@@ -143,27 +160,20 @@ class APEntryState extends FlxState
 					case x = "IncompatibleVersion" | "InvalidPassword" | "InvalidItemsHandling": postError(x);
 					case x: postError("default", ["error" => x]);
 				}
+				_state = Entry;
 			}
-
-			var polltimer = new Timer(50);
-			polltimer.run = ap.poll;
 
 			ap._hOnSocketDisconnected = () ->
 			{
-				polltimer.stop();
 				trace("Disconnected");
 				closeSubState();
 				postError("connectionReset");
+				_state = Entry;
 			};
 
 			ap._hOnSlotConnected = (slotData:Dynamic) ->
 			{
-				trace("Connected - switching to game state");
-				polltimer.stop();
-				ap._hOnRoomInfo = null;
-				ap._hOnSlotRefused = null;
-				ap._hOnSocketDisconnected = null;
-				ap._hOnSlotConnected = null;
+				trace("Connected - preparing to switch to game state");
 				closeSubState();
 
 				var apGames = new FlxSave();
@@ -175,21 +185,30 @@ class APEntryState extends FlxState
 				};
 				apGames.close();
 
-				FlxG.switchState(new APGameState(ap, slotData));
+				_state = Ready(ap, slotData);
 			}
 
-			connectSubState.onCancel.add(() ->
-			{
-				polltimer.stop();
-				ap._hOnSlotConnected = null;
-				ap.disconnect_socket();
-			});
+			connectSubState.onCancel.add(ap.disconnect_socket);
+
+			openSubState(connectSubState);
 		}
 	}
 
 	function onBack()
 	{
 		FlxG.switchState(new MenuState());
+	}
+
+	override function update(elapsed:Float)
+	{
+		super.update(elapsed);
+		switch (_state)
+		{
+			case Ready(ap, slotData):
+				FlxG.switchState(new APGameState(ap, slotData));
+				_state = Entry;
+			default:
+		}
 	}
 
 	// override function update(elapsed:Float)

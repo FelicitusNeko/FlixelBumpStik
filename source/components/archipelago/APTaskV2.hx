@@ -1,11 +1,13 @@
 package components.archipelago;
 
 import haxe.DynamicAccess;
+import haxe.Serializer;
+import haxe.Unserializer;
 import flixel.addons.ui.FlxUIText;
 import flixel.util.FlxColor;
 
 /** The definition for an Archipelago check task. **/
-typedef IAPTask =
+typedef IAPTaskV2 =
 {
 	/** The type of task. **/
 	var type:APTaskType;
@@ -18,14 +20,11 @@ typedef IAPTask =
 
 	/** The current number achieved for this task. **/
 	var current:Int;
-
-	/** The UI text for the task list. **/
-	var uiText:FlxUIText;
 }
 
 /** The implementation for an Archipelago check task. **/
-@:forward(type, goals, uiText)
-abstract APTask(IAPTask) from IAPTask
+@:forward(type, goals)
+abstract APTaskV2(IAPTaskV2) from IAPTaskV2 to IAPTaskV2
 {
 	/** The index of the current goal. **/
 	public var goalIndex(get, set):Int;
@@ -54,8 +53,8 @@ abstract APTask(IAPTask) from IAPTask
 			value = 0;
 		if (value > goalCount)
 			value = goalCount;
-		if (this.uiText != null)
-			this.uiText.color = value >= goalCount ? FlxColor.LIME : FlxColor.WHITE;
+		// if (this.uiText != null)
+		// 	this.uiText.color = value >= goalCount ? FlxColor.LIME : FlxColor.WHITE;
 		return this.goalIndex = value;
 	}
 
@@ -86,71 +85,46 @@ abstract APTask(IAPTask) from IAPTask
 	inline function get_goalsLeft()
 		return complete ? 0 : goalCount - goalIndex;
 
-	/** Serializes the data. **/
-	public inline function serialize()
-	{
-		var retval:DynamicAccess<Dynamic> = {};
-
-		retval["type"] = this.type;
-		retval["goals"] = this.goals;
-		retval["goalIndex"] = this.goalIndex;
-		retval["current"] = this.current;
-
-		return retval;
-	}
-
 	/**
-		Forces completion of the current task step.
+		Forces completion of the task.
+		@param finish Complete the entire task. Defaults to `false`, where it will complete only one step.
 		@return Whether the goal index has advanced. `false` if it was already complete.
 	**/
-	public inline function force()
+	public inline function force(finish = false)
 		return switch (complete)
 		{
 			case true: false;
 			case false:
-				goalIndex++;
+				finish ? (goalIndex = goalCount) : goalIndex++;
 				true;
 		}
-
-	/**
-		Forces completion of the entire task.
-		@return Whether the goal index has advanced to the end of the task. `false` if it was already complete.
-	**/
-	public inline function forceComplete()
-		return switch (complete)
-		{
-			case true: false;
-			case false:
-				goalIndex = goalCount;
-				true;
-		}
-
-	/** Converts the task to its base data structure, stripping `uiText` in the process. **/
-	@:to
-	public function toBaseData():IAPTask
-		return {
-			type: this.type,
-			goals: this.goals,
-			goalIndex: this.goalIndex,
-			current: this.current,
-			uiText: null
-		};
 
 	@:to
 	public function toString()
-		return BumpStikGame.g().i18n.tr('game/ap/task/${this.type}', ["current" => current, "goal" => curGoal]) + switch (goalsLeft)
+	{
+		var t = BumpStikGame.g().i18n.tr;
+		return t('game/ap/task/${this.type}', ["current" => current, "goal" => curGoal]) + switch (goalsLeft)
 		{
-			case 0: BumpStikGame.g().i18n.tr('game/ap/task/goalok');
-			case x: BumpStikGame.g().i18n.tr('game/ap/task/left', ["_" => x - 1]);
+			case 0: t('game/ap/task/goalok');
+			case x: t('game/ap/task/left', ["_" => x - 1]);
 		};
+	}
 
-	/** Creates a new `APTask` from serialized data. **/
-	public static function fromSaved(data:DynamicAccess<Dynamic>, uiText:FlxUIText):APTask
-		return {
-			type: data["type"],
-			goals: data["goals"],
-			goalIndex: data["goalIndex"],
-			current: data["current"],
-			uiText: uiText
-		};
+	@:keep
+	private function hxSerialize(s:Serializer)
+	{
+		s.serialize(this.type);
+		s.serialize(this.goals);
+		s.serialize(this.goalIndex);
+		s.serialize(this.current);
+	}
+
+	@:keep
+	private function hxUnserialize(u:Unserializer)
+	{
+		this.type = u.unserialize();
+		this.goals = u.unserialize();
+		this.goalIndex = u.unserialize();
+		this.current = u.unserialize();
+	}
 }

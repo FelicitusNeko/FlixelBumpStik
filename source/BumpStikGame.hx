@@ -7,7 +7,10 @@ import flixel.FlxState;
 /** The Bumper Stickers base game instance. **/
 class BumpStikGame extends FlxGame
 {
-	/** Read-only. The internationalization/strings manager for the game. **/
+	/** _Read-only._ The current save version. Earlier saves than this may be converted or deleted. **/
+	public static final curSaveVer = 2;
+
+	/** _Read-only._ The internationalization/strings manager for the game. **/
 	public var i18n(default, null):I18nManager;
 
 	public function new(GameWidth:Int = 0, GameHeight:Int = 0, ?InitialState:Class<FlxState>, Zoom:Float = 1, UpdateFramerate:Int = 60,

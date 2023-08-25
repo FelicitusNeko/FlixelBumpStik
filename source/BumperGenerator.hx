@@ -1,6 +1,8 @@
 package;
 
 import haxe.DynamicAccess;
+import haxe.Serializer;
+import haxe.Unserializer;
 import boardObject.Bumper;
 import flixel.math.FlxRandom;
 import flixel.util.FlxColor;
@@ -11,14 +13,11 @@ class BumperGenerator
 	/** The default array to convert numbers into colors. **/
 	public static final defaultColorOpts:Array<FlxColor> = [Color.Blue, Color.Green, Color.Red, Color.Purple, Color.Yellow, Color.White];
 
-	/** An array to convert numbers into colors. **/
-	public var colorOpts:Array<FlxColor> = [];
-
-	/** Read-only. An array of the colors currently in play. **/
-	public var colorsInPlay(get, never):Array<FlxColor>;
-
 	/** An array to convert numbers into directions. **/
 	public static final dirOpts:Array<Direction> = [Up, Right, Down, Left];
+
+	/** An array to convert numbers into colors. **/
+	public var colorOpts:Array<FlxColor> = [];
 
 	/** The number of colors this generator was initialized with. **/
 	public var initColors(default, null):Int;
@@ -26,16 +25,19 @@ class BumperGenerator
 	/** The number of colors currently in play. **/
 	public var colors(default, set):Int = 0;
 
-	/** The maximum number of colors available to be put into play. **/
-	public var maxColors(get, never):Int;
-
 	/** The maximum number of colors to be made available, regardless of how many are actually on the list. **/
 	public var colorLimit(default, set):Int;
 
-	/** The average number of each color generated. **/
+	/** _Read-only._ An array of the colors currently in play. **/
+	public var colorsInPlay(get, never):Array<FlxColor>;
+
+	/** _Read-only._ The maximum number of colors available to be put into play. **/
+	public var maxColors(get, never):Int;
+
+	/** _Read-only._ The average number of each color generated. **/
 	public var average(get, never):Float;
 
-	/** The most of any one color generated. **/
+	/** _Read-only._ The most of any one color generated. **/
 	public var max(get, never):Int;
 
 	/** The random generator for this class. **/
@@ -51,10 +53,7 @@ class BumperGenerator
 		colors = this.initColors = initColors;
 	}
 
-	inline function get_colorsInPlay()
-		return colorOpts.slice(0, colors);
-
-	function set_colors(colors:Int):Int
+	private function set_colors(colors:Int):Int
 	{
 		if (colors < 0)
 			colors = 0;
@@ -77,7 +76,7 @@ class BumperGenerator
 		return this.colors;
 	}
 
-	function set_colorLimit(colorLimit:Int)
+	private function set_colorLimit(colorLimit:Int)
 	{
 		if (colorLimit < colors)
 			colorLimit = colors;
@@ -86,10 +85,13 @@ class BumperGenerator
 		return this.colorLimit = colorLimit;
 	}
 
-	inline function get_maxColors()
+	private inline function get_colorsInPlay()
+		return colorOpts.slice(0, colors);
+
+	private inline function get_maxColors()
 		return colorOpts.length;
 
-	function get_average():Float
+	private function get_average():Float
 	{
 		if (colors == 0)
 			return 0;
@@ -99,7 +101,7 @@ class BumperGenerator
 		return total / colors;
 	}
 
-	function get_max():Int
+	private function get_max():Int
 	{
 		var retval = 0;
 		for (_ => qty in _drops)
@@ -169,6 +171,7 @@ class BumperGenerator
 		colors = 0;
 		colors = initColors;
 		colorLimit = maxColors;
+		_rng = new FlxRandom();
 	}
 
 	public function serialize()
@@ -206,5 +209,29 @@ class BumperGenerator
 		var retval = new BumperGenerator(data["initColors"], data["colorOpts"]);
 		retval.deserialize(data);
 		return retval;
+	}
+
+	@:keep
+	private function hxSerialize(s:Serializer)
+	{
+		s.serialize(colorOpts);
+		s.serialize(initColors);
+		s.serialize(colors);
+		s.serialize(colorLimit);
+		s.serialize(_drops);
+		s.serialize(_rng.initialSeed);
+		s.serialize(_rng.currentSeed);
+	}
+
+	@:keep
+	private function hxUnserialize(u:Unserializer)
+	{
+		colorOpts = u.unserialize();
+		initColors = u.unserialize();
+		colors = u.unserialize();
+		colorLimit = u.unserialize();
+		_drops = u.unserialize();
+		_rng = new FlxRandom(u.unserialize());
+		_rng.currentSeed = u.unserialize();
 	}
 }

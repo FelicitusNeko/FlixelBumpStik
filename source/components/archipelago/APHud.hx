@@ -11,7 +11,7 @@ import components.archipelago.APTask;
 import components.classic.ClassicHUD;
 
 /** Adds Archipelago-specific elements to the Classic mode HUD. **/
-class APHud extends ClassicHUD
+class APHUD extends ClassicHUD
 {
 	/** The total number of points accrued through previous games on this level. **/
 	private var _accruedScoreThisLevel = 0;

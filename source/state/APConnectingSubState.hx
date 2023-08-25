@@ -1,5 +1,6 @@
 package state;
 
+import ap.Client;
 import flixel.FlxSprite;
 import flixel.FlxSubState;
 import flixel.text.FlxText;
@@ -13,9 +14,12 @@ class APConnectingSubState extends FlxSubState
 {
 	public var onCancel(default, null) = new Event<Void->Void>();
 
-	public function new()
+	private var _ap:Client;
+
+	public function new(ap:Client)
 	{
 		super(FlxColor.fromRGBFloat(0, 0, 0, .5));
+		_ap = ap;
 	}
 
 	override function create()
@@ -50,5 +54,11 @@ class APConnectingSubState extends FlxSubState
 		}
 
 		super.create();
+	}
+
+	override function update(elapsed:Float)
+	{
+		super.update(elapsed);
+		_ap.poll();
 	}
 }

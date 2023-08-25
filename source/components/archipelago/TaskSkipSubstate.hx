@@ -90,7 +90,7 @@ class TaskSkipSubstate extends FlxSubState
 		super.create();
 	}
 
-	@:allow(components.archipelago.APHud.loadTaskSkip)
+	@:allow(components.archipelago.APHUD.loadTaskSkip)
 	function loadTasks(tasks:Array<APTask>)
 		_tasks = tasks;
 }

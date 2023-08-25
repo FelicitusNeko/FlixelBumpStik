@@ -1,11 +1,11 @@
 package boardObject;
 
-import components.Board;
+import haxe.DynamicAccess;
+import components.common.CommonBoard;
 import flixel.FlxSprite;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
-import haxe.DynamicAccess;
 
 /** The current color of the bumper, for matching purposes. **/
 enum abstract Color(FlxColor) from FlxColor to FlxColor
@@ -124,7 +124,7 @@ class Bumper extends BoardObject
 	public var flairCount(get, never):Int;
 
 	public function new(x:Float, y:Float, color:Null<FlxColor>, direction:Direction = Direction.None, launchDirection:Direction = Direction.None,
-			owner:Board = null)
+			owner:CommonBoard = null)
 	{
 		super(x, y, owner);
 

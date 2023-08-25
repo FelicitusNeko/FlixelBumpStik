@@ -1,11 +1,11 @@
 package boardObject;
 
-import components.Board;
+import haxe.DynamicAccess;
+import components.common.CommonBoard;
 import flixel.FlxSprite;
 import flixel.group.FlxSpriteGroup;
 import flixel.math.FlxPoint;
 import flixel.ui.FlxSpriteButton;
-import haxe.DynamicAccess;
 import lime.app.Event;
 
 /** Any of a class of object that composes a Bumper Stickers board. **/
@@ -15,7 +15,7 @@ abstract class BoardObject extends FlxSpriteGroup
 	public var objType(get, never):String;
 
 	/** The board this bumper belongs to. **/
-	public var owner(default, set):Board;
+	public var owner(default, set):CommonBoard;
 
 	/** The board's origin point, or (0,0) if there is no owner board. **/
 	public var bOrigin(get, never):FlxPoint;
@@ -38,7 +38,7 @@ abstract class BoardObject extends FlxSpriteGroup
 	/** Event that fires when the object is clicked. **/
 	public var onClick(default, null) = new Event<BoardObject->Void>();
 
-	public function new(x:Float, y:Float, owner:Board = null)
+	public function new(x:Float, y:Float, owner:CommonBoard = null)
 	{
 		super(x, y);
 		this.owner = owner;
@@ -57,7 +57,7 @@ abstract class BoardObject extends FlxSpriteGroup
 	function get_objType()
 		return "generic";
 
-	function set_owner(owner:Board):Board
+	function set_owner(owner:CommonBoard):CommonBoard
 	{
 		// if (this.owner == owner)
 		// 	return owner;
@@ -155,7 +155,5 @@ abstract class BoardObject extends FlxSpriteGroup
 		return retval;
 	}
 
-	public function deserialize(data:DynamicAccess<Dynamic>) {
-		
-	}
+	public function deserialize(data:DynamicAccess<Dynamic>) {}
 }
