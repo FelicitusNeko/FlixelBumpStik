@@ -33,6 +33,9 @@ abstract class CommonPlayerState
 	/** _Read-only._ The ID for this player.**/
 	public var id(default, null):String;
 
+	/** The player's current board. **/
+	public var board:CommonBoard;
+
 	/** The player's current score. **/
 	public var score(default, set) = 0;
 
@@ -218,6 +221,7 @@ abstract class CommonPlayerState
 	private function hxSerialize(s:Serializer)
 	{
 		s.serialize(id);
+		s.serialize(board.serialize());
 		s.serialize(score);
 		s.serialize(block);
 		s.serialize(launched);
@@ -230,12 +234,15 @@ abstract class CommonPlayerState
 		s.serialize(_reg);
 	}
 
+	abstract function deserializeBoard(data:Dynamic):CommonBoard;
+
 	/** Restores the player state from text via Haxe's `Unserializer`. **/
 	@:keep
 	private function hxUnserialize(u:Unserializer)
 	{
 		init();
 		this.id = u.unserialize();
+		this.board = deserializeBoard(u.unserialize());
 		this.score = u.unserialize();
 		this.block = u.unserialize();
 		this.launched = u.unserialize();

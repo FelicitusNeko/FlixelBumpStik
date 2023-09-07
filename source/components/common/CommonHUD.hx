@@ -34,14 +34,23 @@ abstract class CommonHUD extends FlxSpriteGroup
 	/** The current next bumper displayed on the HUD. **/
 	public var nextBumper(default, set):Bumper = null;
 
-	/** Event that fires when the score value changes.**/
+	/**
+		Event that fires when the score value changes.
+		@deprecated Stats are to be stored and handled by the player state
+	**/
 	public var onScoreChanged(default, null) = new Event<Int->Void>();
 
-	/** Event that fires when the cleared bumper value changes.**/
+	/**
+		Event that fires when the cleared bumper value changes.
+		@deprecated Stats are to be stored and handled by the player state
+	**/
 	public var onBlockChanged(default, null) = new Event<Int->Void>();
 
 	/** Event that fires when the Next Bumper is clicked. **/
 	public var onNextBumperClick(default, null) = new Event<Bumper->Void>();
+
+	/** List of player states that are connected. **/
+	private var _connected:Array<String> = [];
 
 	/** Retrieve a string based on an i18n key. **/
 	private var _t:I18nFunction;
@@ -81,8 +90,8 @@ abstract class CommonHUD extends FlxSpriteGroup
 
 	function set_score(score:Int):Int
 	{
-		if (_scoreCounter.value != score)
-			onScoreChanged.dispatch(score);
+		// if (_scoreCounter.value != score)
+		// 	onScoreChanged.dispatch(score);
 		return _scoreCounter.value = score;
 	}
 
@@ -91,16 +100,14 @@ abstract class CommonHUD extends FlxSpriteGroup
 
 	function set_block(block:Int):Int
 	{
-		if (_blockCounter.value != block)
-			onBlockChanged.dispatch(block);
+		// if (_blockCounter.value != block)
+		// 	onBlockChanged.dispatch(block);
 		return _blockCounter.value = block;
 	}
 
-	function set_bonus(bonus:Int):Int
-	{
-		// TODO: display bonus on HUD
-		return score += bonus;
-	}
+	// TODO: display bonus on HUD
+	inline function set_bonus(bonus:Int):Int
+		return score + bonus;
 
 	function set_nextBumper(nextBumper:Bumper):Bumper
 	{
@@ -124,7 +131,10 @@ abstract class CommonHUD extends FlxSpriteGroup
 		return this.nextBumper = nextBumper;
 	}
 
-	/** Resets the HUD to its starting values. **/
+	/**
+		Resets the HUD to its starting values.
+		@deprecated Stats are to be stored and handled by the player state
+	**/
 	public function resetHUD()
 	{
 		if (nextBumper != null)
@@ -136,6 +146,61 @@ abstract class CommonHUD extends FlxSpriteGroup
 		block = 0;
 	}
 
+	private function scoreChanged(id:String, score:Int)
+		if (_connected.contains(id))
+			this.score = score;
+
+	private function blockChanged(id:String, block:Int)
+		if (_connected.contains(id))
+			this.block = block;
+
+	private function bonusSet(id:String, bonus:Int)
+		if (_connected.contains(id))
+			this.bonus = bonus;
+
+	private function nextChanged(id:String, next:Bumper)
+		if (_connected.contains(id))
+			this.nextBumper = next;
+
+	/**
+		Connects this HUD to a player state's events.
+		@param state The state to connect to the HUD.
+		@return Whether the operation succeeded. If `false`, the state was most likely already connected.
+	**/
+	public function connectState(state:CommonPlayerState)
+	{
+		if (_connected.contains(state.id))
+			return false;
+
+		_connected.push(state.id);
+		state.onScoreChanged.add(scoreChanged);
+		state.onBlockChanged.add(blockChanged);
+		state.onBonus.add(bonusSet);
+		state.onNextChanged.add(nextChanged);
+
+		return true;
+	}
+
+	/**
+		Disconnects this HUD from a player state's events.
+		@param state The state to disconnect from the HUD.
+		@return Whether the operation succeeded. If `false`, the state was most likely not connected.
+	**/
+	public function disconnectState(state:CommonPlayerState)
+	{
+		if (!_connected.contains(state.id))
+			return false;
+
+		state.onScoreChanged.remove(scoreChanged);
+		state.onBlockChanged.remove(blockChanged);
+		state.onBonus.remove(bonusSet);
+		state.onNextChanged.remove(nextChanged);
+		_connected = _connected.filter(i -> i != state.id);
+
+		return true;
+	}
+
+	/** @deprecated Stats are to be stored and handled by the player state **/
 	public function serialize()
 	{
 		var retval:DynamicAccess<Dynamic> = {};
@@ -147,6 +212,7 @@ abstract class CommonHUD extends FlxSpriteGroup
 		return retval;
 	}
 
+	/** @deprecated Stats are to be stored and handled by the player state **/
 	public function deserialize(data:DynamicAccess<Dynamic>)
 	{
 		score = data["score"];

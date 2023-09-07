@@ -24,14 +24,23 @@ typedef PlayerInstance =
 
 abstract class CommonGameState extends FlxState
 {
-	/** The list of players for this game. **/
+	/**
+		The list of players for this game.
+		@deprecated Converting to PlayerState
+	**/
 	private var _players:Array<PlayerInstance> = [];
+
+	/** The list of players for this game. **/
+	private var _playersv2:Array<CommonPlayerState> = [];
 
 	/** The GUI for this game. **/
 	private var _hud:CommonHUD;
 
 	/** A shortcut to the first player on the list. **/
 	private var _player(get, never):PlayerInstance;
+
+	/** A shortcut to the local player. **/
+	private var _p(get, never):CommonPlayerState;
 
 	/** The bumper generator for this game. **/
 	private var _bg:BumperGenerator;
@@ -57,6 +66,9 @@ abstract class CommonGameState extends FlxState
 
 	function get__player()
 		return _players.length == 0 ? null : _players[0];
+
+	inline function get__p()
+		return _playersv2.length == 0 ? null : _playersv2[0];
 
 	override function create()
 	{
