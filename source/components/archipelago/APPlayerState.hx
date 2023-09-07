@@ -6,6 +6,7 @@ import haxe.Unserializer;
 import lime.app.Event;
 import utilities.DeploymentSchedule;
 import components.classic.ClassicPlayerState;
+import components.common.CommonBoard;
 
 class APPlayerState extends ClassicPlayerState
 {
@@ -47,6 +48,10 @@ class APPlayerState extends ClassicPlayerState
 	**/
 	public var onDeployHazard(default, null):Event<String->Void>;
 
+	/** The player's current board, as an `APBoard`. **/
+	public var apBoard(get, never):APBoard;
+
+	/** The size of the current board, in board object units. **/
 	public var boardSize(get, never):{w:Int, h:Int};
 
 	/** The player's current count of Task Advances. **/
@@ -118,6 +123,9 @@ class APPlayerState extends ClassicPlayerState
 		_reg["block.accrued.level"] = 0;
 		_reg["block.accrued.game"] = 0;
 	}
+
+	inline private function get_apBoard()
+		return cast(board, APBoard);
 
 	inline private function get_boardSize()
 		return {
@@ -358,6 +366,17 @@ class APPlayerState extends ClassicPlayerState
 		s.serialize(turner);
 		s.serialize(level);
 		s.serialize(tasks);
+	}
+
+	// TODO: make boards hxSerializable
+
+	/** Loads the board data. **/
+	override function deserializeBoard(data:DynamicAccess<Dynamic>):CommonBoard
+	{
+		var boardData:DynamicAccess<Dynamic> = data["board"];
+		var board = new APBoard(0, 0, boardData["width"], boardData["height"]);
+		board.deserialize(data);
+		return board;
 	}
 
 	/** Restores the player state from text via Haxe's `Unserializer`. **/

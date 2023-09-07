@@ -1,8 +1,10 @@
 package components.classic;
 
+import haxe.DynamicAccess;
 import haxe.Serializer;
 import haxe.Unserializer;
 import lime.app.Event;
+import components.common.CommonBoard;
 import components.common.CommonPlayerState;
 
 class ClassicPlayerState extends CommonPlayerState
@@ -13,11 +15,14 @@ class ClassicPlayerState extends CommonPlayerState
 	/** The player's current count of Paint Cans. **/
 	public var paint(default, set) = 0;
 
-	public function new(id:String)
-	{
-		super(id);
-		initReg();
-	}
+	/** The player's current board, as a `ClassicBoard`. **/
+	public var cBoard(get, never):ClassicBoard;
+
+	// public function new(id:String)
+	// {
+	// 	super(id);
+	// 	initReg();
+	// }
 
 	/** Initializes things like event handlers. **/
 	override function init()
@@ -43,6 +48,9 @@ class ClassicPlayerState extends CommonPlayerState
 		return this.paint;
 	}
 
+	inline private function get_cBoard()
+		return cast(board, ClassicBoard);
+
 	/** Resets the player state. **/
 	override function reset()
 	{
@@ -56,6 +64,16 @@ class ClassicPlayerState extends CommonPlayerState
 	{
 		super.hxSerialize(s);
 		s.serialize(paint);
+	}
+
+	// TODO: make boards hxSerializable
+
+	/** Loads the board data. **/
+	function deserializeBoard(data:DynamicAccess<Dynamic>):CommonBoard
+	{
+		var board = new ClassicBoard(0, 0);
+		board.deserialize(data);
+		return board;
 	}
 
 	/** Restores the player state from text via Haxe's `Unserializer`. **/
