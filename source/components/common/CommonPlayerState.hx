@@ -65,11 +65,13 @@ abstract class CommonPlayerState
 
 	//-------- CODE
 
+	/** Creates a new player state **/
 	public function new(id:String)
 	{
-		init();
 		this.id = id;
 		_reg = {};
+		init();
+		initReg();
 	}
 
 	/** Initializes things like event handlers. **/
@@ -81,6 +83,9 @@ abstract class CommonPlayerState
 		onLaunch = new Event<(String, Bumper) -> Void>();
 		onNextChanged = new Event<(String, Bumper) -> Void>();
 	}
+
+	/** _Abstract._ Initializes the value registry. **/
+	abstract function initReg():Void;
 
 	private function set_score(score)
 	{
@@ -234,7 +239,10 @@ abstract class CommonPlayerState
 		s.serialize(_reg);
 	}
 
-	abstract function deserializeBoard(data:Dynamic):CommonBoard;
+	// TODO: make boards hxSerializable
+
+	/** _Abstract._ Loads the board data. **/
+	abstract function deserializeBoard(data:DynamicAccess<Dynamic>):CommonBoard;
 
 	/** Restores the player state from text via Haxe's `Unserializer`. **/
 	@:keep
