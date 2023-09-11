@@ -111,13 +111,17 @@ class APEntryState extends FlxState
 			postError('noSlot');
 		else
 		{
+			FlxG.autoPause = false;
 			var connectSubState = new APConnectingSubState();
 			var uri = '${_hostInput.text}:${_portInput.text}';
 			if (!wsCheck.match(uri))
 				uri = 'ws://$uri';
 
 			openSubState(connectSubState);
-			connectSubState.closeCallback = () -> trace("Close callback test");
+			connectSubState.closeCallback = () ->
+			{
+				FlxG.autoPause = true;
+			};
 
 			var ap = new Client('BumpStik-${_slotInput.text}', "Bumper Stickers", uri);
 
@@ -160,10 +164,10 @@ class APEntryState extends FlxState
 			{
 				trace("Connected - switching to game state");
 				polltimer.stop();
-				ap._hOnRoomInfo = null;
-				ap._hOnSlotRefused = null;
-				ap._hOnSocketDisconnected = null;
-				ap._hOnSlotConnected = null;
+				ap._hOnRoomInfo = () -> {};
+				ap._hOnSlotRefused = (_) -> {};
+				ap._hOnSocketDisconnected = () -> {};
+				ap._hOnSlotConnected = (_) -> {};
 				closeSubState();
 
 				var apGames = new FlxSave();
