@@ -29,6 +29,8 @@
       "slot": "Slot name",
       "pw": "Password",
       "connecting": "Connecting...",
+      "disconnected": "Disconnected",
+      "disconnectMsg": "You got disconnected from the server.\nWe're trying to get you back on now.\nIf you cancel, you'll be sent back to the connect screen,\nbut your game is saved up to the end of your last move.",
       "error": {
         "noHost": "Host name cannot be empty. (That's the address of the server you're connecting to.)",
         "noPort": "Port number cannot be empty. (That's the 4-5 digits at the end of the server address, often 38281.)",
@@ -41,6 +43,8 @@
         "InvalidPassword": "The password supplied is incorrect.",
         "InvalidItemsHandling": "Please report a bug stating that an \"InvalidItemsHandling\" error was received.",
         "connectionReset": "The server closed the connection.",
+        "badHostFormat": "Please check the value entered as Host. The format is invalid.",
+        "unknownHost": "No server was found at \":host\".",
         "default": "An unknown error occurred: :error"
       }
     }

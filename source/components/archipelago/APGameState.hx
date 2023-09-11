@@ -15,8 +15,10 @@ import flixel.math.FlxRandom;
 import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
 import flixel.util.FlxSave;
+import state.APEntryState;
 import state.MenuState;
 import utilities.DeploymentSchedule;
+import components.archipelago.APDisconnectSubstate;
 import components.archipelago.APTask.APTaskType;
 import components.classic.ClassicGameState;
 import components.dialogs.DialogBox;
@@ -326,6 +328,7 @@ class APGameState extends ClassicGameState
 		_ap = ap;
 		_ap.clientStatus = ClientStatus.READY;
 		_ap._hOnItemsReceived = onItemsReceived;
+		_ap._hOnSocketDisconnected = onSocketDisconnect;
 
 		super();
 
@@ -375,6 +378,7 @@ class APGameState extends ClassicGameState
 
 		FlxG.autoPause = false;
 
+		#if debug
 		// TODO: Restart Board button
 		var test = new FlxButton(0, 0, "Test", () ->
 		{
@@ -382,6 +386,7 @@ class APGameState extends ClassicGameState
 			_hudAP.taskSkip++;
 		});
 		_hud.add(test);
+		#end
 	}
 
 	override function destroy()
@@ -728,6 +733,21 @@ class APGameState extends ClassicGameState
 
 					_lastProcessed = itemObj.index;
 				}
+	}
+
+	/** Called by AP client if it loses connection to the server. **/
+	private function onSocketDisconnect()
+	{
+		var dcdlg = new APDisconnectSubState(_ap, _boardClassic.center);
+		dcdlg.onCancel.add(() ->
+		{
+			_queueTo = new APEntryState();
+		});
+		dcdlg.onReconnect.add(() ->
+		{
+			_ap._hOnSocketDisconnected = onSocketDisconnect;
+		});
+		openSubState(dcdlg);
 	}
 
 	/**
