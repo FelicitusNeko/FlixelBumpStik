@@ -579,6 +579,15 @@ class Board extends FlxTypedGroup<FlxBasic>
 				}
 				return order;
 			});
+
+			// make sure all bumpers are aligned and only the correct spaces are reserved
+			for (bumper in _bumpers)
+				bumper.snapToPos();
+			for (space in _spaces)
+				space.reservedFor = null;
+			for (bumper in _bumpers)
+				atGrid(_spaces, bumper.boardX, bumper.boardY).reservedFor = bumper;
+
 			_csm.chain("stopped");
 		}
 	}
@@ -885,6 +894,13 @@ class Board extends FlxTypedGroup<FlxBasic>
 		var bumpersData:Array<DynamicAccess<Dynamic>> = data["bumpers"];
 		for (bumperData in bumpersData)
 		{
+			// HACK: remove bumpers which are out of bounds
+			if (bumperData["boardX"] < 0
+				|| bumperData["boardX"] >= bWidth
+				|| bumperData["boardY"] < 0
+				|| bumperData["boardY"] >= bHeight)
+				continue;
+
 			var bumper:Bumper = switch (bumperData["type"])
 			{
 				case "bumper": Bumper.fromSaved(bumperData);
