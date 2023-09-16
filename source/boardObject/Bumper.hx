@@ -291,8 +291,7 @@ class Bumper extends BoardObject
 
 	/**
 		Starts this bumper moving in its set direction, if any.
-		@param launched Optional. If provided, the bumper will be launched in a temporary direction,
-										starting at half its maximum velocity.
+		@param launched Optional. If provided, the bumper will be launched in a temporary direction, starting at half its maximum velocity.
 	**/
 	public function startMoving(launched:Direction = Direction.None)
 	{
@@ -326,9 +325,7 @@ class Bumper extends BoardObject
 		}
 	}
 
-	/**
-		Snaps the bumper to the nearest board X/Y location.
-	**/
+	/** Snaps the bumper to the nearest board X/Y location. **/
 	public function snapToPos()
 	{
 		velocity.x = velocity.y = 0;
@@ -451,6 +448,14 @@ class Bumper extends BoardObject
 			});
 		}
 	}
+
+	/**
+		Create a clone of this bumper.
+		@param sameOwner Whether the clone should be owned by the same board.
+		@return The cloned bumper.
+	**/
+	public function cloneBumper(sameOwner = false)
+		return new Bumper(x, y, color, direction, launchDirection, sameOwner ? owner : null);
 
 	public override function serialize():DynamicAccess<Dynamic>
 	{
