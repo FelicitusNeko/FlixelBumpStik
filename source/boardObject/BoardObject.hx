@@ -50,8 +50,8 @@ abstract class BoardObject extends FlxSpriteGroup
 
 	function newFinally()
 	{
-		setSize(width - .0002, height - .0002);
-		offset.set(.0001, .0001);
+		setSize(width - .002, height - .002);
+		offset.set(.001, .001);
 	}
 
 	function get_objType()

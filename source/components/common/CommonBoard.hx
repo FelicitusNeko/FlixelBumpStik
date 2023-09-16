@@ -579,6 +579,15 @@ abstract class CommonBoard extends FlxTypedGroup<FlxBasic>
 				}
 				return order;
 			});
+
+			// make sure all bumpers are aligned and only the correct spaces are reserved
+			for (bumper in _bumpers)
+				bumper.snapToPos();
+			for (space in _spaces)
+				space.reservedFor = null;
+			for (bumper in _bumpers)
+				atGrid(_spaces, bumper.boardX, bumper.boardY).reservedFor = bumper;
+
 			_csm.chain("stopped");
 		}
 	}
@@ -885,6 +894,9 @@ abstract class CommonBoard extends FlxTypedGroup<FlxBasic>
 		var bumpersData:Array<DynamicAccess<Dynamic>> = data["bumpers"];
 		for (bumperData in bumpersData)
 		{
+			// NOTE: main branch is discarding OOB bumpers
+			// hopefully that will no longer be necessary now
+
 			var bumper:Bumper = switch (bumperData["type"])
 			{
 				case "bumper": Bumper.fromSaved(bumperData);
