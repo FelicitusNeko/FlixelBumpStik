@@ -21,6 +21,48 @@ typedef BumperCallback = Bumper->Void;
 
 abstract class CommonBoard extends FlxTypedGroup<FlxBasic>
 {
+
+	/**
+		Event that fires when the state changes.
+		@param state The label for the new state.
+	**/
+	public var onBoardStateChanged(get, never):Event<String->Void>;
+
+	/**
+		Event that fires when the game requests that a next bumper be generated.
+		@deprecated Is this needed with `onBoardStateChanged`?
+	**/
+	public var onRequestGenerate(default, null) = new Event<Void->Void>();
+
+	/**
+		Event that fires when the next bumper is being launched.
+		@param callback Function for the receiver to call to send along a bumper.
+	**/
+	public var onLaunchBumper(default, null) = new Event<BumperCallback->Void>(); // NOTE: maybe make this `onLauncherSelect`
+
+	/**
+		Event that fires when a match occurs.
+		@param chain The chain step for this match.
+		@param combo The number of bumpers matched.
+		@param bumpers The bumpers to be cleared.
+	**/
+	public var onMatch(default, null) = new Event<(Int, Int, Array<Bumper>) -> Void>();
+
+	/**
+		Event that fires when a bumper clears.
+		@param chain The chain step for this overall match.
+		@param bumper The bumper being cleared.
+	**/
+	public var onClear(default, null) = new Event<(Int, Bumper) -> Void>();
+
+	/**
+		Event that fires when the game is over.
+		@param animating If `true`, the game over animation is playing. If `false`, it has either ended or timed out.
+		@deprecated Is this needed with `onBoardStateChanged`?
+	**/
+	public var onGameOver(default, null) = new Event<Bool->Void>();
+
+
 	/** The board's top-left corner, excluding Launchers. **/
 	public var origin(default, null):FlxPoint;
 
@@ -83,33 +125,10 @@ abstract class CommonBoard extends FlxTypedGroup<FlxBasic>
 	/** If this is true, `onAdvanceTurn` will not be called. **/
 	private var _dontAdvanceTurn = false;
 
+	#if debug
+	/** The number of frames this board has been running. Does not persist between sessions.**/
 	private var _frames = 0;
-
-	/** Event that fires when the game requests that a next bumper be generated. **/
-	public var onRequestGenerate(default, null) = new Event<Void->Void>();
-
-	/**
-		Event that fires when the next bumper is being launched.
-		@param callback Function for the receiver to call to send along a bumper.
-	**/
-	public var onLaunchBumper(default, null) = new Event<BumperCallback->Void>();
-
-	/**
-		Event that fires when a match occurs.
-		@param chain The chain step for this match.
-		@param combo The number of bumpers matched.
-		@param bumpers The bumpers to be cleared.
-	**/
-	public var onMatch(default, null) = new Event<(Int, Int, Array<Bumper>) -> Void>();
-
-	/**
-		Event that fires when a bumper clears.
-		@param chain The chain step for this overall match.
-	**/
-	public var onClear(default, null) = new Event<(Int, Bumper) -> Void>();
-
-	/** Event that fires when the game is over. **/
-	public var onGameOver(default, null) = new Event<Bool->Void>();
+	#end
 
 	public function new(x:Float = 0, y:Float = 0, bWidth = 5, bHeight = 5)
 	{
@@ -196,6 +215,10 @@ abstract class CommonBoard extends FlxTypedGroup<FlxBasic>
 	inline function get_bCount()
 		return _bumpers.countLiving();
 
+	inline function get_onBoardStateChanged()
+		return _csm.onStateChanged;
+
+	#if debug
 	/**
 		Set up a board state test.
 		@param test The test number to run.
@@ -290,6 +313,7 @@ abstract class CommonBoard extends FlxTypedGroup<FlxBasic>
 
 		// _csm.chain("launch");
 	}
+	#end
 
 	/**
 		Creates a new bumper on the bumper layer and puts it at the given grid coordinates.
@@ -341,13 +365,13 @@ abstract class CommonBoard extends FlxTypedGroup<FlxBasic>
 	}
 
 	/** 
-		Looks for a board object based on a given sprite.
+		_Static generic._ Looks for a board object based on a given sprite.
 		@param list The list of objects to retreve from.
 		@param bspr The sprite to look for.
 		@return The board object to which the sprite belongs, or `null` if none was found.
 	**/
 	@:generic
-	private function spriteTo<T:BoardObject>(list:FlxTypedGroup<T>, spr:FlxSprite):T
+	private static function spriteTo<T:BoardObject>(list:FlxTypedGroup<T>, spr:FlxSprite):T
 	{
 		for (object in list)
 			if (object.has(spr))
@@ -356,7 +380,7 @@ abstract class CommonBoard extends FlxTypedGroup<FlxBasic>
 	}
 
 	/**
-		Determines which board object is located at the given board X and Y grid spaces.
+		_Static generic._ Determines which board object is located at the given board X and Y grid spaces.
 		@param list The list of objects to retreve from.
 		@param x The X grid coordinate on the board.
 		@param y The Y grid coordinate on the board.
@@ -364,7 +388,7 @@ abstract class CommonBoard extends FlxTypedGroup<FlxBasic>
 		@return The board object found at the given board grid coordinates, or `null` if there is none.
 	**/
 	@:generic
-	public function atGrid<T:BoardObject>(list:FlxTypedGroup<T>, x:Int, y:Int, mustBeAlive = true):T
+	public static function atGrid<T:BoardObject>(list:FlxTypedGroup<T>, x:Int, y:Int, mustBeAlive = true):T
 	{
 		for (object in list)
 			if (object.boardX == x && object.boardY == y && (!mustBeAlive || object.alive))
@@ -376,18 +400,18 @@ abstract class CommonBoard extends FlxTypedGroup<FlxBasic>
 		Temporary function for launcher functionality.
 		@deprecated Currently only to be used for the `Launcher` class.
 	**/
-	public function bumperAt(x, y)
+	public inline function bumperAt(x, y)
 		return atGrid(_bumpers, x, y);
 
 	/**
-		Determines which board object, if any, is located at the given `FlxPoint` coordinates.
+		_Static generic._ Determines which board object, if any, is located at the given `FlxPoint` coordinates.
 		@param list The list of objects to retreve from.
 		@param pt The world position to check at.
 		@param mustBeAlive Optional. Whether the returned object must be alive. Default `true`
 		@return The board object at that point, or `null` if there is none.
 	**/
 	@:generic
-	public function atPoint<T:BoardObject>(list:FlxTypedGroup<T>, pt:FlxPoint, mustBeAlive = true):T
+	public static function atPoint<T:BoardObject>(list:FlxTypedGroup<T>, pt:FlxPoint, mustBeAlive = true):T
 	{
 		for (object in list)
 			if (object.overlapsPoint(pt) && (!mustBeAlive || object.alive))
@@ -445,6 +469,10 @@ abstract class CommonBoard extends FlxTypedGroup<FlxBasic>
 		return null;
 	}
 
+	/**
+		Retrieve a random bumper.
+		@return The randomly selected bumper, if any are on the board. If not, returns `null`.
+	**/
 	public function getRandomBumper()
 	{
 		if (bCount == 0)
@@ -460,7 +488,9 @@ abstract class CommonBoard extends FlxTypedGroup<FlxBasic>
 	{
 		super.update(elapsed);
 		_csm.update(elapsed);
+		#if debug
 		_frames++;
+		#end
 	}
 
 	/** State machine call for idle state. **/
@@ -468,7 +498,7 @@ abstract class CommonBoard extends FlxTypedGroup<FlxBasic>
 	{
 		if (_csm.justChanged) // If the state just changed to idle:
 		{
-			onRequestGenerate.dispatch(); // Request that a new next bumper be generated
+			onRequestGenerate.dispatch(); // NOTE: probably don't need this event anymore
 			curChain = 0; // Reset chain to zero
 		}
 	}
@@ -702,9 +732,9 @@ abstract class CommonBoard extends FlxTypedGroup<FlxBasic>
 					_csm.chain("nomatch");
 				else
 				{
-					// NOTE: Game over
-					Timer.delay(() -> if (_csm.is("gameoverwait")) _forceGameOver = true, 5000);
-					onGameOver.dispatch(false);
+					// it's over!
+					Timer.delay(() -> if (_csm.is("gameoverwait")) _forceGameOver = true, 5000); // time out game over anim after five seconds
+					onGameOver.dispatch(false); // NOTE: probably don't need this event anymore
 					_bumpers.forEach(bumper -> bumper.gameOver());
 					_csm.chain("gameover");
 				}
@@ -745,7 +775,7 @@ abstract class CommonBoard extends FlxTypedGroup<FlxBasic>
 				space.reservedFor = null;
 			if (_bumpers.length == 0)
 			{
-				// NOTE: All Clear
+				// All Clear
 				_launchers.forEach(launcher -> launcher.enabled = true);
 				_csm.chain("allclear");
 			}
@@ -762,7 +792,7 @@ abstract class CommonBoard extends FlxTypedGroup<FlxBasic>
 	{
 		if (_bumpers.getFirstExisting() == null || _forceGameOver)
 		{
-			onGameOver.dispatch(true);
+			onGameOver.dispatch(true); // NOTE: probably don't need this event anymore
 			_csm.chain("goanimdone");
 		}
 	}
