@@ -1,5 +1,7 @@
 package components.common;
 
+import haxe.Unserializer;
+import haxe.Serializer;
 import haxe.DynamicAccess;
 import haxe.Exception;
 import Main.I18nFunction;
@@ -36,13 +38,19 @@ abstract class CommonGameState extends FlxState
 	/** The GUI for this game. **/
 	private var _hud:CommonHUD;
 
-	/** A shortcut to the first player on the list. **/
+	/**
+		A shortcut to the first player on the list.
+		@deprecated Use `_p` instead
+	**/
 	private var _player(get, never):PlayerInstance;
 
 	/** A shortcut to the local player. **/
 	private var _p(get, never):CommonPlayerState;
 
-	/** The bumper generator for this game. **/
+	/**
+		The bumper generator for this game.
+		@deprecated Use the generator stored in `PlayerState` instead
+	**/
 	private var _bg:BumperGenerator;
 
 	/** Pulls a string from the i18n bank. **/
@@ -60,9 +68,9 @@ abstract class CommonGameState extends FlxState
 		super();
 	}
 
-	abstract function get_gameName();
+	abstract function get_gameName():String;
 
-	abstract function get_gameType();
+	abstract function get_gameType():String;
 
 	function get__player()
 		return _players.length == 0 ? null : _players[0];
@@ -117,6 +125,12 @@ abstract class CommonGameState extends FlxState
 
 	abstract function createGame():Void;
 
+	function attachPlayer(player:CommonPlayerState) {
+		player.onBoardStateChanged.add(onBoardStateChanged);
+	}
+
+	abstract function onBoardStateChanged(id:String, state:String):Void;
+
 	function saveGame(?file:String)
 	{
 		if (file == null)
@@ -152,18 +166,11 @@ abstract class CommonGameState extends FlxState
 		retval["version"] = BumpStikGame.curSaveVer;
 		retval["gameName"] = gameName;
 		retval["gameType"] = gameType;
-		retval["players"] = _players.map(p ->
-		{
-			var iretval:DynamicAccess<Dynamic> = {};
 
-			iretval["multStack"] = p.multStack;
-			iretval["board"] = p.board.serialize();
+		retval["players"] = Serializer.run(_playersv2);
 
-			return iretval;
-		});
-
+		// ultimately shouldn't need to save the HUD anymore
 		retval["hud"] = _hud.serialize();
-		retval["bg"] = _bg.serialize();
 
 		return retval;
 	}
@@ -172,14 +179,13 @@ abstract class CommonGameState extends FlxState
 	{
 		if (data["gameName"] != gameName && !ignoreGameName)
 			throw new Exception("Game name mismatch");
-
-		if (_bg == null)
-			_bg = BumperGenerator.fromSaved(data["bg"]);
+		
+		_playersv2 = Unserializer.run(data["players"]);
 	}
 
 	function prepareBoard()
 	{
-		for (player in _players)
+		for (player in _playersv2)
 			add(player.board);
 
 		var mainCamera = FlxG.camera;
@@ -187,29 +193,19 @@ abstract class CommonGameState extends FlxState
 
 		if (FlxG.width > FlxG.height)
 		{
-			mainCamera.zoom = Math.min((FlxG.width - hudCamera.width) / _player.board.tWidth, FlxG.height / _player.board.tHeight) * (14 / 15);
-			mainCamera.focusOn(_player.board.center.add(hudCamera.width / 2 / FlxG.camera.zoom, 0));
+			mainCamera.zoom = Math.min((FlxG.width - hudCamera.width) / _p.board.tWidth, FlxG.height / _p.board.tHeight) * (14 / 15);
+			mainCamera.focusOn(_p.board.center.add(hudCamera.width / 2 / FlxG.camera.zoom, 0));
 		}
 		else
 		{
-			mainCamera.zoom = Math.min(FlxG.width / _player.board.tWidth, (FlxG.height - hudCamera.height) / _player.board.tHeight) * (14 / 15);
-			mainCamera.focusOn(_player.board.center.add(hudCamera.width / 2 / FlxG.camera.zoom, 0));
+			mainCamera.zoom = Math.min(FlxG.width / _p.board.tWidth, (FlxG.height - hudCamera.height) / _p.board.tHeight) * (14 / 15);
+			mainCamera.focusOn(_p.board.center.add(hudCamera.width / 2 / FlxG.camera.zoom, 0));
 		}
 	}
 
+	/** @deprecated use `PlayerState.addScore` instead **/
 	function addScore(addScore:Int, ?multStack:Array<Float>)
-	{
-		if (addScore == 0)
-			return 0;
-		if (multStack == null)
-			return addScore;
-
-		var mult:Float = 1;
-		for (factor in multStack)
-			mult *= factor;
-		var retval = Math.floor(addScore * mult);
-		return retval;
-	}
+		return _p.addScore(addScore);
 
 	override function update(elapsed:Float)
 	{

@@ -1,5 +1,9 @@
 package components.common;
 
+import components.common.CommonBoard;
+import flixel.FlxG;
+import haxe.Exception;
+import flixel.FlxSubState;
 import haxe.DynamicAccess;
 import haxe.Serializer;
 import haxe.Unserializer;
@@ -7,6 +11,22 @@ import boardObject.Bumper;
 import boardObject.Launcher;
 import flixel.util.FlxColor;
 import lime.app.Event;
+
+/** The result of calling for next turn. **/
+enum TurnResult
+{
+	/** A bumper has been generated. **/
+	Next(b:Bumper);
+
+	/** A substate is to be displayed. **/
+	Notice(s:FlxSubState);
+
+	/** The game is over. **/
+	Kill;
+
+	/** A custom function is to be called. **/
+	Custom(f:Void->Void);
+}
 
 /** Base class to keep the state of a player. **/
 abstract class CommonPlayerState
@@ -28,21 +48,24 @@ abstract class CommonPlayerState
 	/** Event that fires when the next bumper changes. **/
 	public var onNextChanged(default, null):Event<(String, Bumper) -> Void>;
 
+	/** Event that fires when the board's state changes. **/
+	public var onBoardStateChanged(default, null):Event<(String, String) -> Void>;
+
 	//-------- PROPERTIES
 
 	/** _Read-only._ The ID for this player.**/
 	public var id(default, null):String;
 
 	/** The player's current board. **/
-	public var board:CommonBoard;
+	public var board(default, null):CommonBoard;
 
 	/** The player's current score. **/
 	public var score(default, set) = 0;
 
-	/** The player's current bumpers cleared. **/
+	/** The player's current count of cleared bumpers. **/
 	public var block(default, set) = 0;
 
-	/** The player's count of launched bumpers. **/
+	/** The player's current count of launched bumpers. **/
 	public var launched(default, null) = 0;
 
 	/** The player's current next bumper. **/
@@ -50,6 +73,8 @@ abstract class CommonPlayerState
 
 	/** The player's current multiplier stack. Points added via `addScore()` will have these values multiplied to it. If empty or `null`, points will be added as-is. **/
 	public var multiStack(get, default) = [1.0];
+
+	//-------- MEMBER DATA
 
 	/** The player's bumper generator. **/
 	private var _bg:BumperGenerator;
@@ -82,6 +107,7 @@ abstract class CommonPlayerState
 		onBonus = new Event<(String, Int) -> Void>();
 		onLaunch = new Event<(String, Bumper) -> Void>();
 		onNextChanged = new Event<(String, Bumper) -> Void>();
+		onBoardStateChanged = new Event<(String, String) -> Void>();
 	}
 
 	/** _Abstract._ Initializes the value registry. **/
@@ -169,6 +195,62 @@ abstract class CommonPlayerState
 	}
 
 	/**
+		_Abstract._ Creates a new board.
+		@param force Create a board even if one is present and in progress.
+	**/
+	abstract public function createBoard(force:Bool = false):Void;
+
+	/** Attaches the player state to its board's events. **/
+	function attachBoard()
+	{
+		board.onBoardStateChanged.add(onInnerBoardStateChanged);
+		board.onMatch.add(onMatch);
+		board.onClear.add(onClear);
+		board.onLaunchBumper.add(onLaunchSelect);
+	}
+
+	function onInnerBoardStateChanged(state)
+		onBoardStateChanged.dispatch(id, state);
+
+	function onMatch(chain:Int, combo:Int, _)
+	{
+		var bonus = ((combo - 3) + (chain - 1)) * Math.floor(Math.pow(2, (chain - 1))) * 50;
+		if (chain > 1)
+			FlxG.sound.play(AssetPaths.chain__wav);
+		else if (combo > 3)
+			FlxG.sound.play(AssetPaths.combo__wav);
+		else
+			FlxG.sound.play(AssetPaths.match__wav);
+
+		addScore(bonus, true);
+	}
+
+	function onClear(chain:Int, _)
+	{
+		FlxG.sound.play(AssetPaths.clear__wav);
+		block++;
+		addScore(10 * Math.floor(Math.pow(2, chain - 1)));
+	}
+
+	// NOTE: maybe rework how this works
+	function onLaunchSelect(cb:BumperCallback)
+	{
+		FlxG.sound.play(AssetPaths.launch__wav);
+
+		var b = next == null ? _bg.weightedGenerate() : next;
+		next = null;
+		addScore(5);
+		cb(b);
+	}
+
+	/**
+		Evaluates the next turn loop.
+		@return The result of evaluating the loop.
+	**/
+	public function nextTurn()
+		return Next(generateBumper());
+
+	/**
 		Generates a new Next bumper.
 		@param force By default, a new bumper will only be generated if there is no Next bumper. Set this to `true` to force generation regardless.
 		@return The new bumper.
@@ -176,10 +258,12 @@ abstract class CommonPlayerState
 	**/
 	public function generateBumper(force = false)
 	{
-		if (_bg == null)
-			throw "Attempted to generate bumper without generator";
 		if (next == null || force)
+		{
+			if (_bg == null)
+				throw new Exception("Attempted to generate bumper without generator");
 			next = modifyBumper(_bg.weightedGenerate());
+		}
 		return next;
 	}
 
@@ -251,6 +335,7 @@ abstract class CommonPlayerState
 		init();
 		this.id = u.unserialize();
 		this.board = deserializeBoard(u.unserialize());
+		attachBoard();
 		this.score = u.unserialize();
 		this.block = u.unserialize();
 		this.launched = u.unserialize();

@@ -1,5 +1,6 @@
 package components.classic;
 
+import components.common.CommonPlayerState;
 import haxe.DynamicAccess;
 import haxe.Json;
 import boardObject.Bumper;
@@ -15,7 +16,10 @@ import components.common.CommonGameState;
 
 class ClassicGameState extends CommonGameState
 {
-	/** The value of the All Clear jackpot. **/
+	/**
+		The value of the All Clear jackpot.
+		@deprecated moving to `ClassicPlayerState`
+	**/
 	private var _jackpot:Int = 0;
 
 	/** A GUI element to display which color was selected for Paint Can use. **/
@@ -24,10 +28,16 @@ class ClassicGameState extends CommonGameState
 	/** A button to cancel Paint Can use. **/
 	private var _paintCanCancelButton:FlxButton = null;
 
-	/** The number of bumpers to clear to add a new color. **/
+	/**
+		The number of bumpers to clear to add a new color.
+		@deprecated moving to `ClassicPlayerState`
+	**/
 	private var _nextColor:Int = 100;
 
-	/** The number of bumpers to clear to add a new color. **/
+	/**
+		The number of bumpers to clear to add a new color.
+		@deprecated moving to `ClassicPlayerState`
+	**/
 	private var _nextColorEvery:Int = 150;
 
 	/** A shortcut to cast `_hud` as `ClassicHUD`. **/
@@ -45,162 +55,73 @@ class ClassicGameState extends CommonGameState
 	function get_gameType()
 		return "classic";
 
-	override function create()
-	{
-		super.create();
-
-		var hud = _hudClassic;
-		hud.onPaintCanGet.add((_) -> FlxG.sound.play(AssetPaths.paintcan__wav));
-		hud.onPaintCanClick.add(onPaintCanClick);
-		hud.onNextBumperClick.add(onBumperSelect);
-
-		prepareBoard();
-
-		#if kiosktest
-		var restart = new FlxButton(0, 0, "Restart", () ->
-		{
-			clearGame();
-			FlxG.switchState(new ClassicGameState());
-		});
-		_hud.add(restart);
-		#elseif debug
-		if (gameType == "classic")
-		{
-			var test = new FlxButton(0, 0, "Test", () -> {
-				// openSubState(new AllClearSubstate(12345, _boardClassic.center));
-
-				// _hudClassic.paintCans++;
-
-				// trace(Json.stringify(serialize()));
-
-				// var load = new FlxSave();
-				// load.bind("testFile");
-				// if (load.data.gameName == null)
-				// {
-				// 	load.destroy();
-				// 	saveGame("testFile");
-				// }
-				// else
-				// {
-				// 	trace(Json.stringify(load.data));
-				// 	_boardClassic.bCount == 0 ? load.erase() : load.destroy();
-				// }
-
-				// var bumper = _boardClassic.getRandomBumper();
-				// if (bumper != null && bumper.alive)
-				// 	openSubState(new TurnerSubstate(bumper.getPosition(), bumper.direction, bumper.bColor));
-			});
-			_hud.add(test);
-		}
-		#end
-	}
-
-	function createGame()
-	{
-		if (_players.length == 0)
-			_players.push({
-				board: new ClassicBoard(0, 0),
-				multStack: [1]
-			});
-
-		if (_hud == null)
-			_hud = new ClassicHUD();
-
-		if (_bg == null)
-			_bg = new BumperGenerator(3);
-	}
-
-	override function prepareBoard()
-	{
-		super.prepareBoard();
-
-		var board = _boardClassic;
-		board.onRequestGenerate.add(onRequestGenerate);
-		board.onMatch.add(onMatch);
-		board.onClear.add(onClear);
-		board.onLaunchBumper.add(onLaunch);
-		board.onBumperSelect.add(onBumperSelect);
-		board.onGameOver.add(onGameOver);
-	}
-
 	inline function get__hudClassic()
 		return cast(_hud, ClassicHUD);
 
 	inline function get__boardClassic()
-		return cast(_player.board, ClassicBoard);
+		return cast(_p.board, ClassicBoard);
 
-	/** Calculates score to be added. **/
-	override function addScore(add:Int, ?multStack:Array<Float>):Int
+	override function create()
 	{
-		_jackpot += add;
-		return super.addScore(add, multStack);
-	}
+		super.create();
 
-	/** Called when the board requests a bumper to be generated. Usually when it goes into Idle state. **/
-	function onRequestGenerate()
-	{
-		if (_player.board.bCount <= 0 && _jackpot > 0)
-		{
-			FlxG.sound.play(AssetPaths.allclear__wav);
-			var mJackpot = addScore(_jackpot, _player.multStack);
-			_jackpot = 0;
-			_hud.bonus = mJackpot;
-			trace('All Clear - Awarding jackpot of $mJackpot');
+		_hud.connectState(_p);
+		prepareBoard();
 
-			var allClearSub = new AllClearSubstate(mJackpot, _boardClassic.center);
-			allClearSub.closeCallback = onRequestGenerate;
-			openSubState(allClearSub);
-		}
-		else if (_hud.block >= _nextColor && _bg.colors < _bg.colorLimit)
+		if (gameType == "classic")
 		{
-			FlxG.sound.play(AssetPaths.levelup__wav);
-			var prevNextColor = _nextColor;
-			_nextColor += _nextColorEvery;
-			_player.multStack[0] += .2;
-			trace('Threshold hit ${_hud.block}/$prevNextColor blk - adding new colour, now at ${_bg.colors}/${_bg.colorLimit}, next at $_nextColor');
-
-			var newColorSub = new NewColorSubstate(_bg.colorOpts[_bg.colors++], _boardClassic.center);
-			newColorSub.closeCallback = onRequestGenerate;
-			openSubState(newColorSub);
-		}
-		else
-		{
-			if (_hud.nextBumper == null)
-				_hud.nextBumper = _bg.weightedGenerate();
-			saveGame(); // NOTE: do I maybe want to do this in the base class, though?
+			#if kiosktest
+			var restart = new FlxButton(0, 0, "Restart", () ->
+			{
+				clearGame();
+				FlxG.switchState(new ClassicGameState());
+			});
+			_hud.add(restart);
+			#elseif debug
+			var test = new FlxButton(0, 0, "Test", () -> {
+				trace("Test is currently GNDN");
+			});
+			_hud.add(test);
+			#end
 		}
 	}
 
-	/** Called when the board is asking for a bumper to launch. **/
-	function onLaunch(cb:BumperCallback)
+	function createGame()
 	{
-		FlxG.sound.play(AssetPaths.launch__wav);
-		var retval = _hud.nextBumper != null ? _hud.nextBumper : _bg.weightedGenerate();
-		_hud.nextBumper = null;
-		_hud.score += addScore(5, _player.multStack);
-		cb(retval);
+		if (_playersv2.length == 0)
+			_playersv2.push(new ClassicPlayerState("solo"));
+
+		if (_hud == null)
+			_hud = new ClassicHUD();
 	}
 
-	/** Called when a match is formed. **/
-	function onMatch(chain:Int, combo:Int, bumpers:Array<Bumper>)
-	{
-		var bonus = ((combo - 3) + (chain - 1)) * Math.floor(Math.pow(2, (chain - 1))) * 50;
-		if (chain > 1)
-			FlxG.sound.play(AssetPaths.chain__wav);
-		else if (combo > 3)
-			FlxG.sound.play(AssetPaths.combo__wav);
-		else
-			FlxG.sound.play(AssetPaths.match__wav);
-		_hud.bonus = addScore(bonus, _player.multStack);
+	override function attachPlayer(player:CommonPlayerState) {
+		var playerCl = cast(player, ClassicPlayerState);
+		playerCl.onBumperSelected.add(onBumperSelect);
 	}
 
-	/** Called when a bumper is cleared. **/
-	function onClear(chain:Int, _:Bumper)
-	{
-		FlxG.sound.play(AssetPaths.clear__wav);
-		_hud.block++;
-		_hud.score += addScore(10 * Math.floor(Math.pow(2, chain - 1)), _player.multStack);
+	function onBoardStateChanged(id:String, state:String) {
+		var index = _playersv2.map(i -> i.id).indexOf(id);
+		if (index >= 0) switch (state) {
+			case "initial":
+				switch (_playersv2[index].nextTurn()) {
+					case Next(_):
+						saveGame();
+					case Notice(s):
+						s.closeCallback = () -> onBoardStateChanged(id, state);
+						openSubState(s);
+					default:
+				}
+			case "gameoverwait":
+				FlxG.sound.play(AssetPaths.gameover__wav);
+				if (gameType == "classic")
+					clearGame();
+			default:
+		}
 	}
+
+	// TODO: make Paint Cans work more like Turners
+	// in other words: click the button, pick a bumper, colour wheel shows up around it, pick a colour
 
 	/** Called when the Paint Can button is clicked. **/
 	function onPaintCanClick()
@@ -223,14 +144,16 @@ class ClassicGameState extends CommonGameState
 
 		if (color != null)
 		{
+			var b = _boardClassic;
+
 			FlxG.sound.play(AssetPaths.mselect__wav);
 			_selectedColor = color;
-			_boardClassic.selectMode();
+			b.selectMode();
 
 			if (_paintCanBumper == null)
 			{
-				_paintCanBumper = new Bumper(_boardClassic.center.x - ((_boardClassic.bWidth + 2) * _boardClassic.sWidth / 2),
-					_boardClassic.center.y + (_boardClassic.bHeight * _boardClassic.sHeight / 2), _selectedColor, Clearing);
+				_paintCanBumper = new Bumper(b.center.x - ((b.bWidth + 2) * b.sWidth / 2),
+					b.center.y + (b.bHeight * b.sHeight / 2), _selectedColor, Clearing);
 				_paintCanBumper.scale.set(.75, .75);
 				_paintCanBumper.isUIElement = true;
 				add(_paintCanBumper);
@@ -242,12 +165,11 @@ class ClassicGameState extends CommonGameState
 			}
 			if (_paintCanCancelButton == null)
 			{
-				_paintCanCancelButton = new FlxButton(_boardClassic.center.x
-					+ (_boardClassic.bWidth * _boardClassic.sWidth / 2)
-					+ 20,
-					_boardClassic.center.y
-					+ (_boardClassic.bHeight * _boardClassic.sHeight / 2)
-					+ 20, "X", () -> onFieldCancel);
+				_paintCanCancelButton = new FlxButton(
+					b.center.x + (b.bWidth * b.sWidth / 2) + 20,
+					b.center.y + (b.bHeight * b.sHeight / 2) + 20,
+					"X", () -> onFieldCancel
+				);
 				_paintCanCancelButton.loadGraphic(AssetPaths.button__png, true, 20, 20);
 				_paintCanCancelButton.scale.set(2, 2);
 				_paintCanCancelButton.scrollFactor.set(1, 1);
@@ -262,11 +184,13 @@ class ClassicGameState extends CommonGameState
 
 	function onFieldCancel()
 		if (_selectedColor != null)
-			onBumperSelect(null);
+			onBumperSelect(_p.id, null);
 
 	/** Called when a bumper is selected, or the bumper selection is cancelled. **/
-	function onBumperSelect(bumper:Bumper)
+	function onBumperSelect(id:String, bumper:Bumper)
 	{
+		if (id != _p.id) return;
+		
 		if (_selectedColor != null)
 		{
 			if (bumper != null)
@@ -285,52 +209,5 @@ class ClassicGameState extends CommonGameState
 			_boardClassic.endPaint(_selectedColor == null);
 			_selectedColor = null;
 		}
-	}
-
-	function onGameOver(animDone:Bool)
-		if (!animDone)
-		{
-			FlxG.sound.play(AssetPaths.gameover__wav);
-			if (gameType == "classic")
-				clearGame();
-		}
-
-	override function serialize():DynamicAccess<Dynamic>
-	{
-		var retval = super.serialize();
-
-		retval["jackpot"] = _jackpot;
-		retval["nextColor"] = _nextColor;
-		retval["nextColorEvery"] = _nextColorEvery;
-
-		return retval;
-	}
-
-	override function deserialize(data:DynamicAccess<Dynamic>, ignoreGameName = false)
-	{
-		if (data["gameType"] == "classic")
-		{
-			while (_players.pop() != null) {}
-
-			var playerData:Array<DynamicAccess<Dynamic>> = data["players"];
-			for (player in playerData)
-			{
-				var board = new ClassicBoard(0, 0);
-				board.deserialize(player["board"]);
-				_players.push({
-					board: board,
-					multStack: player["multStack"]
-				});
-			}
-
-			_hud = new ClassicHUD();
-			_hud.deserialize(data["hud"]);
-		}
-
-		_jackpot = data["jackpot"];
-		_nextColor = data["nextColor"];
-		_nextColorEvery = data["nextColorEvery"];
-
-		super.deserialize(data, ignoreGameName);
 	}
 }

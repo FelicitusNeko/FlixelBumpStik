@@ -980,12 +980,14 @@ class APGameState extends ClassicGameState
 		}
 	}
 
-	override function onBumperSelect(bumper:Bumper)
+	override function onBumperSelect(id:String, bumper:Bumper)
 	{
+		if (_p.id != id) return;
+
 		if (_selectedColor != null)
 		{
 			_paintCanCancelButton.kill();
-			super.onBumperSelect(bumper);
+			super.onBumperSelect(id, bumper);
 		}
 		else if (_turnerMode && bumper != _hud.nextBumper)
 		{
