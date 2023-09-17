@@ -1,8 +1,17 @@
 package;
 
+#if lime
+import lime.app.Event;
+#end
+
 /** Event-based "chaining" state machine. **/
-class CSM
+class CSM // stands for Chaining State Machine
 {
+	#if lime
+	/** Fires when the state has changed.**/
+	public var onStateChanged(default, null) = new Event<String->Void>();
+	#end
+
 	/** The name of the current active state. **/
 	public var currentState(default, set):String;
 
@@ -37,11 +46,18 @@ class CSM
 
 	function set_currentState(currentState)
 	{
+		#if lime
+		onStateChanged.dispatch(currentState);
+		#end
+
 		_changedThisFrame = true;
 		return this.currentState = currentState;
 	}
 
-	/** Calls the update function in this state machine, if any. **/
+	/**
+		Calls the update function in this state machine, if any.
+		@param update The time elapsed, in seconds, since the last `update` call.
+	**/
 	public function update(elapsed:Float)
 	{
 		if (currentState != null && _stateList.exists(currentState) && _stateList[currentState] != null)
@@ -113,10 +129,14 @@ class CSM
 	**/
 	public var removeGlobal(default, null):String->Bool;
 
-	/** Clears the state machine of all associations and defined states, except the "initial" state. **/
-	public function clear()
+	/**
+		Clears the state machine of all associations and defined states, except the "initial" state.
+		@param initial Replace the initial state function with a new one.
+	**/
+	public function clear(initial:Float->Void = null)
 	{
-		var initial = _stateList["initial"];
+		if (initial == null)
+			initial = _stateList["initial"];
 		_stateList.clear();
 		_stateList.set("initial", initial);
 		_globalChainList.clear();
