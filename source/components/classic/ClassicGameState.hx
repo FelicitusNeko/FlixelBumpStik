@@ -16,6 +16,15 @@ import components.common.CommonPlayerState;
 
 class ClassicGameState extends CommonGameState
 {
+	/** A shortcut to cast `_hud` as `ClassicHUD`. **/
+	private var _hudClassic(get, never):ClassicHUD;
+
+	/** A shortcut to cast `_board` as `ClassicBoard`. **/
+	private var _boardClassic(get, never):ClassicBoard;
+
+	/** A shortcut to cast `_p` as `ClassicPlayerState`. **/
+	private var _pClassic(get, never):ClassicPlayerState;
+
 	/**
 		The value of the All Clear jackpot.
 		@deprecated moving to `ClassicPlayerState`
@@ -40,12 +49,6 @@ class ClassicGameState extends CommonGameState
 	**/
 	private var _nextColorEvery:Int = 150;
 
-	/** A shortcut to cast `_hud` as `ClassicHUD`. **/
-	private var _hudClassic(get, never):ClassicHUD;
-
-	/** A shortcut to cast `_board` as `ClassicBoard`. **/
-	private var _boardClassic(get, never):ClassicBoard;
-
 	/** The current selected color during a Paint Can event. **/
 	private var _selectedColor:Null<FlxColor> = null;
 
@@ -61,10 +64,14 @@ class ClassicGameState extends CommonGameState
 	inline function get__boardClassic()
 		return cast(_p.board, ClassicBoard);
 
+	inline function get__pClassic()
+		return cast(_p, ClassicPlayerState);
+
 	override function create()
 	{
 		super.create();
 
+		attachPlayer(_p);
 		_hud.attachState(_p);
 		prepareBoard();
 
@@ -86,7 +93,8 @@ class ClassicGameState extends CommonGameState
 			#end
 		}
 
-		onBoardStateChanged(_p.id, "initial");
+		// onBoardStateChanged(_p.id, "initial");
+		_p.nextTurn();
 	}
 
 	function createGame()
@@ -118,8 +126,15 @@ class ClassicGameState extends CommonGameState
 		playerCl.onBumperSelected.remove(onBumperSelect);
 	}
 
+	function attachHUD()
+	{
+		// _hud.onNextBumperClick.add(onNextBumperClick);
+		_hudClassic.onPaintCanClick.add(onPaintCanClick);
+	}
+
 	function onBoardStateChanged(id:String, state:String)
 	{
+		trace(id, state);
 		var index = _playersv2.map(i -> i.id).indexOf(id);
 		if (index >= 0)
 			switch (state)
@@ -148,11 +163,10 @@ class ClassicGameState extends CommonGameState
 	/** Called when the Paint Can button is clicked. **/
 	function onPaintCanClick()
 	{
-		if (_boardClassic.state == "initial" && _selectedColor == null)
+		if (_pClassic.paint > 0 && _boardClassic.state == "initial" && _selectedColor == null)
 		{
 			FlxG.sound.play(AssetPaths.mselect__wav);
-			var bumperSize = new FlxPoint(_hud.nextBumper.width, _hud.nextBumper.height).scale(.5);
-			var paintDialog = new PaintCanSubstate(_boardClassic.center.subtractPoint(bumperSize), _bg.colors, _bg);
+			var paintDialog = _pClassic.makePaintCanSubstate();
 			paintDialog.onDialogResult.add(onColorSelect);
 			openSubState(paintDialog);
 		}
@@ -218,7 +232,7 @@ class ClassicGameState extends CommonGameState
 				if (bumper.bColor == null || bumper.bColor == _selectedColor)
 					return;
 				FlxG.sound.play(AssetPaths.mselect__wav);
-				_hudClassic.paintCans--;
+				_pClassic.paint--;
 				bumper.bColor = _selectedColor;
 			}
 			else
