@@ -455,7 +455,7 @@ class Bumper extends BoardObject
 		@return The cloned bumper.
 	**/
 	public function cloneBumper(sameOwner = false)
-		return new Bumper(x, y, color, direction, launchDirection, sameOwner ? owner : null);
+		return new Bumper(x, y, bColor, direction, launchDirection, sameOwner ? owner : null);
 
 	public override function serialize():DynamicAccess<Dynamic>
 	{
