@@ -2,6 +2,7 @@ package components.classic;
 
 import haxe.DynamicAccess;
 import boardObject.Bumper;
+import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
@@ -10,29 +11,27 @@ import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
 import lime.app.Event;
 import components.common.CommonHUD;
+import components.common.CommonPlayerState;
 
 class ClassicHUD extends CommonHUD
 {
 	/** The button to use a Paint Can. **/
 	private var _pcButton:FlxButton;
 
-	/** The score target for the next Paint Can. **/
+	/**
+		The score target for the next Paint Can.
+		@deprecated handled by `ClassicPlayerState` (this var is still used by APHUD)
+	**/
 	private var _paintCansNext:Int = 1000;
 
-	/** How much the score target for the next Paint Can will be incremented when it is hit. **/
+	/**
+		How much the score target for the next Paint Can will be incremented when it is hit.
+		@deprecated handled by `ClassicPlayerState` (this var is still used by APHUD)
+	**/
 	private var _paintCansIncrement:Int = 1500;
 
 	/** The current number of available Paint Cans. **/
-	public var paintCans(default, set):Int = 0;
-
-	/** The starting score threshold for Paint Cans. **/
-	public var paintCanStartThreshold = 1000;
-
-	/** How much higher the next score target for the next Paint Can will be incremented by when it is hit. **/
-	public var paintCansIncrementStep:Int = 500;
-
-	/** Event that fires when one or more Paint Cans are earned. **/
-	public var onPaintCanGet(default, null) = new Event<Int->Void>();
+	public var paintCans(default, set):Int = 0; // NOTE: do we need this? could make PlayerState events report the old value
 
 	/** Event that fires when the Paint Can button is clicked. **/
 	public var onPaintCanClick(default, null) = new Event<Void->Void>();
@@ -43,11 +42,7 @@ class ClassicHUD extends CommonHUD
 
 		if (_rightSide)
 		{
-			_pcButton = new FlxButton(5, 5, _t("game/classic/paint/count", ["_" => 0]), () ->
-			{
-				if (paintCans > 0)
-					onPaintCanClick.dispatch();
-			});
+			_pcButton = new FlxButton(5, 5, _t("game/classic/paint/count", ["_" => 0]), onPaintCanClick.dispatch);
 			_pcButton.allowSwiping = false;
 			_pcButton.y = height - _pcButton.height - 5;
 			add(_pcButton);
@@ -56,29 +51,10 @@ class ClassicHUD extends CommonHUD
 		paintCans = 0;
 	}
 
-	override function set_score(score:Int):Int
-	{
-		var retval = super.set_score(score);
-
-		var plusPaint = 0;
-		while (score >= _paintCansNext)
-		{
-			plusPaint++;
-			_paintCansNext += _paintCansIncrement;
-			_paintCansIncrement += paintCansIncrementStep;
-			trace('Awarding paint can; next at $_paintCansNext');
-		}
-		if (plusPaint > 0)
-		{
-			paintCans += plusPaint;
-			onPaintCanGet.dispatch(plusPaint);
-		}
-
-		return retval;
-	}
-
 	function set_paintCans(paintCans:Int):Int
 	{
+		// BUG: paint can count not updating (paint cans are working though)
+
 		// var displayPaintCans = Math.round(Math.min(paintCans, 10));
 		_pcButton.text = _t("game/classic/paint/count", ["_" => paintCans]);
 		_pcButton.alive = paintCans > 0;
@@ -89,6 +65,24 @@ class ClassicHUD extends CommonHUD
 
 		return this.paintCans = paintCans;
 	}
+
+	override function attachState(state:CommonPlayerState):Bool
+	{
+		return super.attachState(state);
+		var clPS = cast(state, ClassicPlayerState);
+		clPS.onPaintChanged.add(onPaintChanged);
+	}
+
+	override function detachState(state:CommonPlayerState):Bool
+	{
+		var clPS = cast(state, ClassicPlayerState);
+		clPS.onPaintChanged.remove(onPaintChanged);
+		return super.detachState(state);
+	}
+
+	function onPaintChanged(id:String, paints:Int)
+		if (_connected.contains(id))
+			paintCans = paints;
 
 	/**
 		Creates an `FlxText` that is animated as to emanate from a given sprite.
@@ -103,41 +97,5 @@ class ClassicHUD extends CommonHUD
 		add(flyout);
 		flyout.setPosition(from.x + (from.width * Math.random()) - (flyout.width / 2), from.y);
 		FlxTween.tween(flyout, {alpha: 0, y: flyout.y - (flyout.height * 1.5)}, 1, {ease: FlxEase.circOut, onComplete: (_) -> flyout.kill()});
-	}
-
-	/** Resets the HUD to its starting values. **/
-	public override function resetHUD()
-	{
-		super.resetHUD();
-		paintCans = 0;
-		_paintCansNext = paintCanStartThreshold;
-		_paintCansIncrement = paintCanStartThreshold + paintCansIncrementStep;
-	}
-
-	public override function serialize():DynamicAccess<Dynamic>
-	{
-		var retval = super.serialize();
-
-		var paintCansDA:DynamicAccess<Int> = {};
-		paintCansDA["count"] = paintCans;
-		paintCansDA["start"] = paintCanStartThreshold;
-		paintCansDA["next"] = _paintCansNext;
-		paintCansDA["inc"] = _paintCansIncrement;
-		paintCansDA["incStep"] = paintCansIncrementStep;
-		retval["paintCans"] = paintCansDA;
-
-		return retval;
-	}
-
-	public override function deserialize(data:DynamicAccess<Dynamic>)
-	{
-		super.deserialize(data);
-
-		var paintCansDA:DynamicAccess<Int> = data["paintCans"];
-		paintCans = paintCansDA["count"];
-		paintCanStartThreshold = paintCansDA["start"];
-		_paintCansNext = paintCansDA["next"];
-		_paintCansIncrement = paintCansDA["inc"];
-		paintCansIncrementStep = paintCansDA["incStep"];
 	}
 }
