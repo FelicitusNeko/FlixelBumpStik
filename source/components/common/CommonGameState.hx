@@ -101,6 +101,7 @@ abstract class CommonGameState extends FlxState
 		save.destroy(); // we're not outputting save data here, so just dispose the save object
 
 		add(_hud);
+		attachHUD();
 
 		var mainCamera = FlxG.camera;
 		var hudCamera:FlxCamera;
@@ -134,6 +135,8 @@ abstract class CommonGameState extends FlxState
 	{
 		player.onBoardStateChanged.remove(onBoardStateChanged);
 	}
+
+	abstract function attachHUD():Void;
 
 	abstract function onBoardStateChanged(id:String, state:String):Void;
 
