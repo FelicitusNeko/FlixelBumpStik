@@ -83,16 +83,15 @@ class ClassicPlayerState extends CommonPlayerState
 		}
 	}
 
+	/** Attaches the player state to its board's events. **/
 	override function attachBoard()
 	{
-		/*
-			nboard.onRequestGenerate.add(onRequestGenerate);
-			nboard.onGameOver.add(onGameOver);
-		 */
-
+		super.attachBoard();
 		var boardCl = cast(board, ClassicBoard);
 		boardCl.onBumperSelect.add(onInnerBumperSelect);
 	}
+
+	/** Forwards onBumperSelect events from the board with the player ID. **/
 	function onInnerBumperSelect(bumper)
 		onBumperSelected.dispatch(id, bumper);
 
