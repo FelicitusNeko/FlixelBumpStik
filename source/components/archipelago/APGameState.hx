@@ -807,8 +807,11 @@ class APGameState extends ClassicGameState
 		}
 	}
 
-	/** Called when the board requests a bumper to be generated. Usually when it goes into Idle state. **/
-	override function onRequestGenerate()
+	/**
+		Called when the board requests a bumper to be generated. Usually when it goes into Idle state.
+		@deprecated move to `APPlayerState` and `onBoardStateChanged`
+	**/
+	function onRequestGenerate()
 	{
 		if (_ap.clientStatus == ClientStatus.READY)
 		{
@@ -833,7 +836,7 @@ class APGameState extends ClassicGameState
 		}
 
 		var prevBumper = _hud.nextBumper;
-		super.onRequestGenerate();
+		//super.onRequestGenerate();
 		var newBumper = _hud.nextBumper;
 		if (newBumper != null && newBumper != prevBumper)
 		{
@@ -866,8 +869,11 @@ class APGameState extends ClassicGameState
 		}
 	}
 
-	/** Called when a match is formed. **/
-	override function onMatch(chain:Int, combo:Int, bumpers:Array<Bumper>)
+	/**
+		Called when a match is formed.
+		@deprecated move to APPlayerState
+	**/
+	function onMatch(chain:Int, combo:Int, bumpers:Array<Bumper>)
 	{
 		var boosterUp = false;
 		for (bumper in bumpers)
@@ -880,14 +886,17 @@ class APGameState extends ClassicGameState
 		if (boosterUp)
 			pushToast(_t("game/ap/booster", ["value" => _player.multStack[1]]), FlxColor.YELLOW);
 
-		super.onMatch(chain, combo, bumpers);
+		//super.onMatch(chain, combo, bumpers);
 
 		_hudAP.updateTask(Chain, chain);
 		_hudAP.updateTask(Combo, combo);
 	}
 
-	/** Called when a bumper is cleared. **/
-	override function onClear(chain:Int, bumper:Bumper)
+	/**
+		Called when a bumper is cleared.
+		@deprecated move to `APPlayerState`
+	**/
+	function onClear(chain:Int, bumper:Bumper)
 	{
 		for (key => schedule in _schedule)
 		{
@@ -913,7 +922,7 @@ class APGameState extends ClassicGameState
 			}
 		}
 
-		super.onClear(chain, bumper);
+		//super.onClear(chain, bumper);
 	}
 
 	override function onPaintCanClick()
@@ -1011,13 +1020,16 @@ class APGameState extends ClassicGameState
 		}
 	}
 
-	/** Called by the board when the board is jammed and the game is over. **/
-	override function onGameOver(animDone:Bool)
+	/**
+		Called by the board when the board is jammed and the game is over.
+		@deprecated move to `onBoardStateChanged`
+	**/
+	function onGameOver(animDone:Bool)
 	{
 		if (animDone)
 			restartGame();
-		else
-			super.onGameOver(animDone);
+		//else
+		//	super.onGameOver(animDone);
 	}
 
 	override function update(elapsed:Float)
