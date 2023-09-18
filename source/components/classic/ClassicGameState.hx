@@ -93,6 +93,8 @@ class ClassicGameState extends CommonGameState
 
 		if (_hud == null)
 			_hud = new ClassicHUD();
+
+		_p.createBoard();
 	}
 
 	override function attachPlayer(player:CommonPlayerState) {
@@ -168,7 +170,7 @@ class ClassicGameState extends CommonGameState
 				_paintCanCancelButton = new FlxButton(
 					b.center.x + (b.bWidth * b.sWidth / 2) + 20,
 					b.center.y + (b.bHeight * b.sHeight / 2) + 20,
-					"X", () -> onFieldCancel
+					"X", onFieldCancel
 				);
 				_paintCanCancelButton.loadGraphic(AssetPaths.button__png, true, 20, 20);
 				_paintCanCancelButton.scale.set(2, 2);
