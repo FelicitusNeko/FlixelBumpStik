@@ -108,7 +108,8 @@ abstract class CommonHUD extends FlxSpriteGroup
 			add(nextClone);
 			return this.nextBumper = nextClone;
 		}
-		else return this.nextBumper = null;
+		else
+			return this.nextBumper = null;
 	}
 
 	/**
@@ -147,7 +148,7 @@ abstract class CommonHUD extends FlxSpriteGroup
 		@param state The state to connect to the HUD.
 		@return Whether the operation succeeded. If `false`, the state was most likely already connected.
 	**/
-	public function connectState(state:CommonPlayerState)
+	public function attachState(state:CommonPlayerState)
 	{
 		if (_connected.contains(state.id))
 			return false;
@@ -166,7 +167,7 @@ abstract class CommonHUD extends FlxSpriteGroup
 		@param state The state to disconnect from the HUD.
 		@return Whether the operation succeeded. If `false`, the state was most likely not connected.
 	**/
-	public function disconnectState(state:CommonPlayerState)
+	public function detachState(state:CommonPlayerState)
 	{
 		if (!_connected.contains(state.id))
 			return false;

@@ -1,6 +1,5 @@
 package components.classic;
 
-import components.common.CommonPlayerState;
 import haxe.DynamicAccess;
 import haxe.Json;
 import boardObject.Bumper;
@@ -13,6 +12,7 @@ import components.archipelago.TurnerSubstate;
 import components.classic.ClassicHUD;
 import components.common.CommonBoard;
 import components.common.CommonGameState;
+import components.common.CommonPlayerState;
 
 class ClassicGameState extends CommonGameState
 {
@@ -65,7 +65,7 @@ class ClassicGameState extends CommonGameState
 	{
 		super.create();
 
-		_hud.connectState(_p);
+		_hud.attachState(_p);
 		prepareBoard();
 
 		if (gameType == "classic")
@@ -78,48 +78,68 @@ class ClassicGameState extends CommonGameState
 			});
 			_hud.add(restart);
 			#elseif debug
-			var test = new FlxButton(0, 0, "Test", () -> {
+			var test = new FlxButton(0, 0, "Test", () ->
+			{
 				trace("Test is currently GNDN");
 			});
 			_hud.add(test);
 			#end
 		}
+
+		onBoardStateChanged(_p.id, "initial");
 	}
 
 	function createGame()
 	{
+		trace("ClGS.createGame");
 		if (_playersv2.length == 0)
-			_playersv2.push(new ClassicPlayerState("solo"));
+		{
+			var p = new ClassicPlayerState("solo");
+			p.createGenerator();
+			p.createBoard();
+			_playersv2.push(p);
+		}
 
 		if (_hud == null)
 			_hud = new ClassicHUD();
-
-		_p.createBoard();
 	}
 
-	override function attachPlayer(player:CommonPlayerState) {
+	override function attachPlayer(player:CommonPlayerState)
+	{
+		super.attachPlayer(player);
 		var playerCl = cast(player, ClassicPlayerState);
 		playerCl.onBumperSelected.add(onBumperSelect);
 	}
 
-	function onBoardStateChanged(id:String, state:String) {
+	override function detachPlayer(player:CommonPlayerState)
+	{
+		super.detachPlayer(player);
+		var playerCl = cast(player, ClassicPlayerState);
+		playerCl.onBumperSelected.remove(onBumperSelect);
+	}
+
+	function onBoardStateChanged(id:String, state:String)
+	{
 		var index = _playersv2.map(i -> i.id).indexOf(id);
-		if (index >= 0) switch (state) {
-			case "initial":
-				switch (_playersv2[index].nextTurn()) {
-					case Next(_):
-						saveGame();
-					case Notice(s):
-						s.closeCallback = () -> onBoardStateChanged(id, state);
-						openSubState(s);
-					default:
-				}
-			case "gameoverwait":
-				FlxG.sound.play(AssetPaths.gameover__wav);
-				if (gameType == "classic")
-					clearGame();
-			default:
-		}
+		if (index >= 0)
+			switch (state)
+			{
+				case "initial":
+					switch (_playersv2[index].nextTurn())
+					{
+						case Next(_):
+							saveGame();
+						case Notice(s):
+							s.closeCallback = () -> onBoardStateChanged(id, state);
+							openSubState(s);
+						default:
+					}
+				case "gameoverwait":
+					FlxG.sound.play(AssetPaths.gameover__wav);
+					if (gameType == "classic")
+						clearGame();
+				default:
+			}
 	}
 
 	// TODO: make Paint Cans work more like Turners
@@ -154,8 +174,7 @@ class ClassicGameState extends CommonGameState
 
 			if (_paintCanBumper == null)
 			{
-				_paintCanBumper = new Bumper(b.center.x - ((b.bWidth + 2) * b.sWidth / 2),
-					b.center.y + (b.bHeight * b.sHeight / 2), _selectedColor, Clearing);
+				_paintCanBumper = new Bumper(b.center.x - ((b.bWidth + 2) * b.sWidth / 2), b.center.y + (b.bHeight * b.sHeight / 2), _selectedColor, Clearing);
 				_paintCanBumper.scale.set(.75, .75);
 				_paintCanBumper.isUIElement = true;
 				add(_paintCanBumper);
@@ -167,11 +186,8 @@ class ClassicGameState extends CommonGameState
 			}
 			if (_paintCanCancelButton == null)
 			{
-				_paintCanCancelButton = new FlxButton(
-					b.center.x + (b.bWidth * b.sWidth / 2) + 20,
-					b.center.y + (b.bHeight * b.sHeight / 2) + 20,
-					"X", onFieldCancel
-				);
+				_paintCanCancelButton = new FlxButton(b.center.x + (b.bWidth * b.sWidth / 2) + 20, b.center.y + (b.bHeight * b.sHeight / 2) + 20, "X",
+					onFieldCancel);
 				_paintCanCancelButton.loadGraphic(AssetPaths.button__png, true, 20, 20);
 				_paintCanCancelButton.scale.set(2, 2);
 				_paintCanCancelButton.scrollFactor.set(1, 1);
@@ -191,8 +207,9 @@ class ClassicGameState extends CommonGameState
 	/** Called when a bumper is selected, or the bumper selection is cancelled. **/
 	function onBumperSelect(id:String, bumper:Bumper)
 	{
-		if (id != _p.id) return;
-		
+		if (id != _p.id)
+			return;
+
 		if (_selectedColor != null)
 		{
 			if (bumper != null)
