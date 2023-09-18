@@ -6,6 +6,7 @@ import haxe.Serializer;
 import haxe.Unserializer;
 import boardObject.Bumper;
 import flixel.FlxG;
+import flixel.math.FlxPoint;
 import lime.app.Event;
 import components.common.CommonBoard;
 import components.common.CommonPlayerState;
@@ -35,6 +36,7 @@ class ClassicPlayerState extends CommonPlayerState
 	{
 		super.init();
 		onPaintChanged = new Event<(String, Int) -> Void>();
+		onBumperSelected = new Event<(String, Bumper) -> Void>();
 	}
 
 	/** Initializes the value registry. **/
@@ -47,6 +49,19 @@ class ClassicPlayerState extends CommonPlayerState
 		_reg["color.max"] = 6;
 		_reg["paint.next"] = 1000;
 		_reg["paint.inc"] = 1500;
+		_reg["paint.delay"] = 500;
+	}
+
+	override function set_score(score:Int):Int
+	{
+		var s = super.set_score(score);
+		if (s > _reg["paint.next"])
+		{
+			paint++;
+			_reg["paint.next"] += _reg["paint.inc"];
+			_reg["paint.inc"] += _reg["paint.delay"];
+		}
+		return s;
 	}
 
 	private function set_paint(paint)
@@ -94,6 +109,10 @@ class ClassicPlayerState extends CommonPlayerState
 	/** Forwards onBumperSelect events from the board with the player ID. **/
 	function onInnerBumperSelect(bumper)
 		onBumperSelected.dispatch(id, bumper);
+
+	/** Creates a Paint Can substate. **/
+	public function makePaintCanSubstate()
+		return new PaintCanSubstate(board.center.subtractPoint(new FlxPoint(next.width, next.height).scale(.5)), _bg.colors, _bg);
 
 	/**
 		Evaluate the next turn loop.
