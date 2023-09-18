@@ -34,18 +34,6 @@ abstract class CommonHUD extends FlxSpriteGroup
 	/** The current next bumper displayed on the HUD. **/
 	public var nextBumper(default, set):Bumper = null;
 
-	/**
-		Event that fires when the score value changes.
-		@deprecated Stats are to be stored and handled by the player state
-	**/
-	public var onScoreChanged(default, null) = new Event<Int->Void>();
-
-	/**
-		Event that fires when the cleared bumper value changes.
-		@deprecated Stats are to be stored and handled by the player state
-	**/
-	public var onBlockChanged(default, null) = new Event<Int->Void>();
-
 	/** Event that fires when the Next Bumper is clicked. **/
 	public var onNextBumperClick(default, null) = new Event<Bumper->Void>();
 
@@ -89,21 +77,13 @@ abstract class CommonHUD extends FlxSpriteGroup
 		return _scoreCounter.value;
 
 	function set_score(score:Int):Int
-	{
-		// if (_scoreCounter.value != score)
-		// 	onScoreChanged.dispatch(score);
 		return _scoreCounter.value = score;
-	}
 
 	inline function get_block()
 		return _blockCounter.value;
 
 	function set_block(block:Int):Int
-	{
-		// if (_blockCounter.value != block)
-		// 	onBlockChanged.dispatch(block);
 		return _blockCounter.value = block;
-	}
 
 	// TODO: display bonus on HUD
 	inline function set_bonus(bonus:Int):Int
@@ -118,17 +98,17 @@ abstract class CommonHUD extends FlxSpriteGroup
 		{
 			this.nextBumper.onClick.remove(onNextClick);
 			remove(this.nextBumper);
-			this.nextBumper.isUIElement = false;
 		}
 		if (nextBumper != null)
 		{
-			nextBumper.onClick.add(onNextClick);
-			nextBumper.isUIElement = true;
-			nextBumper.setPosition(width - nextBumper.width - 5, height - nextBumper.height - 5);
-			add(nextBumper);
-			nextBumper.revive();
+			var nextClone = nextBumper.cloneBumper();
+			nextClone.onClick.add(onNextClick);
+			nextClone.isUIElement = true;
+			nextClone.setPosition(width - nextClone.width - 5, height - nextClone.height - 5);
+			add(nextClone);
+			return this.nextBumper = nextClone;
 		}
-		return this.nextBumper = nextBumper;
+		else return this.nextBumper = null;
 	}
 
 	/**
