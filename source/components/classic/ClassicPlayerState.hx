@@ -34,6 +34,8 @@ class ClassicPlayerState extends CommonPlayerState
 	/** Initializes things like event handlers. **/
 	override function init()
 	{
+		// NOTE: if these are assigned in the definition rather than here, are they still empty when deserialised?
+		// would have to test reloading the game to see if that's the case
 		super.init();
 		onPaintChanged = new Event<(String, Int) -> Void>();
 		onBumperSelected = new Event<(String, Bumper) -> Void>();
@@ -57,6 +59,7 @@ class ClassicPlayerState extends CommonPlayerState
 		var s = super.set_score(score);
 		if (s > _reg["paint.next"])
 		{
+			FlxG.sound.play(AssetPaths.paintcan__wav);
 			paint++;
 			_reg["paint.next"] += _reg["paint.inc"];
 			_reg["paint.inc"] += _reg["paint.delay"];
