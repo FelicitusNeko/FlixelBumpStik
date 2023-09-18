@@ -367,7 +367,7 @@ class APGameState extends ClassicGameState
 
 		// _hud.onScoreChanged.add(onScoreChanged);
 		_hudClassic.paintCans = _startPaintCans;
-		_hudClassic.paintCansIncrementStep = 0;
+		// _hudClassic.paintCansIncrementStep = 0;
 		_hudAP.turners = _startTurners;
 		_hudAP.onTaskCleared.add(onTaskComplete);
 		_hudAP.onTurnerClick.add(onTurnerClick);
@@ -654,9 +654,9 @@ class APGameState extends ClassicGameState
 		_bg.colors = _startColors;
 		_bg.colorLimit = _endColors;
 
-		_hudClassic.paintCanStartThreshold = 1000 + (_startPaintCans * 500);
+		// _hudClassic.paintCanStartThreshold = 1000 + (_startPaintCans * 500);
 		_hudClassic.paintCans = _startPaintCans;
-		_hudClassic.paintCansIncrementStep = (_curWidth + _curHeight - 6) * 500;
+		// _hudClassic.paintCansIncrementStep = (_curWidth + _curHeight - 6) * 500;
 		_hudAP.turners = _startTurners;
 
 		_nextColor = _levelNextColor;
@@ -836,7 +836,7 @@ class APGameState extends ClassicGameState
 		}
 
 		var prevBumper = _hud.nextBumper;
-		//super.onRequestGenerate();
+		// super.onRequestGenerate();
 		var newBumper = _hud.nextBumper;
 		if (newBumper != null && newBumper != prevBumper)
 		{
@@ -886,7 +886,7 @@ class APGameState extends ClassicGameState
 		if (boosterUp)
 			pushToast(_t("game/ap/booster", ["value" => _player.multStack[1]]), FlxColor.YELLOW);
 
-		//super.onMatch(chain, combo, bumpers);
+		// super.onMatch(chain, combo, bumpers);
 
 		_hudAP.updateTask(Chain, chain);
 		_hudAP.updateTask(Combo, combo);
@@ -922,7 +922,7 @@ class APGameState extends ClassicGameState
 			}
 		}
 
-		//super.onClear(chain, bumper);
+		// super.onClear(chain, bumper);
 	}
 
 	override function onPaintCanClick()
@@ -991,7 +991,8 @@ class APGameState extends ClassicGameState
 
 	override function onBumperSelect(id:String, bumper:Bumper)
 	{
-		if (_p.id != id) return;
+		if (_p.id != id)
+			return;
 
 		if (_selectedColor != null)
 		{
@@ -1028,7 +1029,7 @@ class APGameState extends ClassicGameState
 	{
 		if (animDone)
 			restartGame();
-		//else
+		// else
 		//	super.onGameOver(animDone);
 	}
 
