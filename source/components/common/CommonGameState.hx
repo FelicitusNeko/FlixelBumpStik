@@ -1,9 +1,9 @@
 package components.common;
 
-import haxe.Unserializer;
-import haxe.Serializer;
 import haxe.DynamicAccess;
 import haxe.Exception;
+import haxe.Serializer;
+import haxe.Unserializer;
 import Main.I18nFunction;
 import flixel.FlxCamera;
 import flixel.FlxG;
@@ -125,8 +125,14 @@ abstract class CommonGameState extends FlxState
 
 	abstract function createGame():Void;
 
-	function attachPlayer(player:CommonPlayerState) {
+	function attachPlayer(player:CommonPlayerState)
+	{
 		player.onBoardStateChanged.add(onBoardStateChanged);
+	}
+
+	function detachPlayer(player:CommonPlayerState)
+	{
+		player.onBoardStateChanged.remove(onBoardStateChanged);
 	}
 
 	abstract function onBoardStateChanged(id:String, state:String):Void;
@@ -159,30 +165,6 @@ abstract class CommonGameState extends FlxState
 		save.erase();
 	}
 
-	function serialize():DynamicAccess<Dynamic>
-	{
-		var retval:DynamicAccess<Dynamic> = {};
-
-		retval["version"] = BumpStikGame.curSaveVer;
-		retval["gameName"] = gameName;
-		retval["gameType"] = gameType;
-
-		retval["players"] = Serializer.run(_playersv2);
-
-		// ultimately shouldn't need to save the HUD anymore
-		retval["hud"] = _hud.serialize();
-
-		return retval;
-	}
-
-	function deserialize(data:DynamicAccess<Dynamic>, ignoreGameName = false)
-	{
-		if (data["gameName"] != gameName && !ignoreGameName)
-			throw new Exception("Game name mismatch");
-		
-		_playersv2 = Unserializer.run(data["players"]);
-	}
-
 	function prepareBoard()
 	{
 		for (player in _playersv2)
@@ -203,10 +185,6 @@ abstract class CommonGameState extends FlxState
 		}
 	}
 
-	/** @deprecated use `PlayerState.addScore` instead **/
-	function addScore(addScore:Int, ?multStack:Array<Float>)
-		return _p.addScore(addScore);
-
 	override function update(elapsed:Float)
 	{
 		#if (debug && sys && !noescape)
@@ -215,5 +193,29 @@ abstract class CommonGameState extends FlxState
 		#end
 
 		super.update(elapsed);
+	}
+
+	function serialize():DynamicAccess<Dynamic>
+	{
+		var retval:DynamicAccess<Dynamic> = {};
+
+		retval["version"] = BumpStikGame.curSaveVer;
+		retval["gameName"] = gameName;
+		retval["gameType"] = gameType;
+
+		retval["players"] = Serializer.run(_playersv2);
+
+		// ultimately shouldn't need to save the HUD anymore
+		retval["hud"] = _hud.serialize();
+
+		return retval;
+	}
+
+	function deserialize(data:DynamicAccess<Dynamic>, ignoreGameName = false)
+	{
+		if (data["gameName"] != gameName && !ignoreGameName)
+			throw new Exception("Game name mismatch");
+
+		_playersv2 = Unserializer.run(data["players"]);
 	}
 }

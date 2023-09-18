@@ -1,11 +1,11 @@
 package components.classic;
 
-import boardObject.Bumper;
-import flixel.FlxG;
-import haxe.Exception;
 import haxe.DynamicAccess;
+import haxe.Exception;
 import haxe.Serializer;
 import haxe.Unserializer;
+import boardObject.Bumper;
+import flixel.FlxG;
 import lime.app.Event;
 import components.common.CommonBoard;
 import components.common.CommonPlayerState;
