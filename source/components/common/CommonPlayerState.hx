@@ -209,9 +209,16 @@ abstract class CommonPlayerState
 		board.onLaunchBumper.add(onLaunchSelect);
 	}
 
+	/** Forwards onBoardStateChanged events from the board with the player ID. **/
 	function onInnerBoardStateChanged(state)
 		onBoardStateChanged.dispatch(id, state);
 
+	/**
+		Receives match events from the board.
+		@param chain The chain valance for this match.
+		@param combo The combo number for this event.
+		@param bumpers The bumpers involved in this match.
+	**/
 	function onMatch(chain:Int, combo:Int, _)
 	{
 		var bonus = ((combo - 3) + (chain - 1)) * Math.floor(Math.pow(2, (chain - 1))) * 50;
@@ -225,6 +232,11 @@ abstract class CommonPlayerState
 		addScore(bonus, true);
 	}
 
+	/**
+		Receives bumper clear events from the board.
+		@param chain The chain valance for this clear.
+		@param bumper The bumper being cleared.
+	**/
 	function onClear(chain:Int, _)
 	{
 		FlxG.sound.play(AssetPaths.clear__wav);
@@ -233,6 +245,10 @@ abstract class CommonPlayerState
 	}
 
 	// NOTE: maybe rework how this works
+	/**
+		Receives onLauncherSelect events from the board.
+		@param cb The bumper to be sent to the Launcher.
+	**/
 	function onLaunchSelect(cb:BumperCallback)
 	{
 		FlxG.sound.play(AssetPaths.launch__wav);
