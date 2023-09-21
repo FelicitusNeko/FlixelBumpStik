@@ -174,43 +174,6 @@ class BumperGenerator
 		_rng = new FlxRandom();
 	}
 
-	public function serialize()
-	{
-		var retval:DynamicAccess<Dynamic> = {};
-
-		retval["initColors"] = initColors;
-		retval["colors"] = colors;
-		retval["colorLimit"] = colorLimit;
-		retval["colorOpts"] = colorOpts;
-
-		var dropsDA:DynamicAccess<Int> = {};
-		for (col => drop in _drops)
-			dropsDA[Std.string(col)] = drop;
-
-		retval["drops"] = dropsDA;
-
-		// TODO: maybe save the state of the RNG
-
-		return retval;
-	}
-
-	public function deserialize(data:DynamicAccess<Dynamic>)
-	{
-		colorLimit = data["colorLimit"];
-		colors = data["colors"];
-
-		var dropsDA:DynamicAccess<Int> = data["drops"];
-		for (col => drop in dropsDA)
-			_drops[Std.parseInt(col)] = drop;
-	}
-
-	public static function fromSaved(data:DynamicAccess<Dynamic>)
-	{
-		var retval = new BumperGenerator(data["initColors"], data["colorOpts"]);
-		retval.deserialize(data);
-		return retval;
-	}
-
 	@:keep
 	private function hxSerialize(s:Serializer)
 	{
