@@ -55,7 +55,7 @@ class ClassicPlayerState extends CommonPlayerState
 	override function set_score(score:Int):Int
 	{
 		var s = super.set_score(score);
-		if (s > _reg["paint.next"])
+		if (s >= _reg["paint.next"])
 		{
 			FlxG.sound.play(AssetPaths.paintcan__wav);
 			paint++;
@@ -78,7 +78,7 @@ class ClassicPlayerState extends CommonPlayerState
 		Adds to the score based on the multiplier stack.
 		@param add The amount of points to be multiplied and added.
 		@param isBonus _Optional._ Whether the score being added is a bonus. Default `false`.
-		@return The new current score.
+		@return The final amount of points being added.
 	**/
 	override function addScore(add, isBonus = false)
 	{
@@ -94,6 +94,8 @@ class ClassicPlayerState extends CommonPlayerState
 	{
 		if (force || board == null || board.state == "gameover")
 		{
+			if (board != null)
+				detachBoard();
 			board = new ClassicBoard(0, 0);
 			attachBoard();
 		}
@@ -103,8 +105,14 @@ class ClassicPlayerState extends CommonPlayerState
 	override function attachBoard()
 	{
 		super.attachBoard();
-		var boardCl = cast(board, ClassicBoard);
-		boardCl.onBumperSelect.add(onInnerBumperSelect);
+		cBoard.onBumperSelect.add(onInnerBumperSelect);
+	}
+
+	/** Detaches the player state from its board's events. **/
+	override function detachBoard()
+	{
+		cBoard.onBumperSelect.remove(onInnerBumperSelect);
+		super.detachBoard();
 	}
 
 	/** Forwards onBumperSelect events from the board with the player ID. **/
@@ -121,6 +129,7 @@ class ClassicPlayerState extends CommonPlayerState
 	**/
 	override public function nextTurn()
 	{
+		// TODO: make this modular so we can add/remove rules at different priorities
 		if (board == null)
 			throw new Exception("Turn advanced without board present");
 		if (_bg == null)
