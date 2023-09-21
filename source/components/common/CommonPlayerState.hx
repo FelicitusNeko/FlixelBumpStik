@@ -1,16 +1,16 @@
 package components.common;
 
-import components.common.CommonBoard;
-import flixel.FlxG;
-import haxe.Exception;
-import flixel.FlxSubState;
 import haxe.DynamicAccess;
+import haxe.Exception;
 import haxe.Serializer;
 import haxe.Unserializer;
 import boardObject.Bumper;
 import boardObject.Launcher;
+import flixel.FlxG;
+import flixel.FlxSubState;
 import flixel.util.FlxColor;
 import lime.app.Event;
+import components.common.CommonBoard;
 
 /** The result of calling for next turn. **/
 enum TurnResult
@@ -163,7 +163,7 @@ abstract class CommonPlayerState
 		Adds to the score based on the multiplier stack.
 		@param add The amount of points to be multiplied and added.
 		@param isBonus _Optional._ Whether the score being added is a bonus. Default `false`.
-		@return The new current score.
+		@return The final amount of points being added.
 	**/
 	public function addScore(add:Int, isBonus = false)
 	{
@@ -179,7 +179,9 @@ abstract class CommonPlayerState
 
 		if (isBonus)
 			onBonus.dispatch(id, add);
-		return score += newAdd;
+
+		score += newAdd;
+		return newAdd;
 	}
 
 	/**
@@ -207,6 +209,15 @@ abstract class CommonPlayerState
 		board.onMatch.add(onMatch);
 		board.onClear.add(onClear);
 		board.onLaunchBumper.add(onLaunchSelect);
+	}
+
+	/** Detaches the player state from its board's events. **/
+	function detachBoard()
+	{
+		board.onBoardStateChanged.remove(onInnerBoardStateChanged);
+		board.onMatch.remove(onMatch);
+		board.onClear.remove(onClear);
+		board.onLaunchBumper.remove(onLaunchSelect);
 	}
 
 	/** Forwards onBoardStateChanged events from the board with the player ID. **/
@@ -245,6 +256,7 @@ abstract class CommonPlayerState
 	}
 
 	// NOTE: maybe rework how this works
+
 	/**
 		Receives onLauncherSelect events from the board.
 		@param cb The bumper to be sent to the Launcher.
