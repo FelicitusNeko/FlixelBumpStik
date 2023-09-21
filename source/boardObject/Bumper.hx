@@ -371,7 +371,8 @@ class Bumper extends BoardObject
 	/**
 		Adds a flair to this bumper.
 		@param name The name of the flair to add.
-		@param sprite The sprite of the flair to add. Should generally be the same size as the bumper.
+		@param sprite _Optional._ The sprite of the flair to add. Should generally be the same size as the bumper.
+		If not specified, it will look for an image of the same filename as `name` in the assets.
 	**/
 	public function addFlair(name:String, ?sprite:FlxSprite)
 	{
@@ -455,7 +456,12 @@ class Bumper extends BoardObject
 		@return The cloned bumper.
 	**/
 	public function cloneBumper(sameOwner = false)
-		return new Bumper(x, y, bColor, direction, launchDirection, sameOwner ? owner : null);
+	{
+		var b = new Bumper(x, y, bColor, direction, launchDirection, sameOwner ? owner : null);
+		for (flair in _flairList.keys())
+			b.addFlair(flair);
+		return b;
+	}
 
 	public override function serialize():DynamicAccess<Dynamic>
 	{
