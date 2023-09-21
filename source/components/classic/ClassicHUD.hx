@@ -53,8 +53,6 @@ class ClassicHUD extends CommonHUD
 
 	function set_paintCans(paintCans:Int):Int
 	{
-		// BUG: paint can count not updating (paint cans are working though)
-
 		// var displayPaintCans = Math.round(Math.min(paintCans, 10));
 		_pcButton.text = _t("game/classic/paint/count", ["_" => paintCans]);
 		_pcButton.alive = paintCans > 0;
@@ -68,16 +66,24 @@ class ClassicHUD extends CommonHUD
 
 	override function attachState(state:CommonPlayerState):Bool
 	{
-		return super.attachState(state);
-		var clPS = cast(state, ClassicPlayerState);
-		clPS.onPaintChanged.add(onPaintChanged);
+		var retval = super.attachState(state);
+		if (retval)
+		{
+			var clPS = cast(state, ClassicPlayerState);
+			clPS.onPaintChanged.add(onPaintChanged);
+		}
+		return retval;
 	}
 
 	override function detachState(state:CommonPlayerState):Bool
 	{
-		var clPS = cast(state, ClassicPlayerState);
-		clPS.onPaintChanged.remove(onPaintChanged);
-		return super.detachState(state);
+		var retval = super.detachState(state);
+		if (retval)
+		{
+			var clPS = cast(state, ClassicPlayerState);
+			clPS.onPaintChanged.remove(onPaintChanged);
+		}
+		return retval;
 	}
 
 	function onPaintChanged(id:String, paints:Int)
