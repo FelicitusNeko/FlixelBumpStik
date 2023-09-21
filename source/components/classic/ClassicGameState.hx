@@ -99,7 +99,6 @@ class ClassicGameState extends CommonGameState
 
 	function createGame()
 	{
-		trace("ClGS.createGame");
 		if (_playersv2.length == 0)
 		{
 			var p = new ClassicPlayerState("solo");
@@ -128,13 +127,12 @@ class ClassicGameState extends CommonGameState
 
 	function attachHUD()
 	{
-		// _hud.onNextBumperClick.add(onNextBumperClick);
+		_hud.onNextBumperClick.add(onNextBumperClick);
 		_hudClassic.onPaintCanClick.add(onPaintCanClick);
 	}
 
 	function onBoardStateChanged(id:String, state:String)
 	{
-		trace(id, state);
 		var index = _playersv2.map(i -> i.id).indexOf(id);
 		if (index >= 0)
 			switch (state)
@@ -217,6 +215,9 @@ class ClassicGameState extends CommonGameState
 	function onFieldCancel()
 		if (_selectedColor != null)
 			onBumperSelect(_p.id, null);
+
+	inline function onNextBumperClick(bumper:Bumper)
+		return onBumperSelect(_p.id, bumper);
 
 	/** Called when a bumper is selected, or the bumper selection is cancelled. **/
 	function onBumperSelect(id:String, bumper:Bumper)
