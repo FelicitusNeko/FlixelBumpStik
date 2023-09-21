@@ -217,7 +217,10 @@ class ClassicGameState extends CommonGameState
 			onBumperSelect(_p.id, null);
 
 	inline function onNextBumperClick(bumper:Bumper)
-		return onBumperSelect(_p.id, bumper);
+	{
+		// BUG: painting the next bumper does not change the bumper in the player state
+		return onBumperSelect(_p.id, _p.next);
+	}
 
 	/** Called when a bumper is selected, or the bumper selection is cancelled. **/
 	function onBumperSelect(id:String, bumper:Bumper)
