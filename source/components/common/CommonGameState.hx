@@ -208,9 +208,6 @@ abstract class CommonGameState extends FlxState
 
 		retval["players"] = Serializer.run(_playersv2);
 
-		// ultimately shouldn't need to save the HUD anymore
-		retval["hud"] = _hud.serialize();
-
 		return retval;
 	}
 
