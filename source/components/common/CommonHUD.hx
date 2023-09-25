@@ -101,12 +101,21 @@ abstract class CommonHUD extends FlxSpriteGroup
 		}
 		if (nextBumper != null)
 		{
-			var nextClone = nextBumper.cloneBumper();
-			nextClone.onClick.add(onNextClick);
-			nextClone.isUIElement = true;
-			nextClone.setPosition(width - nextClone.width - 5, height - nextClone.height - 5);
-			add(nextClone);
-			return this.nextBumper = nextClone;
+			// NOTE: I kind of want a bumper clone here, but this currently makes paint cans not work
+			/*
+				var nextClone = nextBumper.cloneBumper();
+				nextClone.onClick.add(onNextClick);
+				nextClone.isUIElement = true;
+				nextClone.setPosition(width - nextClone.width - 5, height - nextClone.height - 5);
+				add(nextClone);
+				return this.nextBumper = nextClone;
+			 */
+			nextBumper.revive(); // just in case
+			nextBumper.onClick.add(onNextClick);
+			nextBumper.isUIElement = true;
+			nextBumper.setPosition(width - nextBumper.width - 5, height - nextBumper.height - 5);
+			add(nextBumper);
+			return this.nextBumper = nextBumper;
 		}
 		else
 			return this.nextBumper = null;
