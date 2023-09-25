@@ -98,6 +98,7 @@ class ClassicHUD extends CommonHUD
 	**/
 	function makeFlyout(text:String, from:FlxSprite, foColor = FlxColor.YELLOW)
 	{
+		// TODO: this can probably be static (call add(makeFlyout([...])) from parent)
 		var flyout = new FlxText(0, 0, 0, text, 12);
 		flyout.color = foColor;
 		add(flyout);
