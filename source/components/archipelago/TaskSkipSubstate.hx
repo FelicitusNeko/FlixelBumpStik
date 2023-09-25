@@ -17,6 +17,7 @@ using flixel.util.FlxSpriteUtil;
 class TaskSkipSubstate extends FlxSubState
 {
 	var _tasks:Array<APTask> = [];
+	var _tasksv2:Array<APTaskV2> = [];
 	var _t:I18nFunction = null;
 	var _center:FlxPoint;
 
@@ -34,7 +35,7 @@ class TaskSkipSubstate extends FlxSubState
 
 		// var _center = new FlxPoint(camera.width / 2, camera.height / 2);
 		trace(_center);
-		var taskLabels = _tasks.map(i -> i.uiText.text).map(i -> new FlxUIText(0, 0, 0, i, 16));
+		var taskLabels = _tasksv2.map(i -> new FlxUIText(0, 0, 0, i, 16));
 		var widest = .0;
 		for (task in taskLabels)
 			if (task.width > widest)
@@ -93,4 +94,8 @@ class TaskSkipSubstate extends FlxSubState
 	@:allow(components.archipelago.APHUD.loadTaskSkip)
 	function loadTasks(tasks:Array<APTask>)
 		_tasks = tasks;
+
+	@:allow(components.archipelago.APPlayerState.loadTaskSkip)
+	function loadTasksV2(tasks:Array<APTaskV2>)
+		_tasksv2 = tasks;
 }
