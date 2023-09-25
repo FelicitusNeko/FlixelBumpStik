@@ -14,35 +14,13 @@ import flixel.util.FlxSave;
 import openfl.system.System;
 import components.common.CommonHUD;
 
-/** Stats for each player. **/
-typedef PlayerInstance =
-{
-	/** The board to be used for this player. **/
-	var board:CommonBoard;
-
-	/** The player's current score multiplier stack. **/
-	var multStack:Array<Float>;
-}
-
 abstract class CommonGameState extends FlxState
 {
-	/**
-		The list of players for this game.
-		@deprecated Converting to PlayerState
-	**/
-	private var _players:Array<PlayerInstance> = [];
-
 	/** The list of players for this game. **/
 	private var _playersv2:Array<CommonPlayerState> = [];
 
 	/** The GUI for this game. **/
 	private var _hud:CommonHUD;
-
-	/**
-		A shortcut to the first player on the list.
-		@deprecated Use `_p` instead
-	**/
-	private var _player(get, never):PlayerInstance;
 
 	/** A shortcut to the local player. **/
 	private var _p(get, never):CommonPlayerState;
@@ -71,9 +49,6 @@ abstract class CommonGameState extends FlxState
 	abstract function get_gameName():String;
 
 	abstract function get_gameType():String;
-
-	function get__player()
-		return _players.length == 0 ? null : _players[0];
 
 	inline function get__p()
 		return _playersv2.length == 0 ? null : _playersv2[0];
