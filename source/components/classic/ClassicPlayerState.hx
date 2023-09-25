@@ -4,7 +4,6 @@ import haxe.DynamicAccess;
 import haxe.Exception;
 import haxe.Serializer;
 import haxe.Unserializer;
-import sys.io.Process;
 import boardObject.Bumper;
 import flixel.FlxG;
 import flixel.math.FlxPoint;
