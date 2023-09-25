@@ -154,7 +154,7 @@ class BumperGenerator
 
 	/**
 		Generates a random color from the available list.
-		@param track Optional. Whether to track 
+		@param track Optional. Whether to track the selected color as a drop.
 		@return The generated color.
 	**/
 	public function generateColor(track = false)
