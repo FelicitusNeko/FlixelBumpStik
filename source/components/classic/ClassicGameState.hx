@@ -2,6 +2,7 @@ package components.classic;
 
 import haxe.DynamicAccess;
 import haxe.Json;
+import haxe.Timer;
 import boardObject.Bumper;
 import flixel.FlxG;
 import flixel.math.FlxPoint;
@@ -131,6 +132,7 @@ class ClassicGameState extends CommonGameState
 		_hudClassic.onPaintCanClick.add(onPaintCanClick);
 	}
 
+	// TODO: should this go into CommonGameState?
 	function onBoardStateChanged(id:String, state:String)
 	{
 		var index = _playersv2.map(i -> i.id).indexOf(id);
@@ -138,13 +140,15 @@ class ClassicGameState extends CommonGameState
 			switch (state)
 			{
 				case "initial":
-					switch (_playersv2[index].nextTurn())
+					switch (_playersv2[index].runNextTurn())
 					{
 						case Next(_):
 							saveGame();
 						case Notice(s):
 							s.closeCallback = () -> onBoardStateChanged(id, state);
 							openSubState(s);
+						case Wait(msec):
+							Timer.delay(() -> onBoardStateChanged(id, state), msec);
 						default:
 					}
 				case "gameoverwait":
