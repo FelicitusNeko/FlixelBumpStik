@@ -338,6 +338,8 @@ abstract class CommonPlayerState
 	**/
 	final function addRule(rule:RuleDefinition)
 	{
+		if (_rules == null)
+			_rules = [];
 		if (_rules.filter(i -> i.name == rule.name).length > 0)
 			throw new Exception("Duplicate rule name definition");
 
@@ -383,6 +385,9 @@ abstract class CommonPlayerState
 	**/
 	public final function runNextTurn()
 	{
+		if (_rules == null || _rules.length == 0)
+			throw new Exception("No rules defined");
+
 		for (rule in _rules)
 		{
 			if (rule.disabled)
