@@ -9,27 +9,46 @@ import flixel.util.FlxColor;
 import lime.app.Event;
 import components.archipelago.APTask;
 import components.classic.ClassicHUD;
+import components.common.CommonPlayerState;
 
 /** Adds Archipelago-specific elements to the Classic mode HUD. **/
 class APHUD extends ClassicHUD
 {
-	/** The total number of points accrued through previous games on this level. **/
+	/**
+		The total number of points accrued through previous games on this level.
+		@deprecated to be moved to `APPlayerState`
+	**/
 	private var _accruedScoreThisLevel = 0;
 
-	/** The total number of points accrued through previous games. **/
+	/**
+		The total number of points accrued through previous games.
+		@deprecated to be moved to `APPlayerState`
+	**/
 	private var _accruedScore = 0;
 
-	/** The total number of bumpers cleared accured through previous games on this level. **/
+	/**
+		The total number of bumpers cleared accured through previous games on this level.
+		@deprecated to be moved to `APPlayerState`
+	**/
 	private var _accruedBlockThisLevel = 0;
 
-	/** The total number of bumpers cleared accured through previous games. **/
+	/**
+		The total number of bumpers cleared accured through previous games.
+		@deprecated to be moved to `APPlayerState`
+	**/
 	private var _accruedBlock = 0;
 
 	/** The task list display component. **/
 	private var _taskListbox:FlxUIList;
 
-	/** The internal list of tasks to clear. **/
+	/**
+		The internal list of tasks to clear.
+		@deprecated actual tasks to be moved to `APPlayerState`; here will be stored a Map<APTaskType, FlxUIText> instead
+	**/
 	private var _taskList:Array<APTask> = [];
+
+	/** The list of tasks to clear. **/
+	private var _tasks:Array<FlxUIText> = [];
 
 	/** The button to use a Turner. **/
 	private var _turnerButton:FlxButton;
@@ -43,19 +62,34 @@ class APHUD extends ClassicHUD
 	/** The current number of available Task Skips. **/
 	public var taskSkip(default, set):Int = 0;
 
-	/** The total number of points obtained through games on this level. **/
+	/**
+		The total number of points obtained through games on this level.
+		@deprecated to be moved to `APPlayerState`
+	**/
 	public var levelScore(get, never):Int;
 
-	/** The total number of points obtained through all games. **/
+	/**
+		The total number of points obtained through all games.
+		@deprecated to be moved to `APPlayerState`
+	**/
 	public var totalScore(get, never):Int;
 
-	/** The total number of bumpers cleared through games on this level. **/
+	/**
+		The total number of bumpers cleared through games on this level.
+		@deprecated to be moved to `APPlayerState`
+	**/
 	public var levelBlock(get, never):Int;
 
-	/** The total number of bumpers cleared through all games. **/
+	/**
+		The total number of bumpers cleared through all games.
+		@deprecated to be moved to `APPlayerState`
+	**/
 	public var totalBlock(get, never):Int;
 
-	/** The current task level. **/
+	/**
+		The current task level.
+		@deprecated to be moved to `APPlayerState`
+	**/
 	public var level(get, never):Null<Int>;
 
 	/** Event that fires when the Turner button is clicked. **/
@@ -70,6 +104,7 @@ class APHUD extends ClassicHUD
 		@param type The type of task.
 		@param goal The goal achieved.
 		@param current The current value for the goal.
+		@deprecated to be moved to `APPlayerState`
 	**/
 	public var onTaskCleared(default, null) = new Event<(Null<Int>, APTaskType, Int, Int) -> Void>();
 
@@ -132,18 +167,23 @@ class APHUD extends ClassicHUD
 		return this.taskSkip = taskSkip;
 	}
 
+	/** @deprecated to be handled by `APPlayerState` **/
 	inline function get_levelScore()
 		return _accruedScoreThisLevel + score;
 
+	/** @deprecated to be handled by `APPlayerState` **/
 	inline function get_totalScore()
 		return _accruedScore + score;
 
+	/** @deprecated to be handled by `APPlayerState` **/
 	inline function get_levelBlock()
 		return _accruedBlockThisLevel + block;
 
+	/** @deprecated to be handled by `APPlayerState` **/
 	inline function get_totalBlock()
 		return _accruedBlock + block;
 
+	/** @deprecated to be handled by `APPlayerState` **/
 	override function set_score(score:Int):Int
 	{
 		var retval = super.set_score(score);
@@ -153,6 +193,7 @@ class APHUD extends ClassicHUD
 		return retval;
 	}
 
+	/** @deprecated to be handled by `APPlayerState` **/
 	override function set_block(block:Int):Int
 	{
 		var retval = super.set_block(block);
@@ -162,6 +203,7 @@ class APHUD extends ClassicHUD
 		return retval;
 	}
 
+	/** @deprecated to be handled by `APPlayerState` **/
 	function get_level():Null<Int>
 	{
 		if (_taskList.length == 0)
@@ -171,12 +213,64 @@ class APHUD extends ClassicHUD
 		return _taskList[0].curGoal;
 	}
 
+	override function attachState(state:CommonPlayerState):Bool
+	{
+		var retval = super.attachState(state);
+		if (retval)
+		{
+			var apState = cast(state, APPlayerState);
+			apState.onLevelChanged.add(onLevelChanged);
+			apState.onTurnerChanged.add(onTurnerChanged);
+			apState.onTaskSkipChanged.add(onTaskSkipChanged);
+			apState.onTaskUpdated.add(onTaskUpdated);
+		}
+		return retval;
+	}
+
+	function onLevelChanged(id:String, level:Int, tasks:Array<APTaskV2>)
+	{
+		if (!_connected.contains(id))
+			return;
+
+		_taskListbox.clear();
+		for (task in _tasks)
+			task.destroy();
+
+		_tasks = tasks.map(i -> new FlxUIText(0, 0, 0, i));
+		for (x => task in _tasks)
+		{
+			if (tasks[x].type == LevelHeader)
+			{
+				task.size += 4;
+				task.alignment = CENTER;
+			}
+			_taskListbox.add(task);
+		}
+	}
+
+	inline function onTurnerChanged(id:String, count:Int)
+		if (_connected.contains(id))
+			turners = count;
+
+	inline function onTaskSkipChanged(id:String, count:Int)
+		if (_connected.contains(id))
+			taskSkip = count;
+
+	inline function onTaskUpdated(id:String, index:Int, text:String, completed:Bool)
+	{
+		if (!_connected.contains(id))
+			return;
+		_tasks[index].text = text;
+		_tasks[index].color = completed ? FlxColor.LIME : FlxColor.WHITE;
+	}
+
 	/**
 		Adds a task to the list.
 		@param type The type of task.
 		@param goal The goal to achieve.
 		@param current Optional. The current value for the goal.
 		If this is omitted and it is a Score or Clear-based goal, the current value stored by the HUD is used. Otherwise defaults to 0.
+		@deprecated to be moved to `APPlayerState`
 	**/
 	public function addTask(type:APTaskType, goals:Array<Int>, ?current:Int)
 	{
@@ -218,6 +312,7 @@ class APHUD extends ClassicHUD
 
 		@param type The type of task.
 		@param current The current value for the goal.
+		@deprecated to be moved to `APPlayerState`
 	**/
 	public function updateTask(type:APTaskType, current:Int)
 	{
@@ -252,7 +347,10 @@ class APHUD extends ClassicHUD
 		}
 	}
 
-	/** Removes all tasks from the task list. **/
+	/**
+		Removes all tasks from the task list.
+		@deprecated to be moved to `APPlayerState`
+	**/
 	public function wipeTasks()
 	{
 		_taskListbox.clear();
@@ -262,7 +360,10 @@ class APHUD extends ClassicHUD
 		_accruedScoreThisLevel = _accruedBlockThisLevel = 0;
 	}
 
-	/** Resets the HUD to its starting values. For Archipelago games, it will also increment `_accruedScore` and `_accruedBlock`. **/
+	/**
+		Resets the HUD to its starting values. For Archipelago games, it will also increment `_accruedScore` and `_accruedBlock`.
+		@deprecated to be moved to `APPlayerState`
+	**/
 	public override function resetHUD()
 	{
 		_accruedScoreThisLevel += score;
@@ -272,9 +373,11 @@ class APHUD extends ClassicHUD
 		super.resetHUD();
 	}
 
+	/** @deprecated to be moved to `APPlayerState` **/
 	public function loadTaskSkip(dlg:TaskSkipSubstate)
 		dlg.loadTasks(_taskList.slice(1).filter(i -> !i.complete));
 
+	/** @deprecated all data to be handled by player state **/
 	public override function serialize():DynamicAccess<Dynamic>
 	{
 		var retval = super.serialize();
@@ -290,6 +393,7 @@ class APHUD extends ClassicHUD
 		return retval;
 	}
 
+	/** @deprecated all data to be handled by player state **/
 	public override function deserialize(data:DynamicAccess<Dynamic>)
 	{
 		super.deserialize(data);
