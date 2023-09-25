@@ -4,6 +4,7 @@ import haxe.DynamicAccess;
 import haxe.Exception;
 import haxe.Serializer;
 import haxe.Unserializer;
+import haxe.ds.ArraySort;
 import boardObject.Bumper;
 import boardObject.Launcher;
 import flixel.FlxG;
@@ -11,6 +12,32 @@ import flixel.FlxSubState;
 import flixel.util.FlxColor;
 import lime.app.Event;
 import components.common.CommonBoard;
+
+/** The condition upon which a rule will be fired. **/
+enum TurnCondition
+{
+	/** Rule is fired only if the result of the function is `true`. **/
+	If(f:Void->Bool);
+
+	/** Rule is fired every time. **/
+	Always;
+}
+
+/** The function to execute if the condition is met. **/
+enum TurnExecute
+{
+	/** Run a function, then continue evaluating rules. **/
+	Execute(f:Void->Void);
+
+	/** Run a function, then return a result to the game state. **/
+	Process(f:Void->TurnResult);
+
+	/** Return a result to the game state. **/
+	Return(r:TurnResult);
+
+	/** Throw an exception. **/
+	Throw(s:String);
+}
 
 /** The result of calling for next turn. **/
 enum TurnResult
@@ -21,11 +48,36 @@ enum TurnResult
 	/** A substate is to be displayed. **/
 	Notice(s:FlxSubState);
 
+	/** Wait for the state to change again. **/
+	Standby;
+
+	/** Wait `msec` milliseconds before calling nextTurn() again. **/
+	Wait(msec:Int);
+
 	/** The game is over. **/
 	Kill;
 
 	/** A custom function is to be called. **/
 	Custom(f:Void->Void);
+}
+
+/** A definition for a rule to be checked when `nextTurn()` is called. **/
+typedef RuleDefinition =
+{
+	/** The name of the rule, for later reference. **/
+	var name:String;
+
+	/** The rule's priority. Closer to 0 gets executed first. **/
+	var priority:Int;
+
+	/** The condition upon which the rule is fired. **/
+	var condition:TurnCondition;
+
+	/** The function to execute if the condition is met. **/
+	var execute:TurnExecute;
+
+	/** Whether the rule is disabled and will not be checked. **/
+	var ?disabled:Bool;
 }
 
 /** Base class to keep the state of a player. **/
@@ -88,6 +140,9 @@ abstract class CommonPlayerState
 	/** Registry of values. **/
 	private var _reg:DynamicAccess<Int>;
 
+	/** Rules to be processed on `runNextTurn()` **/
+	private var _rules:Array<RuleDefinition>;
+
 	//-------- CODE
 
 	/** Creates a new player state **/
@@ -108,6 +163,13 @@ abstract class CommonPlayerState
 		onLaunch = new Event<(String, Bumper) -> Void>();
 		onNextChanged = new Event<(String, Bumper) -> Void>();
 		onBoardStateChanged = new Event<(String, String) -> Void>();
+
+		addRule({
+			name: "fallbackNext",
+			condition: Always,
+			execute: Process(() -> Next(generateBumper())),
+			priority: 100
+		});
 	}
 
 	/** _Abstract._ Initializes the value registry. **/
@@ -230,7 +292,7 @@ abstract class CommonPlayerState
 		@param combo The combo number for this event.
 		@param bumpers The bumpers involved in this match.
 	**/
-	function onMatch(chain:Int, combo:Int, _)
+	function onMatch(chain:Int, combo:Int, _:Array<Bumper>)
 	{
 		var bonus = ((combo - 3) + (chain - 1)) * Math.floor(Math.pow(2, (chain - 1))) * 50;
 		if (chain > 1)
@@ -248,20 +310,18 @@ abstract class CommonPlayerState
 		@param chain The chain valance for this clear.
 		@param bumper The bumper being cleared.
 	**/
-	function onClear(chain:Int, _)
+	function onClear(chain:Int, _:Bumper)
 	{
 		FlxG.sound.play(AssetPaths.clear__wav);
 		block++;
 		addScore(10 * Math.floor(Math.pow(2, chain - 1)));
 	}
 
-	// NOTE: maybe rework how this works
-
 	/**
 		Receives onLauncherSelect events from the board.
 		@param cb The bumper to be sent to the Launcher.
 	**/
-	function onLaunchSelect(cb:BumperCallback)
+	function onLaunchSelect(cb:BumperCallback) // NOTE: maybe rework how this works
 	{
 		FlxG.sound.play(AssetPaths.launch__wav);
 
@@ -272,11 +332,86 @@ abstract class CommonPlayerState
 	}
 
 	/**
+		Adds a next turn rule.
+		@param rule The rule to be added.
+		@throws Exception Will throw an error if the name used already exists in existing rule definitions.
+	**/
+	final function addRule(rule:RuleDefinition)
+	{
+		if (_rules.filter(i -> i.name == rule.name).length > 0)
+			throw new Exception("Duplicate rule name definition");
+
+		_rules.push(rule);
+		ArraySort.sort(_rules, (l, r) -> l.priority - r.priority);
+	}
+
+	/**
+		Removes a next turn rule.
+		@param name The name of the rule to be removed.
+	**/
+	final function removeRule(name:String)
+		_rules = _rules.filter(i -> i.name != name);
+
+	/**
+		Toggles a rule's enabled state.
+		@param The name of the rule to be toggled.
+		@param enable _Optional._ Whether the rule should be enabled. If not defined, it will invert the rule's current state.
+	**/
+	final function toggleRule(name:String, ?enable:Bool)
+	{
+		var rule = _rules.filter(i -> i.name == name);
+		if (rule.length > 0)
+			rule[0].disabled = switch (enable)
+			{
+				case null:
+					rule[0].disabled != true;
+				case x:
+					!x;
+			}
+	}
+
+	/**
 		Evaluates the next turn loop.
 		@return The result of evaluating the loop.
 	**/
 	public function nextTurn()
 		return Next(generateBumper());
+
+	/**
+		Evaluates the next turn loop.
+		@return The result of evaluating the loop.
+	**/
+	public final function runNextTurn()
+	{
+		for (rule in _rules)
+		{
+			if (rule.disabled)
+				continue;
+
+			switch (rule.condition)
+			{
+				case Always:
+				// don't do anything; always execute
+				case If(f):
+					if (!f())
+						continue;
+			}
+
+			switch (rule.execute)
+			{
+				case Execute(f):
+					f();
+				case Process(f):
+					return f();
+				case Return(r):
+					return r;
+				case Throw(s):
+					throw new Exception(s);
+			}
+		}
+
+		throw new Exception("Next turn request fell through");
+	}
 
 	/**
 		Generates a new Next bumper.
@@ -346,6 +481,7 @@ abstract class CommonPlayerState
 		if (next != null)
 			s.serialize(next.serialize());
 		s.serialize(multiStack);
+		s.serialize(_dfltMultiStack);
 		s.serialize(_bg);
 		s.serialize(_bgColorShuffle);
 		s.serialize(_reg);
@@ -370,6 +506,7 @@ abstract class CommonPlayerState
 		if (cast(u.unserialize(), Bool))
 			this.next = Bumper.fromSaved(u.unserialize());
 		this.multiStack = u.unserialize();
+		_dfltMultiStack = u.unserialize();
 		_bg = u.unserialize();
 		_bgColorShuffle = u.unserialize();
 		_reg = u.unserialize();

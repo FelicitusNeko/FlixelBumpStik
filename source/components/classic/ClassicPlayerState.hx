@@ -4,6 +4,7 @@ import haxe.DynamicAccess;
 import haxe.Exception;
 import haxe.Serializer;
 import haxe.Unserializer;
+import sys.io.Process;
 import boardObject.Bumper;
 import flixel.FlxG;
 import flixel.math.FlxPoint;
@@ -25,18 +26,55 @@ class ClassicPlayerState extends CommonPlayerState
 	/** The player's current board, as a `ClassicBoard`. **/
 	public var cBoard(get, never):ClassicBoard;
 
-	// public function new(id:String)
-	// {
-	// 	super(id);
-	// 	initReg();
-	// }
-
 	/** Initializes things like event handlers. **/
 	override function init()
 	{
 		super.init();
 		onPaintChanged = new Event<(String, Int) -> Void>();
 		onBumperSelected = new Event<(String, Bumper) -> Void>();
+
+		addRule({
+			name: "noTurnWithoutBoard",
+			condition: If(() -> board == null),
+			execute: Throw("Turn advanced without board present"),
+			priority: 10
+		});
+		addRule({
+			name: "noTurnWithoutGenerator",
+			condition: If(() -> _bg == null),
+			execute: Throw("Turn advanced without generator present"),
+			priority: 11
+		});
+		addRule({
+			name: "gameOver",
+			condition: If(() -> ["gameover", "gameoverwait"].contains(board.state)),
+			execute: Return(Kill),
+			priority: 30
+		});
+		addRule({
+			name: "allClearCheck",
+			condition: If(() -> (board.bCount == 0 && _reg["jackpot"] > 0)),
+			execute: Process(() ->
+			{
+				FlxG.sound.play(AssetPaths.allclear__wav);
+				var mJackpot = addScore(_reg["jackpot"], true);
+				_reg["jackpot"] = 0;
+
+				return Notice(new AllClearSubstate(mJackpot, board.center));
+			}),
+			priority: 40
+		});
+		addRule({
+			name: "colorCheck",
+			condition: If(() -> (_reg["color.max"] > _bg.colors && _reg["color.next"] <= block)),
+			execute: Process(() ->
+			{
+				FlxG.sound.play(AssetPaths.levelup__wav);
+				_reg["color.next"] += _reg["color.inc"];
+				return Notice(new NewColorSubstate(_bg.colorOpts[_bg.colors++], board.center));
+			}),
+			priority: 50
+		});
 	}
 
 	/** Initializes the value registry. **/
