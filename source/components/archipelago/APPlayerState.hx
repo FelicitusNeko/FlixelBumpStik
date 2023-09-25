@@ -3,6 +3,9 @@ package components.archipelago;
 import haxe.DynamicAccess;
 import haxe.Serializer;
 import haxe.Unserializer;
+import boardObject.Bumper;
+import boardObject.archipelago.APHazardPlaceholder;
+import flixel.math.FlxRandom;
 import lime.app.Event;
 import utilities.DeploymentSchedule;
 import components.classic.ClassicPlayerState;
@@ -31,6 +34,15 @@ class APPlayerState extends ClassicPlayerState
 		@param tasks The list of tasks for this level.
 	**/
 	public var onLevelChanged(default, null):Event<(String, Int, Array<APTaskV2>) -> Void>;
+
+	/**
+		Event that fires when a task is updated.
+		@param id The sending player's identity string.
+		@param index The index of the task to be updated.
+		@param text The text to be displayed.
+		@param isComplete Whether the task has been completed.
+	**/
+	public var onTaskUpdated(default, null):Event<(String, Int, String, Bool) -> Void>;
 
 	/**
 		Event that fires when a task has been cleared.
@@ -81,6 +93,9 @@ class APPlayerState extends ClassicPlayerState
 	/** The player's current special bumper schedule. **/
 	private var _sched:DynamicAccess<DeploymentSchedule>;
 
+	/** The schedule randomiser for this multiworld. **/
+	private var _rng = new FlxRandom();
+
 	/**
 		Whether a level's tasks are being populated.
 		If they are, no check will be made to see if the level has been cleared.
@@ -100,8 +115,22 @@ class APPlayerState extends ClassicPlayerState
 		onTaskSkipChanged = new Event<(String, Int) -> Void>();
 		onTurnerChanged = new Event<(String, Int) -> Void>();
 		onLevelChanged = new Event<(String, Int, Array<APTaskV2>) -> Void>();
+		onTaskUpdated = new Event<(String, Int, String, Bool) -> Void>();
 		onTaskCleared = new Event<(String, Null<Int>, APTaskType, Int, Int) -> Void>();
 		onDeployHazard = new Event<String->Void>();
+
+		addRule({
+			name: "levelComplete",
+			condition: If(() -> false), // TODO: check to ensure all tasks are complete
+			execute: Process(() -> Kill),
+			priority: 20
+		});
+		addRule({
+			name: "allClearAP",
+			condition: If(() -> (board.bCount == 0 && _reg["jackpot"] > 0)),
+			execute: Execute(() -> updateTask(AllClear, _bg.colors)),
+			priority: 39
+		});
 	}
 
 	/** Initializes the value registry. **/
@@ -122,6 +151,24 @@ class APPlayerState extends ClassicPlayerState
 		_reg["score.accured.game"] = 0;
 		_reg["block.accrued.level"] = 0;
 		_reg["block.accrued.game"] = 0;
+	}
+
+	override function set_score(score:Int):Int
+	{
+		var retval = super.set_score(score);
+		updateTask(Score, retval);
+		updateTask(LevelScore, levelScore);
+		updateTask(TotalScore, totalScore);
+		return retval;
+	}
+
+	override function set_block(block:Int):Int
+	{
+		var retval = super.set_block(block);
+		updateTask(Cleared, retval);
+		updateTask(LevelCleared, levelBlock);
+		updateTask(TotalCleared, totalBlock);
+		return retval;
 	}
 
 	inline private function get_apBoard()
@@ -269,6 +316,79 @@ class APPlayerState extends ClassicPlayerState
 		return this.tasks.slice(0);
 
 	/**
+		Modifies a bumper.
+		@param b The bumper to modify.
+		@return The modified bumper. If not overridden, `b` is returned as-is.
+	**/
+	override function modifyBumper(b:Bumper):Bumper
+	{
+		for (key => schedule in _sched)
+		{
+			if (schedule.inStock <= 0 || schedule.available <= 0)
+				continue;
+			if (++schedule.sinceLast < schedule.minDelay)
+				continue;
+			if (b.flairCount > 0 && key != "hazard")
+				continue;
+			if (schedule.sinceLast >= schedule.maxDelay || _rng.bool(schedule.eligibleTurns / schedule.maxEligible * 100))
+			{
+				schedule.sinceLast = 0;
+				schedule.inStock--;
+				schedule.onBoard++;
+				switch (key)
+				{
+					case "treasure":
+						b.addFlair("treasure");
+					case "booster":
+						b.addFlair("booster");
+					case "hazard":
+						var emptyPos = board.getRandomSpace(true);
+						if (emptyPos != null)
+							board.putObstacleAt(emptyPos[0], emptyPos[1], new APHazardPlaceholder(0, 0, _bg.generateColor(true), board));
+						onDeployHazard.dispatch(id);
+				}
+			}
+		}
+		return b;
+	}
+
+	override function onMatch(chain:Int, combo:Int, bumpers:Array<Bumper>)
+	{
+		updateTask(Chain, chain);
+		updateTask(Combo, combo);
+		for (b in bumpers)
+		{
+			if (b.hasFlair("booster"))
+			{
+				// TODO: report booster clear to game state
+				multiStack[1] += .2;
+			}
+		}
+		super.onMatch(chain, combo, bumpers);
+	}
+
+	override function onClear(chain:Int, bumper:Bumper)
+	{
+		for (key => sched in _sched)
+			if (bumper.hasFlair(key))
+			{
+				sched.clear++;
+				sched.onBoard--;
+				switch (key)
+				{
+					case "treasure":
+						chain++;
+						updateTask(Treasures, sched.clear);
+					case "booster":
+						updateTask(Boosters, sched.clear);
+					case "hazard":
+						updateTask(Hazards, sched.clear);
+				}
+			}
+		super.onClear(chain, bumper);
+	}
+
+	/**
 		Adds a task to the list.
 		@param type The type of task.
 		@param goal The goal to achieve.
@@ -315,7 +435,7 @@ class APPlayerState extends ClassicPlayerState
 		if (tl.length == 0)
 			return;
 
-		for (task in tl)
+		for (x => task in tl)
 		{
 			if (task.type != type || task.current > current)
 				continue;
@@ -328,6 +448,8 @@ class APPlayerState extends ClassicPlayerState
 			}
 			// TODO: this is still to be handled by the HUD
 			// task.uiText.text = task;
+
+			onTaskUpdated.dispatch(id, x, task, task.complete);
 		}
 
 		if (!_levelPopulating)
@@ -347,11 +469,15 @@ class APPlayerState extends ClassicPlayerState
 		}
 	}
 
+	public function loadTaskSkip(dlg:TaskSkipSubstate)
+		dlg.loadTasksV2(tasks.slice(1).filter(i -> !i.complete));
+
 	/** Resets the player state. **/
 	override function reset()
 	{
 		_reg["score.accrued.level"] += score;
 		_reg["block.accrued.level"] += block;
+
 		super.reset();
 		for (sch in _sched)
 			sch.reset();
@@ -362,6 +488,8 @@ class APPlayerState extends ClassicPlayerState
 	override function hxSerialize(s:Serializer)
 	{
 		super.hxSerialize(s);
+		s.serialize(_rng.initialSeed);
+		s.serialize(_rng.currentSeed);
 		s.serialize(taskSkip);
 		s.serialize(turner);
 		s.serialize(level);
@@ -384,6 +512,8 @@ class APPlayerState extends ClassicPlayerState
 	override function hxUnserialize(u:Unserializer)
 	{
 		super.hxUnserialize(u);
+		_rng = new FlxRandom(u.unserialize());
+		_rng.currentSeed = u.unserialize();
 		this.taskSkip = u.unserialize();
 		this.turner = u.unserialize();
 		this.level = u.unserialize();
