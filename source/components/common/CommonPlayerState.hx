@@ -165,6 +165,12 @@ abstract class CommonPlayerState
 		onBoardStateChanged = new Event<(String, String) -> Void>();
 
 		addRule({
+			name: "noTurnWithoutGenerator",
+			condition: If(() -> _bg == null),
+			execute: Throw("Turn advanced without generator present"),
+			priority: 10
+		});
+		addRule({
 			name: "fallbackNext",
 			condition: Always,
 			execute: Process(() -> Next(generateBumper())),

@@ -39,12 +39,6 @@ class ClassicPlayerState extends CommonPlayerState
 			priority: 10
 		});
 		addRule({
-			name: "noTurnWithoutGenerator",
-			condition: If(() -> _bg == null),
-			execute: Throw("Turn advanced without generator present"),
-			priority: 11
-		});
-		addRule({
 			name: "gameOver",
 			condition: If(() -> ["gameover", "gameoverwait"].contains(board.state)),
 			execute: Return(Kill),
