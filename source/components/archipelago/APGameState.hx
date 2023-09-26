@@ -343,7 +343,7 @@ class APGameState extends ClassicGameState
 		return cast(_hud, APHUD);
 
 	inline function get__boardAP()
-		return cast(_player.board, APBoard);
+		return cast(_p.board, APBoard);
 
 	override function create()
 	{
@@ -395,11 +395,8 @@ class APGameState extends ClassicGameState
 
 	override function createGame()
 	{
-		if (_players.length == 0)
-			_players.push({
-				board: new APBoard(0, 0, _curWidth, _curHeight),
-				multStack: [.8, 1]
-			});
+		if (_playersv2.length == 0)
+			_playersv2.push(new APPlayerState("ap"));
 
 		_hud = new APHUD();
 
@@ -630,7 +627,7 @@ class APGameState extends ClassicGameState
 	/** Resets the game state and starts a new board without affecting multiworld stats. **/
 	function restartGame()
 	{
-		remove(_player.board);
+		remove(_p.board);
 		_jackpot = 0;
 		_hud.resetHUD();
 
@@ -662,8 +659,9 @@ class APGameState extends ClassicGameState
 		_nextColor = _levelNextColor;
 		_nextColorEvery = _levelStepColor;
 
-		_player.board = new APBoard(0, 0, _curWidth, _curHeight);
-		_player.multStack[0] = (_startColors + 2) * .2;
+		// TODO: tell player state to reset everything
+		_p.createBoard();
+		// _player.multStack[0] = (_startColors + 2) * .2;
 
 		if (_paintCanBumper != null)
 		{
@@ -880,11 +878,11 @@ class APGameState extends ClassicGameState
 			if (bumper.hasFlair("booster"))
 			{
 				boosterUp = true;
-				_player.multStack[1] += .2;
+				_p.multiStack[1] += .2;
 			}
 
 		if (boosterUp)
-			pushToast(_t("game/ap/booster", ["value" => _player.multStack[1]]), FlxColor.YELLOW);
+			pushToast(_t("game/ap/booster", ["value" => _p.multiStack[1]]), FlxColor.YELLOW);
 
 		// super.onMatch(chain, combo, bumpers);
 
@@ -1050,6 +1048,7 @@ class APGameState extends ClassicGameState
 		}
 	}
 
+	/** @deprecated probably none of this is necessary **/
 	override function serialize():DynamicAccess<Dynamic>
 	{
 		var retval = super.serialize();
@@ -1063,26 +1062,27 @@ class APGameState extends ClassicGameState
 		return retval;
 	}
 
+	/** @deprecated probably none of this is necessary **/
 	override function deserialize(data:DynamicAccess<Dynamic>, ignoreGameName = false)
 	{
-		if (data["gameType"] == "archipelago")
-		{
-			while (_players.pop() != null) {}
+		// if (data["gameType"] == "archipelago")
+		// {
+		// 	while (_playersv2.pop() != null) {}
 
-			var playerData:Array<DynamicAccess<Dynamic>> = data["players"];
-			for (player in playerData)
-			{
-				var boardData:DynamicAccess<Dynamic> = player["board"];
-				var board = new APBoard(0, 0, boardData["width"], boardData["height"]);
-				board.deserialize(boardData);
-				_players.push({
-					board: board,
-					multStack: player["multStack"]
-				});
-			}
+		// 	var playerData:Array<DynamicAccess<Dynamic>> = data["players"];
+		// 	for (player in playerData)
+		// 	{
+		// 		var boardData:DynamicAccess<Dynamic> = player["board"];
+		// 		var board = new APBoard(0, 0, boardData["width"], boardData["height"]);
+		// 		board.deserialize(boardData);
+		// 		_players.push({
+		// 			board: board,
+		// 			multStack: player["multStack"]
+		// 		});
+		// 	}
 
-			_hud = new APHUD();
-		}
+		// 	_hud = new APHUD();
+		// }
 
 		_startPaintCans = data["startPaintCans"];
 		_startTurners = data["startTurners"];
