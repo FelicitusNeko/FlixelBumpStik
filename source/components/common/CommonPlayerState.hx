@@ -450,6 +450,8 @@ abstract class CommonPlayerState
 		next = null;
 		multiStack = _dfltMultiStack.slice(0);
 
+		createBoard(true);
+
 		_bg.reset();
 		if (_bgColorShuffle)
 			_bg.shuffleColors();
