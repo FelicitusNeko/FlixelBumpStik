@@ -382,13 +382,6 @@ abstract class CommonPlayerState
 		Evaluates the next turn loop.
 		@return The result of evaluating the loop.
 	**/
-	public function nextTurn()
-		return Next(generateBumper());
-
-	/**
-		Evaluates the next turn loop.
-		@return The result of evaluating the loop.
-	**/
 	public final function runNextTurn()
 	{
 		if (_rules == null || _rules.length == 0)

@@ -154,36 +154,6 @@ class ClassicPlayerState extends CommonPlayerState
 	public function makePaintCanSubstate()
 		return new PaintCanSubstate(board.center.subtractPoint(new FlxPoint(next.width, next.height).scale(.5)), _bg.colors, _bg);
 
-	/**
-		Evaluate the next turn loop.
-		@return The result of evaluating the loop.
-	**/
-	override public function nextTurn()
-	{
-		// TODO: make this modular so we can add/remove rules at different priorities
-		if (board == null)
-			throw new Exception("Turn advanced without board present");
-		if (_bg == null)
-			throw new Exception("Turn advanced without generator present");
-		if (board.state == "gameover" || board.state == "gameoverwait")
-			return Kill;
-		if (board.bCount <= 0 && _reg["jackpot"] > 0)
-		{
-			FlxG.sound.play(AssetPaths.allclear__wav);
-			var mJackpot = addScore(_reg["jackpot"], true);
-			_reg["jackpot"] = 0;
-
-			return Notice(new AllClearSubstate(mJackpot, board.center));
-		}
-		if (_reg["color.max"] > _bg.colors && _reg["color.next"] <= block)
-		{
-			FlxG.sound.play(AssetPaths.levelup__wav);
-			_reg["color.next"] += _reg["color.inc"];
-			return Notice(new NewColorSubstate(_bg.colorOpts[_bg.colors++], board.center));
-		}
-		return super.nextTurn();
-	}
-
 	/** Resets the player state. **/
 	override function reset()
 	{

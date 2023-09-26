@@ -94,8 +94,7 @@ class ClassicGameState extends CommonGameState
 			#end
 		}
 
-		// onBoardStateChanged(_p.id, "initial");
-		_p.nextTurn();
+		_p.runNextTurn();
 	}
 
 	function createGame()
