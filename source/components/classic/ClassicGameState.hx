@@ -220,10 +220,14 @@ class ClassicGameState extends CommonGameState
 		if (_selectedColor != null)
 			onBumperSelect(_p.id, null);
 
-	inline function onNextBumperClick(bumper:Bumper)
+	function onNextBumperClick(bumper:Bumper)
 	{
-		// BUG: painting the next bumper does not change the bumper in the player state
-		return onBumperSelect(_p.id, _p.next);
+		if (_selectedColor != null)
+		{
+			var nextClone = _p.next.cloneBumper();
+			onBumperSelect(_p.id, nextClone);
+			_p.next = nextClone;
+		}
 	}
 
 	/** Called when a bumper is selected, or the bumper selection is cancelled. **/
