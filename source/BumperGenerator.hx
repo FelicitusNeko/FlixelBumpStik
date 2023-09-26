@@ -165,7 +165,7 @@ class BumperGenerator
 		return retval;
 	}
 
-	/** Resets the generator to its initial setting. **/
+	/** Reseeds the randomizer, and resets the generator to its initial setting. **/
 	public function reset()
 	{
 		colors = 0;
