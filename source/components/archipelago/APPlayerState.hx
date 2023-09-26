@@ -479,6 +479,11 @@ class APPlayerState extends ClassicPlayerState
 		_reg["block.accrued.level"] += block;
 
 		super.reset();
+
+		paint = _reg["paint.starting"];
+		turner = 0;
+		turner = _reg["turner.starting"];
+
 		for (sch in _sched)
 			sch.reset();
 	}
