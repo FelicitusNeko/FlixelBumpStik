@@ -932,7 +932,6 @@ class APGameState extends ClassicGameState
 
 	function onTurnerClick()
 	{
-		// TODO: show cancel button
 		if (_boardAP.state != "initial" || _selectedColor != null)
 			return;
 
@@ -1019,16 +1018,17 @@ class APGameState extends ClassicGameState
 		}
 	}
 
-	/**
-		Called by the board when the board is jammed and the game is over.
-		@deprecated move to `onBoardStateChanged`
-	**/
-	function onGameOver(animDone:Bool)
+	override function onBoardStateChanged(id:String, state:String)
 	{
-		if (animDone)
-			restartGame();
-		// else
-		//	super.onGameOver(animDone);
+		super.onBoardStateChanged(id, state);
+
+		var index = _playersv2.map(i -> i.id).indexOf(id);
+		if (index >= 0)
+			switch (state)
+			{
+				case "gameover":
+					restartGame();
+			}
 	}
 
 	override function update(elapsed:Float)
@@ -1046,52 +1046,5 @@ class APGameState extends ClassicGameState
 			_ap.disconnect_socket();
 			FlxG.switchState(_queueTo);
 		}
-	}
-
-	/** @deprecated probably none of this is necessary **/
-	override function serialize():DynamicAccess<Dynamic>
-	{
-		var retval = super.serialize();
-
-		retval["startPaintCans"] = _startPaintCans;
-		retval["startTurners"] = _startTurners;
-		retval["allClears"] = _allClears;
-		retval["schedule"] = Serializer.run(_schedule);
-		retval["lastProcessed"] = _lastProcessed;
-
-		return retval;
-	}
-
-	/** @deprecated probably none of this is necessary **/
-	override function deserialize(data:DynamicAccess<Dynamic>, ignoreGameName = false)
-	{
-		// if (data["gameType"] == "archipelago")
-		// {
-		// 	while (_playersv2.pop() != null) {}
-
-		// 	var playerData:Array<DynamicAccess<Dynamic>> = data["players"];
-		// 	for (player in playerData)
-		// 	{
-		// 		var boardData:DynamicAccess<Dynamic> = player["board"];
-		// 		var board = new APBoard(0, 0, boardData["width"], boardData["height"]);
-		// 		board.deserialize(boardData);
-		// 		_players.push({
-		// 			board: board,
-		// 			multStack: player["multStack"]
-		// 		});
-		// 	}
-
-		// 	_hud = new APHUD();
-		// }
-
-		_startPaintCans = data["startPaintCans"];
-		_startTurners = data["startTurners"];
-		_allClears = data["allClears"];
-		_schedule = Unserializer.run(data["schedule"]);
-		_lastProcessed = data["lastProcessed"];
-
-		super.deserialize(data, ignoreGameName);
-
-		createLevel(_hudAP.level, true);
 	}
 }
