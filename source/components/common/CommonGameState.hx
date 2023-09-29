@@ -148,18 +148,21 @@ abstract class CommonGameState extends FlxState
 		for (player in _playersv2)
 			add(player.board);
 
-		var mainCamera = FlxG.camera;
-		var hudCamera = FlxG.cameras.list[1];
+		if (_p.board != null)
+		{
+			var mainCamera = FlxG.camera;
+			var hudCamera = FlxG.cameras.list[1];
 
-		if (FlxG.width > FlxG.height)
-		{
-			mainCamera.zoom = Math.min((FlxG.width - hudCamera.width) / _p.board.tWidth, FlxG.height / _p.board.tHeight) * (14 / 15);
-			mainCamera.focusOn(_p.board.center.add(hudCamera.width / 2 / FlxG.camera.zoom, 0));
-		}
-		else
-		{
-			mainCamera.zoom = Math.min(FlxG.width / _p.board.tWidth, (FlxG.height - hudCamera.height) / _p.board.tHeight) * (14 / 15);
-			mainCamera.focusOn(_p.board.center.add(hudCamera.width / 2 / FlxG.camera.zoom, 0));
+			if (FlxG.width > FlxG.height)
+			{
+				mainCamera.zoom = Math.min((FlxG.width - hudCamera.width) / _p.board.tWidth, FlxG.height / _p.board.tHeight) * (14 / 15);
+				mainCamera.focusOn(_p.board.center.add(hudCamera.width / 2 / FlxG.camera.zoom, 0));
+			}
+			else
+			{
+				mainCamera.zoom = Math.min(FlxG.width / _p.board.tWidth, (FlxG.height - hudCamera.height) / _p.board.tHeight) * (14 / 15);
+				mainCamera.focusOn(_p.board.center.add(hudCamera.width / 2 / FlxG.camera.zoom, 0));
+			}
 		}
 	}
 
