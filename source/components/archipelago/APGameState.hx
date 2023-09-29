@@ -236,7 +236,7 @@ private enum abstract APItem(Int) from Int to Int
 }
 
 /** A queued toast popup message. **/
-private typedef QueuedToast =
+private typedef QueuedToast = // NOTE: Do we want to move this functionality to core? It could be useful in other places/modes
 {
 	/** The content of the message. **/
 	var message:String;
@@ -318,6 +318,9 @@ class APGameState extends ClassicGameState
 	/** The APHUD instance for the current game. **/
 	private var _hudAP(get, never):APHUD;
 
+	/** The APPlayerState instance for the current game. **/
+	private var _pAP(get, never):APPlayerState;
+
 	/** If this is set, the game will transition to a different scene on the next call to `update`. **/
 	private var _queueTo:Null<FlxState> = null;
 
@@ -345,6 +348,9 @@ class APGameState extends ClassicGameState
 	inline function get__boardAP()
 		return cast(_p.board, APBoard);
 
+	inline function get__pAP()
+		return cast(_p, APPlayerState);
+
 	override function create()
 	{
 		super.create();
@@ -359,8 +365,8 @@ class APGameState extends ClassicGameState
 			apGames.close();
 		}
 
-		if (_hudAP.level == null)
-			createLevel(1);
+		if (_pAP.level == 0)
+			_pAP.level = 1;
 
 		_generalCamera = FlxG.cameras.add(new FlxCamera(0, 0, FlxG.width, FlxG.height), false);
 		_generalCamera.bgColor = FlxColor.TRANSPARENT;
@@ -628,40 +634,8 @@ class APGameState extends ClassicGameState
 	function restartGame()
 	{
 		remove(_p.board);
-		_jackpot = 0;
-		_hud.resetHUD();
 
-		for (schedule in _schedule)
-			schedule.reset();
-
-		if (_levelClear || _hudAP.level == null)
-			switch (_hudAP.level)
-			{
-				case null:
-					createLevel(1);
-				case x if (x < 5):
-					createLevel(x + 1);
-				default:
-					createLevel(-1);
-					return; // because we're done at this point
-			}
-
-		_bg.reset();
-		_bg.shuffleColors();
-		_bg.colors = _startColors;
-		_bg.colorLimit = _endColors;
-
-		// _hudClassic.paintCanStartThreshold = 1000 + (_startPaintCans * 500);
-		_hudClassic.paintCans = _startPaintCans;
-		// _hudClassic.paintCansIncrementStep = (_curWidth + _curHeight - 6) * 500;
-		_hudAP.turners = _startTurners;
-
-		_nextColor = _levelNextColor;
-		_nextColorEvery = _levelStepColor;
-
-		// TODO: tell player state to reset everything
-		_p.createBoard();
-		// _player.multStack[0] = (_startColors + 2) * .2;
+		_p.reset();
 
 		if (_paintCanBumper != null)
 		{

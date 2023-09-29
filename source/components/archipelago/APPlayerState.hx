@@ -140,6 +140,7 @@ class APPlayerState extends ClassicPlayerState
 		_reg["board.w"] = 3;
 		_reg["board.h"] = 3;
 		_reg["color.next"] = 50;
+		_reg["color.next.start"] = 50;
 		_reg["color.step"] = 50;
 		_reg["color.start"] = 2;
 		_reg["color.max"] = 3;
@@ -221,7 +222,7 @@ class APPlayerState extends ClassicPlayerState
 				_reg["board.w"] = _reg["board.h"] = 3;
 				_reg["color.start"] = 2;
 				_reg["color.max"] = 3;
-				_reg["color.next"] = _reg["color.step"] = 50;
+				_reg["color.next"] = _reg["color.next.start"] = _reg["color.step"] = 50;
 				addTask(Score, [250, 500, 750, 1000]);
 				addTask(LevelScore, [500, 1000, 1500, 2000]);
 				addTask(LevelCleared, [for (x in 1...4) x * 25]);
@@ -236,7 +237,7 @@ class APPlayerState extends ClassicPlayerState
 				_reg["board.w"] = _reg["board.h"] = 4;
 				_reg["color.start"] = 2;
 				_reg["color.max"] = 4;
-				_reg["color.next"] = 25;
+				_reg["color.next"] = _reg["color.next.start"] = 25;
 				_reg["color.step"] = 50;
 				addTask(Score, [500, 1000, 1500, 2000]);
 				addTask(LevelScore, [1000, 2000, 3000, 4000]);
@@ -255,7 +256,7 @@ class APPlayerState extends ClassicPlayerState
 				_reg["board.h"] = 4;
 				_reg["color.start"] = 3;
 				_reg["color.max"] = 5;
-				_reg["color.next"] = _reg["color.step"] = 50;
+				_reg["color.next"] = _reg["color.next.start"] = _reg["color.step"] = 50;
 				addTask(Score, [800, 1600, 2400, 3200]);
 				addTask(LevelScore, [2000, 4000, 6000, 8000]);
 				addTask(LevelCleared, [for (x in 1...6) x * 25]);
@@ -273,7 +274,7 @@ class APPlayerState extends ClassicPlayerState
 				_reg["board.w"] = _reg["board.h"] = 5;
 				_reg["color.start"] = 3;
 				_reg["color.max"] = 6;
-				_reg["color.next"] = _reg["color.step"] = 75;
+				_reg["color.next"] = _reg["color.next.start"] = _reg["color.step"] = 75;
 				addTask(Score, [1500, 3000, 4500, 6000]);
 				addTask(LevelScore, [3000, 6000, 9000, 12000]);
 				addTask(LevelCleared, [for (x in 1...7) x * 25]);
@@ -290,7 +291,7 @@ class APPlayerState extends ClassicPlayerState
 				_reg["board.w"] = _reg["board.h"] = 6;
 				_reg["color.start"] = 4;
 				_reg["color.max"] = 6;
-				_reg["color.next"] = _reg["color.step"] = 100;
+				_reg["color.next"] = _reg["color.next.start"] = _reg["color.step"] = 100;
 				addTask(TotalScore, [Math.round(Math.max(50000, totalScore + 5000))]);
 				addTask(Hazards, [25], _sched["hazard"].clear);
 				_sched["hazard"].setDelay(1, 10);
@@ -389,6 +390,24 @@ class APPlayerState extends ClassicPlayerState
 	}
 
 	/**
+		Creates a new board.
+		@param force Create a board even if one is present and in progress. Default `false`.
+	**/
+	override function createBoard(force:Bool = false)
+	{
+		if (force || board == null || board.state == "gameover")
+		{
+			if (board != null)
+				detachBoard();
+			if (level < 1 || level > 5)
+				board = null;
+			else
+				board = new APBoard(0, 0, _reg["board.w"], _reg["board.h"]);
+			attachBoard();
+		}
+	}
+
+	/**
 		Adds a task to the list.
 		@param type The type of task.
 		@param goal The goal to achieve.
@@ -478,7 +497,15 @@ class APPlayerState extends ClassicPlayerState
 		_reg["score.accrued.level"] += score;
 		_reg["block.accrued.level"] += block;
 
+		if (level == 0 || tasks.length == 0 || (tasks[0].type == LevelHeader && tasks[0].complete))
+			level++;
+
 		super.reset();
+
+		multiStack = [.4 + (_bg.colors * .2), 1.0 + (_sched["booster"].clear * .2)];
+		_bg.colorLimit = _reg["color.max"];
+		_bg.colors = _reg["color.start"];
+		_reg["color.next"] = _reg["color.next.start"];
 
 		paint = _reg["paint.starting"];
 		turner = 0;
