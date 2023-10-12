@@ -46,7 +46,7 @@ class ClassicPlayerState extends CommonPlayerState
 		});
 		addRule({
 			name: "allClearCheck",
-			condition: If(() -> (board.bCount == 0 && _reg["jackpot"] > 0)),
+			condition: If(() -> (board.bCount <= 0 && _reg["jackpot"] > 0)),
 			execute: Process(() ->
 			{
 				FlxG.sound.play(AssetPaths.allclear__wav);
