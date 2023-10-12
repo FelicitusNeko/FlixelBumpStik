@@ -120,9 +120,25 @@ class APPlayerState extends ClassicPlayerState
 		onDeployHazard = new Event<String->Void>();
 
 		addRule({
+			name: "gameComplete",
+			condition: If(() -> level >= 6),
+			execute: Process(() ->
+			{
+				// TODO: send complete to server
+				return Signal("ap-complete");
+			}),
+			priority: 5
+		});
+		addRule({
 			name: "levelComplete",
-			condition: If(() -> false), // TODO: check to ensure all tasks are complete
-			execute: Process(() -> Kill),
+			condition: If(() ->
+			{
+				for (task in tasks)
+					if (!task.complete)
+						return false;
+				return true;
+			}),
+			execute: Return(Kill),
 			priority: 20
 		});
 		addRule({
@@ -357,14 +373,11 @@ class APPlayerState extends ClassicPlayerState
 	{
 		updateTask(Chain, chain);
 		updateTask(Combo, combo);
+
 		for (b in bumpers)
-		{
 			if (b.hasFlair("booster"))
-			{
-				// TODO: report booster clear to game state
 				multiStack[1] += .2;
-			}
-		}
+
 		super.onMatch(chain, combo, bumpers);
 	}
 
@@ -378,9 +391,11 @@ class APPlayerState extends ClassicPlayerState
 				switch (key)
 				{
 					case "treasure":
+						// TODO: report treasure clear to game state
 						chain++;
 						updateTask(Treasures, sched.clear);
 					case "booster":
+						// TODO: report booster clear to game state
 						updateTask(Boosters, sched.clear);
 					case "hazard":
 						updateTask(Hazards, sched.clear);
@@ -502,17 +517,20 @@ class APPlayerState extends ClassicPlayerState
 
 		super.reset();
 
-		multiStack = [.4 + (_bg.colors * .2), 1.0 + (_sched["booster"].clear * .2)];
-		_bg.colorLimit = _reg["color.max"];
-		_bg.colors = _reg["color.start"];
-		_reg["color.next"] = _reg["color.next.start"];
+		if (level < 6)
+		{
+			multiStack = [.4 + (_bg.colors * .2), 1.0 + (_sched["booster"].clear * .2)];
+			_bg.colorLimit = _reg["color.max"];
+			_bg.colors = _reg["color.start"];
+			_reg["color.next"] = _reg["color.next.start"];
 
-		paint = _reg["paint.starting"];
-		turner = 0;
-		turner = _reg["turner.starting"];
+			paint = _reg["paint.starting"];
+			turner = 0;
+			turner = _reg["turner.starting"];
 
-		for (sch in _sched)
-			sch.reset();
+			for (sch in _sched)
+				sch.reset();
+		}
 	}
 
 	/** Saves the player state to text via Haxe's `Serializer`. **/

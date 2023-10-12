@@ -26,47 +26,16 @@ class ClassicGameState extends CommonGameState
 	/** A shortcut to cast `_p` as `ClassicPlayerState`. **/
 	private var _pClassic(get, never):ClassicPlayerState;
 
-	/**
-		The value of the All Clear jackpot.
-		@deprecated moving to `ClassicPlayerState`
-	**/
-	private var _jackpot:Int = 0;
-
 	/** A GUI element to display which color was selected for Paint Can use. **/
 	private var _paintCanBumper:Bumper = null;
 
 	/** A button to cancel Paint Can use. **/
 	private var _paintCanCancelButton:FlxButton = null;
 
-	/**
-		The number of bumpers to clear to add a new color.
-		@deprecated moving to `ClassicPlayerState`
-	**/
-	private var _nextColor:Int = 100;
-
-	/**
-		The number of bumpers to clear to add a new color.
-		@deprecated moving to `ClassicPlayerState`
-	**/
-	private var _nextColorEvery:Int = 150;
-
 	/** The current selected color during a Paint Can event. **/
 	private var _selectedColor:Null<FlxColor> = null;
 
-	function get_gameName()
-		return "classic";
-
-	function get_gameType()
-		return "classic";
-
-	inline function get__hudClassic()
-		return cast(_hud, ClassicHUD);
-
-	inline function get__boardClassic()
-		return cast(_p.board, ClassicBoard);
-
-	inline function get__pClassic()
-		return cast(_p, ClassicPlayerState);
+	// !------------------------- INSTANTIATION
 
 	override function create()
 	{
@@ -97,43 +66,33 @@ class ClassicGameState extends CommonGameState
 		_p.runNextTurn();
 	}
 
-	function createGame()
-	{
-		if (_playersv2.length == 0)
-		{
-			var p = new ClassicPlayerState("solo");
-			p.createGenerator();
-			p.createBoard();
-			_playersv2.push(p);
-		}
+	// !------------------------- PROPERTY HANDLERS
 
-		if (_hud == null)
-			_hud = new ClassicHUD();
-	}
+	function get_gameName()
+		return "classic";
 
-	override function attachPlayer(player:CommonPlayerState)
-	{
-		super.attachPlayer(player);
-		var playerCl = cast(player, ClassicPlayerState);
-		playerCl.onBumperSelected.add(onBumperSelect);
-	}
+	function get_gameType()
+		return "classic";
 
-	override function detachPlayer(player:CommonPlayerState)
-	{
-		super.detachPlayer(player);
-		var playerCl = cast(player, ClassicPlayerState);
-		playerCl.onBumperSelected.remove(onBumperSelect);
-	}
+	inline function get__hudClassic()
+		return cast(_hud, ClassicHUD);
 
-	function attachHUD()
-	{
-		_hud.onNextBumperClick.add(onNextBumperClick);
-		_hudClassic.onPaintCanClick.add(onPaintCanClick);
-	}
+	inline function get__boardClassic()
+		return cast(_p.board, ClassicBoard);
 
-	// TODO: should this go into CommonGameState?
+	inline function get__pClassic()
+		return cast(_p, ClassicPlayerState);
+
+	// !------------------------- EVENT HANDLERS
+
+	/**
+		Called when the state of a connected player's board has changed.
+		@param id The seconding player's identity string.
+		@param state The current board state's identifier.
+	**/
 	function onBoardStateChanged(id:String, state:String)
 	{
+		// TODO: should this go into CommonGameState? also can this be modular like runNextTurn?
 		var index = _playersv2.map(i -> i.id).indexOf(id);
 		if (index >= 0)
 			switch (state)
@@ -157,6 +116,12 @@ class ClassicGameState extends CommonGameState
 				default:
 			}
 	}
+
+	/**
+		Called when a `Signal` is received from the player state.
+		@param signal The signal string.
+	**/
+	function onSignal(signal:String) {}
 
 	// TODO: make Paint Cans work more like Turners
 	// in other words: click the button, pick a bumper, colour wheel shows up around it, pick a colour
@@ -215,10 +180,15 @@ class ClassicGameState extends CommonGameState
 			FlxG.sound.play(AssetPaths.mback__wav);
 	}
 
+	/** Called when the Cancel button is clicked during a Paint Can event. **/
 	function onFieldCancel()
 		if (_selectedColor != null)
 			onBumperSelect(_p.id, null);
 
+	/**
+		Called when the Next bumper is clicked.
+		@param bumper The clone of the Next bumper from the HUD.
+	**/
 	function onNextBumperClick(bumper:Bumper)
 	{
 		if (_selectedColor != null)
@@ -229,7 +199,11 @@ class ClassicGameState extends CommonGameState
 		}
 	}
 
-	/** Called when a bumper is selected, or the bumper selection is cancelled. **/
+	/**
+		Called when a bumper is selected, or the bumper selection is cancelled.
+		@param id The sending player's identity string.
+		@param bumper The selected bumper.
+	**/
 	function onBumperSelect(id:String, bumper:Bumper)
 	{
 		if (id != _p.id)
@@ -253,5 +227,51 @@ class ClassicGameState extends CommonGameState
 			_boardClassic.endPaint(_selectedColor == null);
 			_selectedColor = null;
 		}
+	}
+
+	// !------------------------- OVERRIDES & ABSTRACT DEFS
+
+	/** Starts a new game. **/
+	function createGame()
+	{
+		if (_playersv2.length == 0)
+		{
+			var p = new ClassicPlayerState("solo");
+			p.createGenerator();
+			p.createBoard();
+			_playersv2.push(p);
+		}
+
+		if (_hud == null)
+			_hud = new ClassicHUD();
+	}
+
+	/** Connects this game state to the HUD's events. **/
+	function attachHUD()
+	{
+		_hud.onNextBumperClick.add(onNextBumperClick);
+		_hudClassic.onPaintCanClick.add(onPaintCanClick);
+	}
+
+	/**
+		Connects this game state to a player state's events.
+		@param state The state to connect to the game state.
+	**/
+	override function attachPlayer(player:CommonPlayerState)
+	{
+		super.attachPlayer(player);
+		var playerCl = cast(player, ClassicPlayerState);
+		playerCl.onBumperSelected.add(onBumperSelect);
+	}
+
+	/**
+		Disconnects this game state from a player state's events.
+		@param state The state to disconnect from the game state.
+	**/
+	override function detachPlayer(player:CommonPlayerState)
+	{
+		super.detachPlayer(player);
+		var playerCl = cast(player, ClassicPlayerState);
+		playerCl.onBumperSelected.remove(onBumperSelect);
 	}
 }

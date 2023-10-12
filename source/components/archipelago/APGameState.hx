@@ -256,39 +256,6 @@ class APGameState extends ClassicGameState
 	/** The index of the last item that has been processed. **/
 	private var _lastProcessed = -1;
 
-	/** The width at which the next game will start. **/
-	private var _curWidth = 3;
-
-	/** The height at which the next game will start. **/
-	private var _curHeight = 3;
-
-	/** The number of colors with which the next game will start. **/
-	private var _startColors = 2;
-
-	/** The maximum number of colors the next came can reach. **/
-	private var _endColors = 3;
-
-	/** How many clears to the first color extension this level. **/
-	private var _levelNextColor = 50;
-
-	/** How many more clears for additional color extensions this level. **/
-	private var _levelStepColor = 50;
-
-	/** The number of Paint Cans with which the next game will start. **/
-	private var _startPaintCans = 0;
-
-	/** The number of Turners with which the next game will start. **/
-	private var _startTurners = 0;
-
-	/** Scheduling data for special bumpers. **/
-	private var _schedule:Map<String, DeploymentSchedule> = [];
-
-	/** The number of All Clears achieved this multiworld. Used for determining checks to send. **/
-	private var _allClears = 0;
-
-	/** The schedule randomiser for this multiworld. **/
-	private var _rng = new FlxRandom();
-
 	/** The primary camera where the game board lives. **/
 	private var _generalCamera:FlxCamera;
 
@@ -308,9 +275,7 @@ class APGameState extends ClassicGameState
 	private var _levelClear = false;
 
 	/** Whether the user is attempting to use a Turner. **/
-	private var _turnerMode = false;
-
-	// TODO: will need to make this check before game over check (not that it makes much of a difference in this mode, but it could later)
+	private var _turnerMode = false; // TODO: probably a better way to do this
 
 	/** The APBoard instance for the current game. **/
 	private var _boardAP(get, never):APBoard;
@@ -324,6 +289,8 @@ class APGameState extends ClassicGameState
 	/** If this is set, the game will transition to a different scene on the next call to `update`. **/
 	private var _queueTo:Null<FlxState> = null;
 
+	// !------------------------- INSTANTIATION
+
 	public function new(ap:Client, slotData:Dynamic)
 	{
 		_ap = ap;
@@ -331,25 +298,7 @@ class APGameState extends ClassicGameState
 		_ap._hOnItemsReceived = onItemsReceived;
 
 		super();
-
-		_nextColor = 50;
-		_nextColorEvery = 50;
 	}
-
-	override function get_gameName()
-		return 'ap-${_ap.seed}-${_ap.slotnr}';
-
-	override function get_gameType()
-		return "archipelago";
-
-	inline function get__hudAP()
-		return cast(_hud, APHUD);
-
-	inline function get__boardAP()
-		return cast(_p.board, APBoard);
-
-	inline function get__pAP()
-		return cast(_p, APPlayerState);
 
 	override function create()
 	{
@@ -371,14 +320,6 @@ class APGameState extends ClassicGameState
 		_generalCamera = FlxG.cameras.add(new FlxCamera(0, 0, FlxG.width, FlxG.height), false);
 		_generalCamera.bgColor = FlxColor.TRANSPARENT;
 
-		// _hud.onScoreChanged.add(onScoreChanged);
-		_hudClassic.paintCans = _startPaintCans;
-		// _hudClassic.paintCansIncrementStep = 0;
-		_hudAP.turners = _startTurners;
-		_hudAP.onTaskCleared.add(onTaskComplete);
-		_hudAP.onTurnerClick.add(onTurnerClick);
-		_hudAP.onTaskSkipClick.add(onTaskSkipClick);
-
 		FlxG.autoPause = false;
 
 		// TODO: Restart Board button
@@ -395,199 +336,30 @@ class APGameState extends ClassicGameState
 	override function destroy()
 	{
 		_ap.disconnect_socket();
+		FlxG.cameras.remove(_generalCamera);
+		_generalCamera.destroy();
 		FlxG.autoPause = true;
 		super.destroy();
 	}
 
-	override function createGame()
-	{
-		if (_playersv2.length == 0)
-			_playersv2.push(new APPlayerState("ap"));
+	// !------------------------- PROPERTY HANDLERS
 
-		_hud = new APHUD();
+	override function get_gameName()
+		return 'ap-${_ap.seed}-${_ap.slotnr}';
 
-		for (type in ["booster", "hazard", "treasure"])
-			_schedule.set(type, {
-				inStock: 0,
-				maxAvailable: 0,
-				onBoard: 0,
-				clear: 0,
-				sinceLast: 0,
-				minDelay: 0,
-				maxDelay: 10
-			});
-		_schedule["booster"].setDelay(7, 20);
+	override function get_gameType()
+		return "archipelago";
 
-		_bg = new BumperGenerator(2, [
-			APColor.Red,
-			APColor.Green,
-			APColor.Rose,
-			APColor.Beige,
-			APColor.Purple,
-			APColor.Yellow
-		]);
-		_bg.shuffleColors();
-		_bg.colors = _startColors;
-		_bg.colorLimit = _endColors;
-	}
+	inline function get__hudAP()
+		return cast(_hud, APHUD);
 
-	/**
-		Creates the tasks for a level. Also removes any tasks that currently exist.
-		@param level The level number to set up.
-	**/
-	function createLevel(level:Int, dontCreateTasks = false)
-	{
-		_levelClear = false;
-		if (!dontCreateTasks)
-		{
-			_hudAP.wipeTasks();
-			if (level > 0)
-				_hudAP.addTask(LevelHeader, [level]);
-		}
-		switch (level)
-		{
-			case 1:
-				_curWidth = 3;
-				_curHeight = 3;
-				_startColors = 2;
-				_endColors = 3;
-				_levelNextColor = _levelStepColor = 50;
-				if (!dontCreateTasks)
-				{
-					_hudAP.addTask(Score, [250, 500, 750, 1000]);
-					_hudAP.addTask(LevelScore, [500, 1000, 1500, 2000]);
-					_hudAP.addTask(LevelCleared, [for (x in 1...4) x * 25]);
-					_hudAP.addTask(Combo, [5]);
-					_hudAP.addTask(Boosters, [1], _schedule["booster"].clear);
-					_hudAP.addTask(Treasures, [8], _schedule["treasure"].clear);
-				}
-				_schedule["booster"].maxAvailable = 2;
-				_schedule["treasure"].maxAvailable = 9;
-				_schedule["hazard"].maxAvailable = 0;
-			case 2:
-				_curWidth = 4;
-				_curHeight = 4;
-				_startColors = 2;
-				_endColors = 4;
-				_levelNextColor = 25;
-				_levelStepColor = 50;
-				if (!dontCreateTasks)
-				{
-					_hudAP.addTask(Score, [500, 1000, 1500, 2000]);
-					_hudAP.addTask(LevelScore, [1000, 2000, 3000, 4000]);
-					_hudAP.addTask(LevelCleared, [for (x in 1...5) x * 25]);
-					_hudAP.addTask(Combo, [5]);
-					_hudAP.addTask(Chain, [2]);
-					_hudAP.addTask(Boosters, [2], _schedule["booster"].clear);
-					_hudAP.addTask(Treasures, [16], _schedule["treasure"].clear);
-				}
-				_schedule["booster"].maxAvailable = 3;
-				_schedule["treasure"].maxAvailable = 17;
-				_schedule["hazard"].setDelay(10, 25);
-				_schedule["hazard"].maxAvailable = 3;
-			case 3:
-				_curWidth = 5;
-				_curHeight = 4;
-				_startColors = 3;
-				_endColors = 5;
-				_levelNextColor = _levelStepColor = 50;
-				if (!dontCreateTasks)
-				{
-					_hudAP.addTask(Score, [800, 1600, 2400, 3200]);
-					_hudAP.addTask(LevelScore, [2000, 4000, 6000, 8000]);
-					_hudAP.addTask(LevelCleared, [for (x in 1...6) x * 25]);
-					_hudAP.addTask(Combo, [5, 7]);
-					_hudAP.addTask(Chain, [2]);
-					_hudAP.addTask(AllClear, [3]);
-					_hudAP.addTask(Boosters, [3], _schedule["booster"].clear);
-					_hudAP.addTask(Treasures, [24], _schedule["treasure"].clear);
-				}
-				_schedule["booster"].maxAvailable = 4;
-				_schedule["treasure"].maxAvailable = 25;
-				_schedule["hazard"].setDelay(5, 20);
-				_schedule["hazard"].maxAvailable = 8;
-			case 4:
-				_curWidth = 5;
-				_curHeight = 5;
-				_startColors = 3;
-				_endColors = 6;
-				_levelNextColor = _levelStepColor = 75;
-				if (!dontCreateTasks)
-				{
-					_hudAP.addTask(Score, [1500, 3000, 4500, 6000]);
-					_hudAP.addTask(LevelScore, [3000, 6000, 9000, 12000]);
-					_hudAP.addTask(LevelCleared, [for (x in 1...7) x * 25]);
-					_hudAP.addTask(Combo, [5, 7]);
-					_hudAP.addTask(Chain, [2, 3]);
-					_hudAP.addTask(Boosters, [5], _schedule["booster"].clear);
-					_hudAP.addTask(Treasures, [32], _schedule["treasure"].clear);
-				}
-				_schedule["booster"].maxAvailable = 5;
-				_schedule["treasure"].maxAvailable = 999;
-				_schedule["hazard"].setDelay(3, 15);
-				_schedule["hazard"].maxAvailable = 15;
-			case 5:
-				_curWidth = 6;
-				_curHeight = 6;
-				_startColors = 4;
-				_endColors = 6;
-				_levelNextColor = _levelStepColor = 100;
-				if (!dontCreateTasks)
-				{
-					_hudAP.addTask(TotalScore, [Math.round(Math.max(50000, _hudAP.totalScore + 5000))]);
-					_hudAP.addTask(Hazards, [25], _schedule["hazard"].clear);
-				}
-				_schedule["hazard"].setDelay(1, 10);
-				for (schedule in _schedule)
-					schedule.maxAvailable = 999;
-			case 6 | -1: // the game is complete in this case; send a goal condition to the server
-				_ap.clientStatus = ClientStatus.GOAL;
-				var dlg = new DialogBox(_t("game/ap/goal"), {
-					buttons: [
-						{
-							text: _t("base/dlg/back2menu"),
-							result: Custom(() ->
-							{
-								_queueTo = new MenuState();
-								return No;
-							})
-						},
-						{
-							text: _t("menu/main/classic"),
-							result: Custom(() ->
-							{
-								_queueTo = new ClassicGameState();
-								return Yes;
-							})
-						}
-					],
-					camera: _generalCamera
-				});
-				dlg.closeCallback = () ->
-				{
-					_ap.Say("!release");
-					_ap.Say("!collect");
-				}
-				openSubState(dlg);
-				_hudAP.addTask(Score, [99999]);
-			default: // If we don't recognise the level, just default to 99999 score and make it obvious something's wrong
-				openSubState(new DialogBox(_t("game/ap/error/levelgen", ["level" => level]), {
-					title: _t("base/error"),
-					titleColor: FlxColor.fromRGB(255, 127, 127),
-					defAccept: Custom(() ->
-					{
-						_queueTo = new MenuState();
-						return Close;
-					}),
-					defCancel: Custom(() ->
-					{
-						_queueTo = new MenuState();
-						return Close;
-					})
-				}));
-				_hudAP.addTask(Score, [99999]);
-		}
-	}
+	inline function get__boardAP()
+		return cast(_p.board, APBoard);
+
+	inline function get__pAP()
+		return cast(_p, APPlayerState);
+
+	// !------------------------- METHODS
 
 	/**
 		Pushes a notification toast onto the stack.
@@ -648,6 +420,8 @@ class APGameState extends ClassicGameState
 		prepareBoard();
 	}
 
+	// !------------------------- EVENT HANDLERS
+
 	/** Called by AP client when an item is received. **/
 	private function onItemsReceived(items:Array<NetworkItem>)
 	{
@@ -666,25 +440,25 @@ class APGameState extends ClassicGameState
 					switch (item)
 					{
 						case ScoreBonus:
-							var bonus = 200 * Math.round(Math.pow(2, _hudAP.level - 1));
+							var bonus = 200 * Math.round(Math.pow(2, _pAP.level - 1));
 							_hudAP.score += bonus;
 							substitutes.set("bonus", bonus);
 						case TaskSkip:
 							_hudAP.taskSkip++;
 						case StartingTurner:
-							_startTurners++;
+							// _startTurners++;
 							_hudAP.turners++;
 						// case Blank004:
 						// this shouldn't happen currently
 						case StartPaintCan:
-							_startPaintCans++;
+							// _startPaintCans++;
 							_hudClassic.paintCans++;
 						case BonusBooster:
-							_schedule["booster"].inStock++;
+						// _schedule["booster"].inStock++;
 						case HazardBumper:
-							_schedule["hazard"].inStock++;
+						// _schedule["hazard"].inStock++;
 						case TreasureBumper:
-							_schedule["treasure"].inStock++;
+						// _schedule["treasure"].inStock++;
 						case RainbowTrap:
 							_boardAP.trapTrigger = Rainbow(_bg.colorsInPlay);
 						case SpinnerTrap:
@@ -704,12 +478,13 @@ class APGameState extends ClassicGameState
 
 	/**
 		Called when a task is completed.
+		@param id The seconding player's identity string.
 		@param level The level number related to the cleared task.
 		@param type The type of task.
 		@param goal The goal achieved.
 		@param current The current value for the goal.
 	**/
-	private function onTaskComplete(level:Null<Int>, task:APTaskType, goal:Int, current:Int)
+	private function onTaskComplete(id:String, level:Null<Int>, task:APTaskType, goal:Int, current:Int)
 	{
 		// TODO: here's where we actually send checks
 		trace("Task complete", task, '$current/$goal');
@@ -718,7 +493,7 @@ class APGameState extends ClassicGameState
 			_levelClear = true;
 		else
 		{
-			var check:Null<Int> = switch ([task, _hudAP.level, goal])
+			var check:Null<Int> = switch ([task, _pAP.level, goal])
 			{
 				case [Score, 1, x]:
 					L1Score250 + Math.round(x / 250 - 1);
@@ -780,123 +555,24 @@ class APGameState extends ClassicGameState
 	}
 
 	/**
-		Called when the board requests a bumper to be generated. Usually when it goes into Idle state.
-		@deprecated move to `APPlayerState` and `onBoardStateChanged`
+		Called when the state of a connected player's board has changed.
+		@param id The seconding player's identity string.
+		@param state The current board state's identifier.
 	**/
-	function onRequestGenerate()
+	override function onBoardStateChanged(id:String, state:String)
 	{
-		if (_ap.clientStatus == ClientStatus.READY)
-		{
-			_ap.clientStatus = ClientStatus.PLAYING;
-			if (_itemBuffer.length > 0)
-			{
-				onItemsReceived(_itemBuffer);
-				_itemBuffer = [];
-			}
-		}
+		super.onBoardStateChanged(id, state);
 
-		if (_boardClassic.bCount <= 0 && _jackpot > 0)
-			_hudAP.updateTask(AllClear, _bg.colors);
-		// if (++_allClears == 1)
-		// 	_ap.LocationChecks([APLocation.AllClear]);
-		if (_levelClear)
-		{
-			FlxG.sound.play(AssetPaths.levelup__wav);
-			pushToast(_t("game/ap/levelcomplete"), FlxColor.LIME, 3000);
-			_boardAP.levelClear();
-			return;
-		}
-
-		var prevBumper = _hud.nextBumper;
-		// super.onRequestGenerate();
-		var newBumper = _hud.nextBumper;
-		if (newBumper != null && newBumper != prevBumper)
-		{
-			for (key => schedule in _schedule)
+		var index = _playersv2.map(i -> i.id).indexOf(id);
+		if (index >= 0)
+			switch (state)
 			{
-				if (schedule.inStock <= 0 || schedule.available <= 0)
-					continue;
-				if (++schedule.sinceLast < schedule.minDelay)
-					continue;
-				if (schedule.sinceLast >= schedule.maxDelay || _rng.bool(schedule.eligibleTurns / schedule.maxEligible * 100))
-				{
-					schedule.sinceLast = 0;
-					schedule.inStock--;
-					schedule.onBoard++;
-					switch (key)
-					{
-						case "booster":
-							newBumper.addFlair("booster");
-						case "treasure":
-							newBumper.addFlair("treasure");
-						case "hazard":
-							var emptyPos = _boardClassic.getRandomSpace(true);
-							if (emptyPos != null)
-								_boardClassic.putObstacleAt(emptyPos[0], emptyPos[1], new APHazardPlaceholder(0, 0, _bg.generateColor(true), _boardClassic));
-					}
-					if (newBumper.flairCount > 0)
-						break;
-				}
+				case "gameover":
+					restartGame();
 			}
-		}
 	}
 
-	/**
-		Called when a match is formed.
-		@deprecated move to APPlayerState
-	**/
-	function onMatch(chain:Int, combo:Int, bumpers:Array<Bumper>)
-	{
-		var boosterUp = false;
-		for (bumper in bumpers)
-			if (bumper.hasFlair("booster"))
-			{
-				boosterUp = true;
-				_p.multiStack[1] += .2;
-			}
-
-		if (boosterUp)
-			pushToast(_t("game/ap/booster", ["value" => _p.multiStack[1]]), FlxColor.YELLOW);
-
-		// super.onMatch(chain, combo, bumpers);
-
-		_hudAP.updateTask(Chain, chain);
-		_hudAP.updateTask(Combo, combo);
-	}
-
-	/**
-		Called when a bumper is cleared.
-		@deprecated move to `APPlayerState`
-	**/
-	function onClear(chain:Int, bumper:Bumper)
-	{
-		for (key => schedule in _schedule)
-		{
-			if (bumper.hasFlair(key))
-			{
-				schedule.onBoard--;
-				schedule.clear++;
-
-				switch (key)
-				{
-					case "treasure":
-						chain++; // This will double the value of the bumper
-						_hudAP.updateTask(Treasures, schedule.clear);
-						if (schedule.clear <= 32)
-							_checkBuffer.push(APLocation.Treasure1 + schedule.clear - 1);
-					case "booster":
-						_hudAP.updateTask(Boosters, schedule.clear);
-						if (schedule.clear <= 5)
-							_checkBuffer.push(APLocation.Booster1 + schedule.clear - 1);
-					case "hazard":
-						_hudAP.updateTask(Hazards, schedule.clear);
-				}
-			}
-		}
-
-		// super.onClear(chain, bumper);
-	}
-
+	/** Called when the Paint Can button is clicked. **/
 	override function onPaintCanClick()
 	{
 		if (_turnerMode)
@@ -904,9 +580,10 @@ class APGameState extends ClassicGameState
 		super.onPaintCanClick();
 	}
 
+	/** Called when the Turner button is clicked. **/
 	function onTurnerClick()
 	{
-		if (_boardAP.state != "initial" || _selectedColor != null)
+		if (_boardAP.state != "initial" || _selectedColor != null || _pAP.turner == 0)
 			return;
 
 		if (_paintCanCancelButton == null)
@@ -929,6 +606,7 @@ class APGameState extends ClassicGameState
 		_boardAP.selectMode();
 	}
 
+	/** Called when the Cancel button is clicked during a Paint Can or Turner event. **/
 	override function onFieldCancel()
 	{
 		if (_turnerMode)
@@ -941,25 +619,31 @@ class APGameState extends ClassicGameState
 			super.onFieldCancel();
 	}
 
+	/** Called when the Task Advance button is clicked. **/
 	function onTaskSkipClick()
 	{
-		if (_boardAP.state == "initial" && !_turnerMode && _selectedColor == null)
+		if (_boardAP.state == "initial" && !_turnerMode && _selectedColor == null && _pAP.taskSkip > 0)
 		{
 			var dlg = new TaskSkipSubstate(_boardAP.center);
 			dlg.onTaskSkip.add(task ->
 			{
-				_hudAP.taskSkip--;
-				_hudAP.updateTask(task.type, task.current);
+				_pAP.taskSkip--;
+				_pAP.updateTask(task.type, task.current);
 				if (![Treasures, Boosters].contains(task.type))
-					onTaskComplete(_hudAP.level, task.type, task.goals[task.goalIndex - 1], task.current);
+					onTaskComplete(_p.id, _pAP.level, task.type, task.goals[task.goalIndex - 1], task.current);
 				if (_levelClear)
 					onRequestGenerate();
 			});
-			_hudAP.loadTaskSkip(dlg);
+			_pAP.loadTaskSkip(dlg);
 			openSubState(dlg);
 		}
 	}
 
+	/**
+		Called when a bumper is selected, or the bumper selection is cancelled.
+		@param id The sending player's identity string.
+		@param bumper The selected bumper.
+	**/
 	override function onBumperSelect(id:String, bumper:Bumper)
 	{
 		if (_p.id != id)
@@ -992,17 +676,42 @@ class APGameState extends ClassicGameState
 		}
 	}
 
-	override function onBoardStateChanged(id:String, state:String)
-	{
-		super.onBoardStateChanged(id, state);
+	// !------------------------- OVERRIDES (Common)
 
-		var index = _playersv2.map(i -> i.id).indexOf(id);
-		if (index >= 0)
-			switch (state)
-			{
-				case "gameover":
-					restartGame();
-			}
+	/** Starts a new game. **/
+	override function createGame()
+	{
+		if (_playersv2.length == 0)
+			_playersv2.push(new APPlayerState("ap"));
+
+		_hud = new APHUD();
+	}
+
+	/** Connects this game state to the HUD's events. **/
+	override function attachHUD()
+	{
+		super.attachHUD();
+		_hudAP.onTurnerClick.add(onTurnerClick);
+		_hudAP.onTaskSkipClick.add(onTaskSkipClick);
+	}
+
+	/**
+		Connects this game state to a player state's events.
+		@param state The state to connect to the game state.
+	**/
+	override function attachPlayer(player)
+	{
+		super.attachPlayer(player);
+		_pAP.onTaskCleared.add(onTaskComplete);
+	}
+
+	/**
+		Disconnects this game state from a player state's events.
+		@param state The state to disconnect from the game state.
+	**/
+	override function detachPlayer(player)
+	{
+		super.detachPlayer(player);
 	}
 
 	override function update(elapsed:Float)
@@ -1020,5 +729,131 @@ class APGameState extends ClassicGameState
 			_ap.disconnect_socket();
 			FlxG.switchState(_queueTo);
 		}
+	}
+
+	// !------------------------- DEPRECATED
+
+	/**
+		Creates the tasks for a level. Also removes any tasks that currently exist.
+		@param level The level number to set up.
+		@deprecated moving to `APPlayerState`
+	**/
+	function createLevel(level:Int, dontCreateTasks = false)
+	{
+		_levelClear = false;
+		switch (level)
+		{
+			case x if (x > 0 && x < 6):
+			// temporary measure to avoid breaking before removing entire function
+
+			case 6 | -1: // the game is complete in this case; send a goal condition to the server
+				_ap.clientStatus = ClientStatus.GOAL;
+				var dlg = new DialogBox(_t("game/ap/goal"), {
+					buttons: [
+						{
+							text: _t("base/dlg/back2menu"),
+							result: Custom(() ->
+							{
+								_queueTo = new MenuState();
+								return No;
+							})
+						},
+						{
+							text: _t("menu/main/classic"),
+							result: Custom(() ->
+							{
+								_queueTo = new ClassicGameState();
+								return Yes;
+							})
+						}
+					],
+					camera: _generalCamera
+				});
+				dlg.closeCallback = () ->
+				{
+					_ap.Say("!release");
+					_ap.Say("!collect");
+				}
+				openSubState(dlg);
+			// _hudAP.addTask(Score, [99999]);
+			default: // If we don't recognise the level, just default to 99999 score and make it obvious something's wrong
+				openSubState(new DialogBox(_t("game/ap/error/levelgen", ["level" => level]), {
+					title: _t("base/error"),
+					titleColor: FlxColor.fromRGB(255, 127, 127),
+					defAccept: Custom(() ->
+					{
+						_queueTo = new MenuState();
+						return Close;
+					}),
+					defCancel: Custom(() ->
+					{
+						_queueTo = new MenuState();
+						return Close;
+					})
+				}));
+				// _hudAP.addTask(Score, [99999]);
+		}
+	}
+
+	/**
+		Called when the board requests a bumper to be generated. Usually when it goes into Idle state.
+		@deprecated move to `APPlayerState` and `onBoardStateChanged`
+	**/
+	function onRequestGenerate()
+	{
+		if (_ap.clientStatus == ClientStatus.READY)
+		{
+			_ap.clientStatus = ClientStatus.PLAYING;
+			if (_itemBuffer.length > 0)
+			{
+				onItemsReceived(_itemBuffer);
+				_itemBuffer = [];
+			}
+		}
+
+		// if (++_allClears == 1)
+		// 	_ap.LocationChecks([APLocation.AllClear]);
+		if (_levelClear)
+		{
+			FlxG.sound.play(AssetPaths.levelup__wav);
+			pushToast(_t("game/ap/levelcomplete"), FlxColor.LIME, 3000);
+			_boardAP.levelClear();
+			return;
+		}
+
+		// var prevBumper = _hud.nextBumper;
+		// super.onRequestGenerate();
+		// var newBumper = _hud.nextBumper;
+		/*
+			if (newBumper != null && newBumper != prevBumper)
+			{
+				for (key => schedule in _schedule)
+				{
+					if (schedule.inStock <= 0 || schedule.available <= 0)
+						continue;
+					if (++schedule.sinceLast < schedule.minDelay)
+						continue;
+					if (schedule.sinceLast >= schedule.maxDelay || _rng.bool(schedule.eligibleTurns / schedule.maxEligible * 100))
+					{
+						schedule.sinceLast = 0;
+						schedule.inStock--;
+						schedule.onBoard++;
+						switch (key)
+						{
+							case "booster":
+								newBumper.addFlair("booster");
+							case "treasure":
+								newBumper.addFlair("treasure");
+							case "hazard":
+								var emptyPos = _boardClassic.getRandomSpace(true);
+								if (emptyPos != null)
+									_boardClassic.putObstacleAt(emptyPos[0], emptyPos[1], new APHazardPlaceholder(0, 0, _bg.generateColor(true), _boardClassic));
+						}
+						if (newBumper.flairCount > 0)
+							break;
+					}
+				}
+			}
+		 */
 	}
 }

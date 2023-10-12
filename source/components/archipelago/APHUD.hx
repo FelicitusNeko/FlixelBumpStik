@@ -9,35 +9,13 @@ import flixel.util.FlxColor;
 import lime.app.Event;
 import components.archipelago.APTask;
 import components.classic.ClassicHUD;
+import components.common.CommonGameState;
+import components.common.CommonHUD;
 import components.common.CommonPlayerState;
 
 /** Adds Archipelago-specific elements to the Classic mode HUD. **/
 class APHUD extends ClassicHUD
 {
-	/**
-		The total number of points accrued through previous games on this level.
-		@deprecated to be moved to `APPlayerState`
-	**/
-	private var _accruedScoreThisLevel = 0;
-
-	/**
-		The total number of points accrued through previous games.
-		@deprecated to be moved to `APPlayerState`
-	**/
-	private var _accruedScore = 0;
-
-	/**
-		The total number of bumpers cleared accured through previous games on this level.
-		@deprecated to be moved to `APPlayerState`
-	**/
-	private var _accruedBlockThisLevel = 0;
-
-	/**
-		The total number of bumpers cleared accured through previous games.
-		@deprecated to be moved to `APPlayerState`
-	**/
-	private var _accruedBlock = 0;
-
 	/** The task list display component. **/
 	private var _taskListbox:FlxUIList;
 
@@ -62,36 +40,6 @@ class APHUD extends ClassicHUD
 	/** The current number of available Task Skips. **/
 	public var taskSkip(default, set):Int = 0;
 
-	/**
-		The total number of points obtained through games on this level.
-		@deprecated to be moved to `APPlayerState`
-	**/
-	public var levelScore(get, never):Int;
-
-	/**
-		The total number of points obtained through all games.
-		@deprecated to be moved to `APPlayerState`
-	**/
-	public var totalScore(get, never):Int;
-
-	/**
-		The total number of bumpers cleared through games on this level.
-		@deprecated to be moved to `APPlayerState`
-	**/
-	public var levelBlock(get, never):Int;
-
-	/**
-		The total number of bumpers cleared through all games.
-		@deprecated to be moved to `APPlayerState`
-	**/
-	public var totalBlock(get, never):Int;
-
-	/**
-		The current task level.
-		@deprecated to be moved to `APPlayerState`
-	**/
-	public var level(get, never):Null<Int>;
-
 	/** Event that fires when the Turner button is clicked. **/
 	public var onTurnerClick(default, null) = new Event<Void->Void>();
 
@@ -107,6 +55,8 @@ class APHUD extends ClassicHUD
 		@deprecated to be moved to `APPlayerState`
 	**/
 	public var onTaskCleared(default, null) = new Event<(Null<Int>, APTaskType, Int, Int) -> Void>();
+
+	// !------------------------- INSTANTIATION
 
 	public function new()
 	{
@@ -141,6 +91,8 @@ class APHUD extends ClassicHUD
 		turners = 0;
 	}
 
+	// !------------------------- PROPERTY HANDLERS
+
 	function set_turners(turners:Int)
 	{
 		// var displayTurners = Math.round(Math.min(turners, 10));
@@ -149,7 +101,7 @@ class APHUD extends ClassicHUD
 
 		var diff = turners - this.turners;
 		if (diff > 0)
-			makeFlyout('+$diff', _turnerButton);
+			add(CommonHUD.generateFlyout('+$diff', _turnerButton));
 
 		return this.turners = turners;
 	}
@@ -162,70 +114,52 @@ class APHUD extends ClassicHUD
 
 		var diff = taskSkip - this.taskSkip;
 		if (diff > 0)
-			makeFlyout('+$diff', _skipButton);
+			add(CommonHUD.generateFlyout('+$diff', _skipButton));
 
 		return this.taskSkip = taskSkip;
 	}
 
-	/** @deprecated to be handled by `APPlayerState` **/
-	inline function get_levelScore()
-		return _accruedScoreThisLevel + score;
+	// !------------------------- OVERRIDES
 
-	/** @deprecated to be handled by `APPlayerState` **/
-	inline function get_totalScore()
-		return _accruedScore + score;
-
-	/** @deprecated to be handled by `APPlayerState` **/
-	inline function get_levelBlock()
-		return _accruedBlockThisLevel + block;
-
-	/** @deprecated to be handled by `APPlayerState` **/
-	inline function get_totalBlock()
-		return _accruedBlock + block;
-
-	/** @deprecated to be handled by `APPlayerState` **/
-	override function set_score(score:Int):Int
-	{
-		var retval = super.set_score(score);
-		updateTask(Score, retval);
-		updateTask(LevelScore, levelScore);
-		updateTask(TotalScore, totalScore);
-		return retval;
-	}
-
-	/** @deprecated to be handled by `APPlayerState` **/
-	override function set_block(block:Int):Int
-	{
-		var retval = super.set_block(block);
-		updateTask(Cleared, retval);
-		updateTask(LevelCleared, levelBlock);
-		updateTask(TotalCleared, totalBlock);
-		return retval;
-	}
-
-	/** @deprecated to be handled by `APPlayerState` **/
-	function get_level():Null<Int>
-	{
-		if (_taskList.length == 0)
-			return null;
-		if (_taskList[0].type != LevelHeader)
-			return null;
-		return _taskList[0].curGoal;
-	}
-
-	override function attachState(state:CommonPlayerState):Bool
+	/**
+		Connects this HUD to a player state's events.
+		@param state The state to connect to the HUD.
+		@return Whether the operation succeeded. If `false`, the state was most likely already connected.
+	**/
+	override public function attachState(state:CommonPlayerState):Bool
 	{
 		var retval = super.attachState(state);
 		if (retval)
 		{
-			var apState = cast(state, APPlayerState);
-			apState.onLevelChanged.add(onLevelChanged);
-			apState.onTurnerChanged.add(onTurnerChanged);
-			apState.onTaskSkipChanged.add(onTaskSkipChanged);
-			apState.onTaskUpdated.add(onTaskUpdated);
+			var apPS = cast(state, APPlayerState);
+			apPS.onLevelChanged.add(onLevelChanged);
+			apPS.onTurnerChanged.add(onTurnerChanged);
+			apPS.onTaskSkipChanged.add(onTaskSkipChanged);
+			apPS.onTaskUpdated.add(onTaskUpdated);
 		}
 		return retval;
 	}
+
+	/**
+		Disconnects this HUD from a player state's events.
+		@param state The state to disconnect from the HUD.
+		@return Whether the operation succeeded. If `false`, the state was most likely not connected.
+	**/
+	override public function detachState(state:CommonPlayerState):Bool
+	{
+		var retval = super.detachState(state);
+		if (retval)
+		{
+			var apPS = cast(state, APPlayerState);
+			apPS.onLevelChanged.remove(onLevelChanged);
+			apPS.onTurnerChanged.remove(onTurnerChanged);
+			apPS.onTaskSkipChanged.remove(onTaskSkipChanged);
+			apPS.onTaskUpdated.remove(onTaskUpdated);
+		}
+		return retval;
+	}
+
+	// !------------------------- EVENT HANDLERS
 
 	function onLevelChanged(id:String, level:Int, tasks:Array<APTaskV2>)
 	{
@@ -262,163 +196,5 @@ class APHUD extends ClassicHUD
 			return;
 		_tasks[index].text = text;
 		_tasks[index].color = completed ? FlxColor.LIME : FlxColor.WHITE;
-	}
-
-	/**
-		Adds a task to the list.
-		@param type The type of task.
-		@param goal The goal to achieve.
-		@param current Optional. The current value for the goal.
-		If this is omitted and it is a Score or Clear-based goal, the current value stored by the HUD is used. Otherwise defaults to 0.
-		@deprecated to be moved to `APPlayerState`
-	**/
-	public function addTask(type:APTaskType, goals:Array<Int>, ?current:Int)
-	{
-		if (type == LevelHeader && _taskList.length > 0)
-			throw new Exception("Only first task may be Level pseudotask");
-
-		if (current == null)
-			current = switch (type)
-			{
-				case Score: score;
-				case LevelScore: levelScore;
-				case TotalScore: totalScore;
-				case Cleared: block;
-				case LevelCleared: levelBlock;
-				case TotalCleared: totalBlock;
-				default: 0;
-			}
-		var newTask:APTask = {
-			type: type,
-			goals: goals,
-			goalIndex: 0,
-			current: 0,
-			uiText: new FlxUIText(0, 0, 0,
-				_t('game/ap/task/$type', ["current" => current, "goal" => goals[0]]) + _t('game/ap/task/left', ["_" => goals.length - 1]))
-		};
-		if (type == LevelHeader)
-		{
-			newTask.uiText.size += 4;
-			newTask.uiText.alignment = CENTER;
-		}
-		_taskList.push(newTask);
-		updateTask(type, current);
-		_taskListbox.add(newTask.uiText);
-	}
-
-	/**
-		Updates the current value for a task. If the goal for a task has been achieved, `onTaskCleared` will be dispatched.
-		If all tasks have been completed, another `onTaskCleared` will be dispatched to signal this.
-
-		@param type The type of task.
-		@param current The current value for the goal.
-		@deprecated to be moved to `APPlayerState`
-	**/
-	public function updateTask(type:APTaskType, current:Int)
-	{
-		if (_taskList.length == 0)
-			return;
-
-		for (task in _taskList)
-		{
-			if (task.type != type || task.current > current)
-				continue;
-
-			task.current = current;
-			while (task.current >= task.curGoal && task.goalIndex < task.goalCount)
-			{
-				onTaskCleared.dispatch(level, task.type, task.curGoal, task.current);
-				task.goalIndex++;
-			}
-			task.uiText.text = task;
-		}
-
-		var levelTask = _taskList[0];
-		if (levelTask.type == LevelHeader && !levelTask.complete && _taskList.length > 1)
-		{
-			var allTasksCleared = true;
-			for (task in _taskList.slice(1))
-				allTasksCleared = allTasksCleared && task.complete;
-			if (allTasksCleared)
-			{
-				levelTask.current = levelTask.curGoal;
-				onTaskCleared.dispatch(level, LevelHeader, levelTask.curGoal, levelTask.curGoal);
-			}
-		}
-	}
-
-	/**
-		Removes all tasks from the task list.
-		@deprecated to be moved to `APPlayerState`
-	**/
-	public function wipeTasks()
-	{
-		_taskListbox.clear();
-		for (task in _taskList)
-			task.uiText.destroy();
-		_taskList = [];
-		_accruedScoreThisLevel = _accruedBlockThisLevel = 0;
-	}
-
-	/**
-		Resets the HUD to its starting values. For Archipelago games, it will also increment `_accruedScore` and `_accruedBlock`.
-		@deprecated to be moved to `APPlayerState`
-	**/
-	public override function resetHUD()
-	{
-		_accruedScoreThisLevel += score;
-		_accruedBlockThisLevel += block;
-		_accruedScore += score;
-		_accruedBlock += block;
-		super.resetHUD();
-	}
-
-	/** @deprecated to be moved to `APPlayerState` **/
-	public function loadTaskSkip(dlg:TaskSkipSubstate)
-		dlg.loadTasks(_taskList.slice(1).filter(i -> !i.complete));
-
-	/** @deprecated all data to be handled by player state **/
-	public override function serialize():DynamicAccess<Dynamic>
-	{
-		var retval = super.serialize();
-
-		retval["turners"] = turners;
-		retval["taskSkip"] = taskSkip;
-		retval["accScore"] = _accruedScore;
-		retval["accScoreTL"] = _accruedScoreThisLevel;
-		retval["accBlock"] = _accruedBlock;
-		retval["accBlockTL"] = _accruedBlockThisLevel;
-		retval["tasks"] = _taskList.map(t -> t.toBaseData());
-
-		return retval;
-	}
-
-	/** @deprecated all data to be handled by player state **/
-	public override function deserialize(data:DynamicAccess<Dynamic>)
-	{
-		super.deserialize(data);
-
-		turners = data["turners"];
-		taskSkip = data["taskSkip"];
-		_accruedScore = data["accScore"];
-		_accruedScoreThisLevel = data["ScoreTL"];
-		_accruedBlock = data["accBlock"];
-		_accruedBlockThisLevel = data["accBlockTL"];
-
-		var taskData:Array<APTask> = data["tasks"];
-		for (task in taskData)
-		{
-			task.uiText = new FlxUIText(0, 0, 0, task);
-			if (task.complete)
-				task.uiText.color = FlxColor.LIME;
-			_taskList.push(task);
-
-			if (task.type == LevelHeader)
-			{
-				task.uiText.size += 4;
-				task.uiText.alignment = CENTER;
-			}
-			_taskListbox.add(task.uiText);
-		}
 	}
 }

@@ -18,23 +18,13 @@ class ClassicHUD extends CommonHUD
 	/** The button to use a Paint Can. **/
 	private var _pcButton:FlxButton;
 
-	/**
-		The score target for the next Paint Can.
-		@deprecated handled by `ClassicPlayerState` (this var is still used by APHUD)
-	**/
-	private var _paintCansNext:Int = 1000;
-
-	/**
-		How much the score target for the next Paint Can will be incremented when it is hit.
-		@deprecated handled by `ClassicPlayerState` (this var is still used by APHUD)
-	**/
-	private var _paintCansIncrement:Int = 1500;
-
 	/** The current number of available Paint Cans. **/
 	public var paintCans(default, set):Int = 0; // NOTE: do we need this? could make PlayerState events report the old value
 
 	/** Event that fires when the Paint Can button is clicked. **/
 	public var onPaintCanClick(default, null) = new Event<Void->Void>();
+
+	// !------------------------- INSTANTIATION
 
 	public function new()
 	{
@@ -51,6 +41,8 @@ class ClassicHUD extends CommonHUD
 		paintCans = 0;
 	}
 
+	// !------------------------- PROPERTY HANDLERS
+
 	function set_paintCans(paintCans:Int):Int
 	{
 		// var displayPaintCans = Math.round(Math.min(paintCans, 10));
@@ -59,12 +51,19 @@ class ClassicHUD extends CommonHUD
 
 		var diff = paintCans - this.paintCans;
 		if (diff > 0)
-			makeFlyout('+$diff', _pcButton);
+			add(CommonHUD.generateFlyout('+$diff', _pcButton));
 
 		return this.paintCans = paintCans;
 	}
 
-	override function attachState(state:CommonPlayerState):Bool
+	// !------------------------- OVERRIDES
+
+	/**
+		Connects this HUD to a player state's events.
+		@param state The state to connect to the HUD.
+		@return Whether the operation succeeded. If `false`, the state was most likely already connected.
+	**/
+	override public function attachState(state:CommonPlayerState):Bool
 	{
 		var retval = super.attachState(state);
 		if (retval)
@@ -75,7 +74,12 @@ class ClassicHUD extends CommonHUD
 		return retval;
 	}
 
-	override function detachState(state:CommonPlayerState):Bool
+	/**
+		Disconnects this HUD from a player state's events.
+		@param state The state to disconnect from the HUD.
+		@return Whether the operation succeeded. If `false`, the state was most likely not connected.
+	**/
+	override public function detachState(state:CommonPlayerState):Bool
 	{
 		var retval = super.detachState(state);
 		if (retval)
@@ -86,23 +90,9 @@ class ClassicHUD extends CommonHUD
 		return retval;
 	}
 
+	// !------------------------- EVENT HANDLERS
+
 	function onPaintChanged(id:String, paints:Int)
 		if (_connected.contains(id))
 			paintCans = paints;
-
-	/**
-		Creates an `FlxText` that is animated as to emanate from a given sprite.
-		@param text The text to create as a flyout.
-		@param from The sprite to emanate from.
-		@param foColor *Optional.* The color of the text. Defaults to `FlxColor.YELLOW`.
-	**/
-	function makeFlyout(text:String, from:FlxSprite, foColor = FlxColor.YELLOW)
-	{
-		// TODO: this can probably be static (call add(makeFlyout([...])) from parent)
-		var flyout = new FlxText(0, 0, 0, text, 12);
-		flyout.color = foColor;
-		add(flyout);
-		flyout.setPosition(from.x + (from.width * Math.random()) - (flyout.width / 2), from.y);
-		FlxTween.tween(flyout, {alpha: 0, y: flyout.y - (flyout.height * 1.5)}, 1, {ease: FlxEase.circOut, onComplete: (_) -> flyout.kill()});
-	}
 }

@@ -40,18 +40,13 @@ abstract class CommonGameState extends FlxState
 	/** Read-only. The type of game. **/
 	public var gameType(get, never):String;
 
+	// !------------------------- INSTANTIATION
+
 	public function new()
 	{
 		_t = BumpStikGame.g().i18n.tr;
 		super();
 	}
-
-	abstract function get_gameName():String;
-
-	abstract function get_gameType():String;
-
-	inline function get__p()
-		return _playersv2.length == 0 ? null : _playersv2[0];
 
 	override function create()
 	{
@@ -99,22 +94,45 @@ abstract class CommonGameState extends FlxState
 		super.create();
 	}
 
+	// !------------------------- PROPERTY HANDLERS
+
+	abstract function get_gameName():String;
+
+	abstract function get_gameType():String;
+
+	inline function get__p()
+		return _playersv2.length == 0 ? null : _playersv2[0];
+
+	// !------------------------- METHODS
+
+	/** Starts a new game. **/
 	abstract function createGame():Void;
 
+	/** Connects this game state to the HUD's events. **/
+	abstract function attachHUD():Void;
+
+	/**
+		Connects this game state to a player state's events.
+		@param state The state to connect to the game state.
+	**/
 	function attachPlayer(player:CommonPlayerState)
 	{
 		player.onBoardStateChanged.add(onBoardStateChanged);
 	}
 
+	/**
+		Disconnects this game state from a player state's events.
+		@param state The state to disconnect from the game state.
+	**/
 	function detachPlayer(player:CommonPlayerState)
 	{
 		player.onBoardStateChanged.remove(onBoardStateChanged);
 	}
 
-	abstract function attachHUD():Void;
-
-	abstract function onBoardStateChanged(id:String, state:String):Void;
-
+	/**
+		Saves the game in progress.
+		@param file _Optional._ The file to erase. If not specified, `gameName` is used.
+	**/
 	function saveGame(?file:String)
 	{
 		if (file == null)
@@ -133,6 +151,10 @@ abstract class CommonGameState extends FlxState
 		save.close();
 	}
 
+	/**
+		Erases a save file.
+		@param file _Optional._ The file to erase. If not specified, `gameName` is used.
+	**/
 	function clearGame(?file:String)
 	{
 		if (file == null)
@@ -143,6 +165,7 @@ abstract class CommonGameState extends FlxState
 		save.erase();
 	}
 
+	/** Prepares the players' board(s) to be displayed and used by the game state. **/
 	function prepareBoard()
 	{
 		for (player in _playersv2)
@@ -166,16 +189,7 @@ abstract class CommonGameState extends FlxState
 		}
 	}
 
-	override function update(elapsed:Float)
-	{
-		#if (debug && sys && !noescape)
-		if (FlxG.keys.anyJustPressed([ESCAPE]))
-			System.exit(0);
-		#end
-
-		super.update(elapsed);
-	}
-
+	/** Stringifies the game state's data to be saved to a file. **/
 	function serialize():DynamicAccess<Dynamic>
 	{
 		var retval:DynamicAccess<Dynamic> = {};
@@ -189,11 +203,37 @@ abstract class CommonGameState extends FlxState
 		return retval;
 	}
 
+	/**
+		Parses serialized data and loads it into the game state.
+		@param data The data to be parsed.
+		@param ignoreGameName _Optional._ If `true`, will load whether or not the `gameName` matches. Defaults to `false`, and should only be set to `true` by child overrides.
+	**/
 	function deserialize(data:DynamicAccess<Dynamic>, ignoreGameName = false)
 	{
 		if (data["gameName"] != gameName && !ignoreGameName)
 			throw new Exception("Game name mismatch");
 
 		_playersv2 = Unserializer.run(data["players"]);
+	}
+
+	// !------------------------- EVENT HANDLERS
+
+	/**
+		Called when the state of a connected player's board has changed.
+		@param id The seconding player's identity string.
+		@param state The current board state's identifier.
+	**/
+	abstract function onBoardStateChanged(id:String, state:String):Void;
+
+	// !------------------------- OVERRIDES
+
+	override function update(elapsed:Float)
+	{
+		#if (debug && sys && !noescape)
+		if (FlxG.keys.anyJustPressed([ESCAPE]))
+			System.exit(0);
+		#end
+
+		super.update(elapsed);
 	}
 }

@@ -6,6 +6,9 @@ import boardObject.Bumper;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.group.FlxSpriteGroup;
+import flixel.text.FlxText;
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import lime.app.Event;
 
@@ -43,6 +46,8 @@ abstract class CommonHUD extends FlxSpriteGroup
 	/** Retrieve a string based on an i18n key. **/
 	private var _t:I18nFunction;
 
+	// !------------------------- INSTANTIATION
+
 	public function new()
 	{
 		super(0, 0);
@@ -73,6 +78,8 @@ abstract class CommonHUD extends FlxSpriteGroup
 		}
 	}
 
+	// !------------------------- PROPERTY HANDLERS
+
 	inline function get_score()
 		return _scoreCounter.value;
 
@@ -96,8 +103,10 @@ abstract class CommonHUD extends FlxSpriteGroup
 
 		if (this.nextBumper != null)
 		{
+			var next = this.nextBumper;
 			this.nextBumper.onClick.remove(onNextClick);
 			remove(this.nextBumper);
+			next.destroy();
 		}
 		if (nextBumper != null)
 		{
@@ -112,36 +121,7 @@ abstract class CommonHUD extends FlxSpriteGroup
 			return this.nextBumper = null;
 	}
 
-	/**
-		Resets the HUD to its starting values.
-		@deprecated Stats are to be stored and handled by the player state
-	**/
-	public function resetHUD()
-	{
-		if (nextBumper != null)
-		{
-			remove(nextBumper);
-			nextBumper = null;
-		}
-		score = 0;
-		block = 0;
-	}
-
-	private function scoreChanged(id:String, score:Int)
-		if (_connected.contains(id))
-			this.score = score;
-
-	private function blockChanged(id:String, block:Int)
-		if (_connected.contains(id))
-			this.block = block;
-
-	private function bonusSet(id:String, bonus:Int)
-		if (_connected.contains(id))
-			this.bonus = bonus;
-
-	private function nextChanged(id:String, next:Bumper)
-		if (_connected.contains(id))
-			this.nextBumper = next;
+	// !------------------------- METHODS
 
 	/**
 		Connects this HUD to a player state's events.
@@ -181,23 +161,39 @@ abstract class CommonHUD extends FlxSpriteGroup
 		return true;
 	}
 
-	/** @deprecated Stats are to be stored and handled by the player state **/
-	public function serialize()
+	// !------------------------- EVENT HANDLERS
+
+	private function scoreChanged(id:String, score:Int)
+		if (_connected.contains(id))
+			this.score = score;
+
+	private function blockChanged(id:String, block:Int)
+		if (_connected.contains(id))
+			this.block = block;
+
+	private function bonusSet(id:String, bonus:Int)
+		if (_connected.contains(id))
+			this.bonus = bonus;
+
+	private function nextChanged(id:String, next:Bumper)
+		if (_connected.contains(id))
+			this.nextBumper = next;
+
+	// !------------------------- STATICS
+
+	/**
+		Creates an `FlxText` that is animated as to emanate from a given sprite.
+		@param text The text to create as a flyout.
+		@param from The sprite to emanate from.
+		@param foColor *Optional.* The color of the text. Defaults to `FlxColor.YELLOW`.
+		@return The flyout text.
+	**/
+	static function generateFlyout(text:String, from:FlxSprite, foColor = FlxColor.YELLOW)
 	{
-		var retval:DynamicAccess<Dynamic> = {};
-
-		retval["score"] = score;
-		retval["block"] = block;
-		retval["nextBumper"] = nextBumper == null ? null : nextBumper.serialize();
-
-		return retval;
-	}
-
-	/** @deprecated Stats are to be stored and handled by the player state **/
-	public function deserialize(data:DynamicAccess<Dynamic>)
-	{
-		score = data["score"];
-		block = data["block"];
-		nextBumper = Bumper.fromSaved(data["nextBumper"]);
+		var flyout = new FlxText(0, 0, 0, text, 12);
+		flyout.color = foColor;
+		flyout.setPosition(from.x + (from.width * Math.random()) - (flyout.width / 2), from.y);
+		FlxTween.tween(flyout, {alpha: 0, y: flyout.y - (flyout.height * 1.5)}, 1, {ease: FlxEase.circOut, onComplete: (_) -> flyout.kill()});
+		return flyout;
 	}
 }
