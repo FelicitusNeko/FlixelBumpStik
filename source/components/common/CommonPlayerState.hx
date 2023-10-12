@@ -57,6 +57,9 @@ enum TurnResult
 	/** The game is over. **/
 	Kill;
 
+	/** Sends a string signal to the game state. **/
+	Signal(sig:String);
+
 	/** A custom function is to be called. **/
 	Custom(f:Void->Void);
 }
