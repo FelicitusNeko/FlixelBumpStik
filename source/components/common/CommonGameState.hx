@@ -12,7 +12,9 @@ import flixel.math.FlxPoint;
 import flixel.util.FlxColor;
 import flixel.util.FlxSave;
 import openfl.system.System;
+import state.MenuState;
 import components.common.CommonHUD;
+import components.dialogs.DialogBox;
 
 abstract class CommonGameState extends FlxState
 {
@@ -190,6 +192,30 @@ abstract class CommonGameState extends FlxState
 				mainCamera.focusOn(_p.board.center.add(hudCamera.width / 2 / FlxG.camera.zoom, 0));
 			}
 		}
+	}
+
+	/**
+		Shows an error dialog.
+		@param text The caption for the error dialog.
+		@param title _Optional._ The title for the error dialog. Defaults to `base/error` i18n string.
+		@param fatal _Optional._ If `true`, closing the dialog will terminate the game in progress. Default `false`.
+	**/
+	final function showError(text:String, ?title:String, fatal = false)
+	{
+		var dlgDef:DialogOptions = {
+			title: title == null ? _t("base/error") : title,
+			titleColor: FlxColor.fromRGB(255, 127, 127)
+		};
+		if (fatal)
+			dlgDef.defAccept = dlgDef.defCancel = Custom(() ->
+			{
+				_queueTo = new MenuState();
+				return Close;
+			});
+		else
+			dlgDef.defAccept = dlgDef.defCancel = Close;
+
+		openSubState(new DialogBox(text, dlgDef));
 	}
 
 	/** Stringifies the game state's data to be saved to a file. **/
