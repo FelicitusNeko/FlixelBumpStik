@@ -39,10 +39,9 @@ class APPlayerState extends ClassicPlayerState
 		Event that fires when a task is updated.
 		@param id The sending player's identity string.
 		@param index The index of the task to be updated.
-		@param text The text to be displayed.
-		@param isComplete Whether the task has been completed.
+		@param task The task to be updated.
 	**/
-	public var onTaskUpdated(default, null):Event<(String, Int, String, Bool) -> Void>;
+	public var onTaskUpdated(default, null):Event<(String, Int, APTaskV2) -> Void>;
 
 	/**
 		Event that fires when a task has been cleared.
@@ -115,7 +114,7 @@ class APPlayerState extends ClassicPlayerState
 		onTaskSkipChanged = new Event<(String, Int) -> Void>();
 		onTurnerChanged = new Event<(String, Int) -> Void>();
 		onLevelChanged = new Event<(String, Int, Array<APTaskV2>) -> Void>();
-		onTaskUpdated = new Event<(String, Int, String, Bool) -> Void>();
+		onTaskUpdated = new Event<(String, Int, APTaskV2) -> Void>();
 		onTaskCleared = new Event<(String, Null<Int>, APTaskType, Int, Int) -> Void>();
 		onDeployHazard = new Event<String->Void>();
 
@@ -483,7 +482,7 @@ class APPlayerState extends ClassicPlayerState
 			// TODO: this is still to be handled by the HUD
 			// task.uiText.text = task;
 
-			onTaskUpdated.dispatch(id, x, task, task.complete);
+			onTaskUpdated.dispatch(id, x, task);
 		}
 
 		if (!_levelPopulating)

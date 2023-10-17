@@ -190,11 +190,11 @@ class APHUD extends ClassicHUD
 		if (_connected.contains(id))
 			taskSkip = count;
 
-	inline function onTaskUpdated(id:String, index:Int, text:String, completed:Bool)
+	inline function onTaskUpdated(id:String, index:Int, task:APTaskV2)
 	{
 		if (!_connected.contains(id))
 			return;
-		_tasks[index].text = text;
-		_tasks[index].color = completed ? FlxColor.LIME : FlxColor.WHITE;
+		_tasks[index].text = task;
+		_tasks[index].color = task.complete ? FlxColor.LIME : FlxColor.WHITE;
 	}
 }
