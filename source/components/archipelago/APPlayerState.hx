@@ -6,6 +6,7 @@ import haxe.Serializer;
 import haxe.Unserializer;
 import boardObject.Bumper;
 import boardObject.archipelago.APHazardPlaceholder;
+import flixel.FlxG;
 import flixel.math.FlxRandom;
 import lime.app.Event;
 import utilities.DeploymentSchedule;
@@ -140,7 +141,12 @@ class APPlayerState extends ClassicPlayerState
 						return false;
 				return true;
 			}),
-			execute: Return(Kill), // TODO: wipe board and prep next level
+			execute: Process(() ->
+			{
+				FlxG.sound.play(AssetPaths.levelup__wav);
+				apBoard.levelClear();
+				return Signal("ap-lvcomplete");
+			}),
 			priority: 20
 		});
 		addRule({
