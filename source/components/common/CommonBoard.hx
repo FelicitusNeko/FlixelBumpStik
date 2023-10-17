@@ -385,7 +385,9 @@ abstract class CommonBoard extends FlxTypedGroup<FlxBasic>
 		Temporary function for launcher functionality.
 		@deprecated Currently only to be used for the `Launcher` class.
 	**/
-	public inline function bumperAt(x, y)
+	@:allow(boardObject.Launcher.set_enabled)
+	@:allow(boardObject.archipelago.APHazardPlaceholder.onAdvanceTurn)
+	inline function bumperAt(x, y)
 		return atGrid(_bumpers, x, y);
 
 	/**
