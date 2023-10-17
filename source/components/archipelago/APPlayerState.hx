@@ -101,6 +101,8 @@ class APPlayerState extends ClassicPlayerState
 	**/
 	private var _levelPopulating = false;
 
+	// !------------------------- INSTANTIATION
+
 	public function new(id:String)
 	{
 		super(id);
@@ -137,7 +139,7 @@ class APPlayerState extends ClassicPlayerState
 						return false;
 				return true;
 			}),
-			execute: Return(Kill),
+			execute: Return(Kill), // TODO: wipe board and prep next level
 			priority: 20
 		});
 		addRule({
@@ -168,6 +170,8 @@ class APPlayerState extends ClassicPlayerState
 		_reg["block.accrued.level"] = 0;
 		_reg["block.accrued.game"] = 0;
 	}
+
+	// !------------------------- PROPERTY HANDLERS
 
 	override function set_score(score:Int):Int
 	{
@@ -331,95 +335,7 @@ class APPlayerState extends ClassicPlayerState
 	inline private function get_tasks()
 		return this.tasks.slice(0);
 
-	/**
-		Modifies a bumper.
-		@param b The bumper to modify.
-		@return The modified bumper. If not overridden, `b` is returned as-is.
-	**/
-	override function modifyBumper(b:Bumper):Bumper
-	{
-		for (key => schedule in _sched)
-		{
-			if (schedule.inStock <= 0 || schedule.available <= 0)
-				continue;
-			if (++schedule.sinceLast < schedule.minDelay)
-				continue;
-			if (b.flairCount > 0 && key != "hazard")
-				continue;
-			if (schedule.sinceLast >= schedule.maxDelay || _rng.bool(schedule.eligibleTurns / schedule.maxEligible * 100))
-			{
-				schedule.sinceLast = 0;
-				schedule.inStock--;
-				schedule.onBoard++;
-				switch (key)
-				{
-					case "treasure":
-						b.addFlair("treasure");
-					case "booster":
-						b.addFlair("booster");
-					case "hazard":
-						var emptyPos = board.getRandomSpace(true);
-						if (emptyPos != null)
-							board.putObstacleAt(emptyPos[0], emptyPos[1], new APHazardPlaceholder(0, 0, _bg.generateColor(true), board));
-						onDeployHazard.dispatch(id);
-				}
-			}
-		}
-		return b;
-	}
-
-	override function onMatch(chain:Int, combo:Int, bumpers:Array<Bumper>)
-	{
-		updateTask(Chain, chain);
-		updateTask(Combo, combo);
-
-		for (b in bumpers)
-			if (b.hasFlair("booster"))
-				multiStack[1] += .2;
-
-		super.onMatch(chain, combo, bumpers);
-	}
-
-	override function onClear(chain:Int, bumper:Bumper)
-	{
-		for (key => sched in _sched)
-			if (bumper.hasFlair(key))
-			{
-				sched.clear++;
-				sched.onBoard--;
-				switch (key)
-				{
-					case "treasure":
-						// TODO: report treasure clear to game state
-						chain++;
-						updateTask(Treasures, sched.clear);
-					case "booster":
-						// TODO: report booster clear to game state
-						updateTask(Boosters, sched.clear);
-					case "hazard":
-						updateTask(Hazards, sched.clear);
-				}
-			}
-		super.onClear(chain, bumper);
-	}
-
-	/**
-		Creates a new board.
-		@param force Create a board even if one is present and in progress. Default `false`.
-	**/
-	override function createBoard(force:Bool = false)
-	{
-		if (force || board == null || board.state == "gameover")
-		{
-			if (board != null)
-				detachBoard();
-			if (level < 1 || level > 5)
-				board = null;
-			else
-				board = new APBoard(0, 0, _reg["board.w"], _reg["board.h"]);
-			attachBoard();
-		}
-	}
+	// !------------------------- METHODS
 
 	/**
 		Adds a task to the list.
@@ -504,6 +420,99 @@ class APPlayerState extends ClassicPlayerState
 
 	public function loadTaskSkip(dlg:TaskSkipSubstate)
 		dlg.loadTasksV2(tasks.slice(1).filter(i -> !i.complete));
+
+	// !------------------------- EVENT HANDLERS
+	// !------------------------- OVERRIDES
+
+	/**
+		Creates a new board.
+		@param force Create a board even if one is present and in progress. Default `false`.
+	**/
+	override function createBoard(force:Bool = false)
+	{
+		if (force || board == null || board.state == "gameover")
+		{
+			if (board != null)
+				detachBoard();
+			if (level < 1 || level > 5)
+				board = null;
+			else
+				board = new APBoard(0, 0, _reg["board.w"], _reg["board.h"]);
+			attachBoard();
+		}
+	}
+
+	/**
+		Modifies a bumper.
+		@param b The bumper to modify.
+		@return The modified bumper. If not overridden, `b` is returned as-is.
+	**/
+	override function modifyBumper(b:Bumper):Bumper
+	{
+		for (key => schedule in _sched)
+		{
+			if (schedule.inStock <= 0 || schedule.available <= 0)
+				continue;
+			if (++schedule.sinceLast < schedule.minDelay)
+				continue;
+			if (b.flairCount > 0 && key != "hazard")
+				continue;
+			if (schedule.sinceLast >= schedule.maxDelay || _rng.bool(schedule.eligibleTurns / schedule.maxEligible * 100))
+			{
+				schedule.sinceLast = 0;
+				schedule.inStock--;
+				schedule.onBoard++;
+				switch (key)
+				{
+					case "treasure":
+						b.addFlair("treasure");
+					case "booster":
+						b.addFlair("booster");
+					case "hazard":
+						var emptyPos = board.getRandomSpace(true);
+						if (emptyPos != null)
+							board.putObstacleAt(emptyPos[0], emptyPos[1], new APHazardPlaceholder(0, 0, _bg.generateColor(true), board));
+						onDeployHazard.dispatch(id);
+				}
+			}
+		}
+		return b;
+	}
+
+	override function onMatch(chain:Int, combo:Int, bumpers:Array<Bumper>)
+	{
+		updateTask(Chain, chain);
+		updateTask(Combo, combo);
+
+		for (b in bumpers)
+			if (b.hasFlair("booster"))
+				multiStack[1] += .2;
+
+		super.onMatch(chain, combo, bumpers);
+	}
+
+	override function onClear(chain:Int, bumper:Bumper)
+	{
+		for (key => sched in _sched)
+			if (bumper.hasFlair(key))
+			{
+				sched.clear++;
+				sched.onBoard--;
+				switch (key)
+				{
+					case "treasure":
+						// TODO: report treasure clear to game state
+						chain++;
+						updateTask(Treasures, sched.clear);
+					case "booster":
+						// TODO: report booster clear to game state
+						updateTask(Boosters, sched.clear);
+					case "hazard":
+						updateTask(Hazards, sched.clear);
+				}
+			}
+		super.onClear(chain, bumper);
+	}
 
 	/** Resets the player state. **/
 	override function reset()
