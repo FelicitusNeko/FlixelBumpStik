@@ -362,14 +362,15 @@ class APGameState extends ClassicGameState
 	/**
 		Pushes a notification toast onto the stack.
 		@param message The message to display.
-		@param color Optional. The background color for this message. Default is `FlxColor.WHITE`.
-		@param delay Optional. The number of milliseconds to display the message. This is the amount of time for which it will be stationary on the screen.
+		@param color _Optional._ The background color for this message. Default is `FlxColor.WHITE`.
+		@param delay _Optional._ The number of milliseconds to display the message. This is the amount of time for which it will be stationary on the screen.
 		Default is 2000msec.
+		@param priority _Optional._ If `true`, the toast will skip the queue and be displayed next. Default `false`.
 	**/
-	function pushToast(message:String, color = FlxColor.WHITE, delay = 2000)
+	function pushToast(message:String, color = FlxColor.WHITE, delay = 2000, priority = false)
 	{
 		var queueEmpty = _toastQueue.length == 0;
-		_toastQueue.push({
+		(priority ? _toastQueue.unshift : _toastQueue.push)({
 			message: message,
 			color: color,
 			delay: delay
@@ -689,6 +690,8 @@ class APGameState extends ClassicGameState
 	override function onSignal(signal:String)
 		switch (signal)
 		{
+			case "ap-lvcomplete":
+				pushToast(_t("game/ap/levelcomplete"), FlxColor.LIME, 3000, true);
 			case "ap-complete":
 				_ap.clientStatus = ClientStatus.GOAL;
 				var dlg = new DialogBox(_t("game/ap/goal"), {
@@ -799,7 +802,7 @@ class APGameState extends ClassicGameState
 		if (_levelClear)
 		{
 			FlxG.sound.play(AssetPaths.levelup__wav);
-			pushToast(_t("game/ap/levelcomplete"), FlxColor.LIME, 3000);
+			pushToast(_t("game/ap/levelcomplete"), FlxColor.LIME, 3000, true);
 			_boardAP.levelClear();
 			return;
 		}
