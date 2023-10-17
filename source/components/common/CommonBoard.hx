@@ -21,7 +21,6 @@ typedef BumperCallback = Bumper->Void;
 
 abstract class CommonBoard extends FlxTypedGroup<FlxBasic>
 {
-
 	/**
 		Event that fires when the state changes.
 		@param state The label for the new state.
@@ -54,14 +53,6 @@ abstract class CommonBoard extends FlxTypedGroup<FlxBasic>
 		@param bumper The bumper being cleared.
 	**/
 	public var onClear(default, null) = new Event<(Int, Bumper) -> Void>();
-
-	/**
-		Event that fires when the game is over.
-		@param animating If `true`, the game over animation is playing. If `false`, it has either ended or timed out.
-		@deprecated Is this needed with `onBoardStateChanged`?
-	**/
-	public var onGameOver(default, null) = new Event<Bool->Void>();
-
 
 	/** The board's top-left corner, excluding Launchers. **/
 	public var origin(default, null):FlxPoint;
@@ -734,7 +725,6 @@ abstract class CommonBoard extends FlxTypedGroup<FlxBasic>
 				{
 					// it's over!
 					Timer.delay(() -> if (_csm.is("gameoverwait")) _forceGameOver = true, 5000); // time out game over anim after five seconds
-					onGameOver.dispatch(false); // NOTE: probably don't need this event anymore
 					_bumpers.forEach(bumper -> bumper.gameOver());
 					_csm.chain("gameover");
 				}
@@ -789,13 +779,8 @@ abstract class CommonBoard extends FlxTypedGroup<FlxBasic>
 
 	/** State machine call for waiting for the Game Over animation to finish. **/
 	private function smGameOverWait(_:Float)
-	{
 		if (_bumpers.getFirstExisting() == null || _forceGameOver)
-		{
-			onGameOver.dispatch(true); // NOTE: probably don't need this event anymore
 			_csm.chain("goanimdone");
-		}
-	}
 
 	/** 
 		Event handler for when launchers are clicked.

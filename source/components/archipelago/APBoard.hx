@@ -33,6 +33,7 @@ class APBoard extends ClassicBoard
 		_csm.set("initial", "rainbowtrap", "checking");
 		_csm.set("initial", "spinnertrap", "moving");
 		_csm.set("initial", "killertrap", "gameoverwait");
+		_csm.set("levelclear", "levelcleardone", "gameover");
 		_csm.set("selecting", "turned", "moving");
 	}
 
@@ -50,13 +51,20 @@ class APBoard extends ClassicBoard
 	{
 		for (launcher in _launchers)
 			launcher.enabled = false;
-		for (bumper in _bumpers)
-			bumper.markForClear();
-		_randomClearList = [];
-		for (bumper in _bumpers)
-			_randomClearList.push(bumper);
-		(new FlxRandom()).shuffle(_randomClearList);
-		_delay = .075;
+
+		if (_bumpers.countLiving() > 0)
+		{
+			for (bumper in _bumpers)
+				bumper.markForClear();
+			_randomClearList = [];
+			for (bumper in _bumpers)
+				_randomClearList.push(bumper);
+			(new FlxRandom()).shuffle(_randomClearList);
+			_delay = .075;
+		}
+		else
+			_delay = 2;
+
 		trapTrigger = None;
 		_csm.chain("levelclear");
 	}
@@ -92,7 +100,6 @@ class APBoard extends ClassicBoard
 
 				case Killer:
 					Timer.delay(() -> if (_csm.is("gameoverwait")) _forceGameOver = true, 5000);
-					onGameOver.dispatch(false);
 					_launchers.forEachAlive(l -> l.enabled = false);
 					_bumpers.forEach(bumper -> bumper.gameOver());
 					_csm.chain("killertrap");
@@ -115,7 +122,7 @@ class APBoard extends ClassicBoard
 			}
 		}
 		else if (_bumpers.countLiving() <= 0 && _delay <= 0)
-			onGameOver.dispatch(true);
+			_csm.chain("levelcleardone");
 	}
 
 	public override function serialize():DynamicAccess<Dynamic>
