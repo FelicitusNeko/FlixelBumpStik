@@ -1,6 +1,7 @@
 package components.archipelago;
 
 import haxe.DynamicAccess;
+import haxe.Exception;
 import haxe.Serializer;
 import haxe.Unserializer;
 import ap.Client;
@@ -404,7 +405,13 @@ class APGameState extends ClassicGameState
 	{
 		remove(_p.board);
 
-		_p.reset();
+		try
+			_p.reset()
+		catch (e:Exception)
+		{
+			trace(e);
+			showError(e.message, null, true);
+		}
 
 		if (_paintCanBumper != null)
 		{
@@ -770,40 +777,6 @@ class APGameState extends ClassicGameState
 	}
 
 	// !------------------------- DEPRECATED
-
-	/**
-		Creates the tasks for a level. Also removes any tasks that currently exist.
-		@param level The level number to set up.
-		@deprecated moving to `APPlayerState`
-	**/
-	function createLevel(level:Int, dontCreateTasks = false)
-	{
-		_levelClear = false;
-		switch (level)
-		{
-			case x if (x > 0 && x < 6):
-			// temporary measure to avoid breaking before removing entire function
-
-			case 6 | -1: // the game is complete in this case; send a goal condition to the server
-
-			default: // If we don't recognise the level, just default to 99999 score and make it obvious something's wrong
-				openSubState(new DialogBox(_t("game/ap/error/levelgen", ["level" => level]), {
-					title: _t("base/error"),
-					titleColor: FlxColor.fromRGB(255, 127, 127),
-					defAccept: Custom(() ->
-					{
-						_queueTo = new MenuState();
-						return Close;
-					}),
-					defCancel: Custom(() ->
-					{
-						_queueTo = new MenuState();
-						return Close;
-					})
-				}));
-				// _hudAP.addTask(Score, [99999]);
-		}
-	}
 
 	/**
 		Called when the board requests a bumper to be generated. Usually when it goes into Idle state.
