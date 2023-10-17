@@ -258,7 +258,7 @@ class APGameState extends ClassicGameState
 	private var _lastProcessed = -1;
 
 	/** The primary camera where the game board lives. **/
-	private var _generalCamera:FlxCamera;
+	private var _camGeneral:FlxCamera;
 
 	/** The current popup toast being displayed. **/
 	private var _curToast:APToast = null;
@@ -315,8 +315,8 @@ class APGameState extends ClassicGameState
 		if (_pAP.level == 0)
 			_pAP.level = 1;
 
-		_generalCamera = FlxG.cameras.add(new FlxCamera(0, 0, FlxG.width, FlxG.height), false);
-		_generalCamera.bgColor = FlxColor.TRANSPARENT;
+		_camGeneral = FlxG.cameras.add(new FlxCamera(0, 0, FlxG.width, FlxG.height), false);
+		_camGeneral.bgColor = FlxColor.TRANSPARENT;
 
 		FlxG.autoPause = false;
 
@@ -334,8 +334,8 @@ class APGameState extends ClassicGameState
 	override function destroy()
 	{
 		_ap.disconnect_socket();
-		FlxG.cameras.remove(_generalCamera);
-		_generalCamera.destroy();
+		FlxG.cameras.remove(_camGeneral);
+		_camGeneral.destroy();
 		FlxG.autoPause = true;
 		super.destroy();
 	}
@@ -392,7 +392,7 @@ class APGameState extends ClassicGameState
 			var queuedMsg = _toastQueue.shift();
 			_curToast = new APToast(0, FlxG.height, queuedMsg.message, queuedMsg.color, queuedMsg.delay);
 			_curToast.onFinish.add(popToast);
-			_curToast.camera = _generalCamera;
+			_curToast.camera = _camGeneral;
 			_curToast.screenCenter(X);
 			_curToast.slideIn();
 			add(_curToast);
@@ -731,7 +731,7 @@ class APGameState extends ClassicGameState
 							})
 						}
 					],
-					camera: _generalCamera
+					camera: _camGeneral
 				});
 				dlg.closeCallback = () ->
 				{

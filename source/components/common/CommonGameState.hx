@@ -72,23 +72,23 @@ abstract class CommonGameState extends FlxState
 		add(_hud);
 		attachHUD();
 
-		var mainCamera = FlxG.camera;
-		var hudCamera:FlxCamera;
+		var camMain = FlxG.camera;
+		var camHUD:FlxCamera;
 
-		mainCamera.antialiasing = true;
+		camMain.antialiasing = true;
 
 		if (FlxG.width > FlxG.height)
-			hudCamera = new FlxCamera(Math.round(FlxG.width * .75), 0, Math.round(FlxG.width / 4), FlxG.height);
+			camHUD = new FlxCamera(Math.round(FlxG.width * .75), 0, Math.round(FlxG.width / 4), FlxG.height);
 		else
-			hudCamera = new FlxCamera(0, Math.round(FlxG.height * .8), FlxG.width, Math.round(FlxG.height / 5));
+			camHUD = new FlxCamera(0, Math.round(FlxG.height * .8), FlxG.width, Math.round(FlxG.height / 5));
 
-		FlxG.cameras.add(hudCamera, false);
-		_hud.cameras = [hudCamera];
-		hudCamera.update(0);
-		hudCamera.bgColor = FlxColor.TRANSPARENT;
-		hudCamera.zoom = hudCamera.width / _hud.width;
-		hudCamera.antialiasing = true;
-		hudCamera.focusOn(new FlxPoint(_hud.width / 2, _hud.height / 2));
+		FlxG.cameras.add(camHUD, false);
+		_hud.cameras = [camHUD];
+		camHUD.update(0);
+		camHUD.bgColor = FlxColor.TRANSPARENT;
+		camHUD.zoom = camHUD.width / _hud.width;
+		camHUD.antialiasing = true;
+		camHUD.focusOn(new FlxPoint(_hud.width / 2, _hud.height / 2));
 
 		super.create();
 	}
@@ -172,18 +172,18 @@ abstract class CommonGameState extends FlxState
 
 		if (_p.board != null)
 		{
-			var mainCamera = FlxG.camera;
-			var hudCamera = FlxG.cameras.list[1];
+			var camMain = FlxG.camera;
+			var camHUD = FlxG.cameras.list[1];
 
 			if (FlxG.width > FlxG.height)
 			{
-				mainCamera.zoom = Math.min((FlxG.width - hudCamera.width) / _p.board.tWidth, FlxG.height / _p.board.tHeight) * (14 / 15);
-				mainCamera.focusOn(_p.board.center.add(hudCamera.width / 2 / FlxG.camera.zoom, 0));
+				camMain.zoom = Math.min((FlxG.width - camHUD.width) / _p.board.tWidth, FlxG.height / _p.board.tHeight) * (14 / 15);
+				camMain.focusOn(_p.board.center.add(camHUD.width / 2 / FlxG.camera.zoom, 0));
 			}
 			else
 			{
-				mainCamera.zoom = Math.min(FlxG.width / _p.board.tWidth, (FlxG.height - hudCamera.height) / _p.board.tHeight) * (14 / 15);
-				mainCamera.focusOn(_p.board.center.add(hudCamera.width / 2 / FlxG.camera.zoom, 0));
+				camMain.zoom = Math.min(FlxG.width / _p.board.tWidth, (FlxG.height - camHUD.height) / _p.board.tHeight) * (14 / 15);
+				camMain.focusOn(_p.board.center.add(camHUD.width / 2 / FlxG.camera.zoom, 0));
 			}
 		}
 	}
