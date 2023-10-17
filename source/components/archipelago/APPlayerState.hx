@@ -1,6 +1,7 @@
 package components.archipelago;
 
 import haxe.DynamicAccess;
+import haxe.Exception;
 import haxe.Serializer;
 import haxe.Unserializer;
 import boardObject.Bumper;
@@ -325,7 +326,7 @@ class APPlayerState extends ClassicPlayerState
 			// just handling the state so it doesn't fall through into throw
 
 			case x:
-				throw 'Invalid level generated (#$x)';
+				throw new Exception(_t("game/ap/error/levelgen", ["level" => level]));
 		}
 
 		onLevelChanged.dispatch(id, level, tasks);

@@ -5,6 +5,7 @@ import haxe.Exception;
 import haxe.Serializer;
 import haxe.Unserializer;
 import haxe.ds.ArraySort;
+import Main.I18nFunction;
 import boardObject.Bumper;
 import boardObject.Launcher;
 import flixel.FlxG;
@@ -131,6 +132,9 @@ abstract class CommonPlayerState
 
 	//-------- MEMBER DATA
 
+	/** Pulls a string from the i18n bank. **/
+	private var _t:I18nFunction;
+
 	/** The player's bumper generator. **/
 	private var _bg:BumperGenerator;
 
@@ -160,6 +164,8 @@ abstract class CommonPlayerState
 	/** Initializes things like event handlers. **/
 	private function init()
 	{
+		_t = BumpStikGame.g().i18n.tr;
+
 		onScoreChanged = new Event<(String, Int) -> Void>();
 		onBlockChanged = new Event<(String, Int) -> Void>();
 		onBonus = new Event<(String, Int) -> Void>();
