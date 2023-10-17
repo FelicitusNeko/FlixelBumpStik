@@ -572,6 +572,17 @@ class APGameState extends ClassicGameState
 		if (index >= 0)
 			switch (state)
 			{
+				case "initial":
+					if (_ap.clientStatus == ClientStatus.READY)
+					{
+						_ap.clientStatus = ClientStatus.PLAYING;
+						if (_itemBuffer.length > 0)
+						{
+							onItemsReceived(_itemBuffer);
+							_itemBuffer = [];
+						}
+					}
+
 				case "gameover":
 					restartGame();
 			}
@@ -637,7 +648,10 @@ class APGameState extends ClassicGameState
 				if (![Treasures, Boosters].contains(task.type))
 					onTaskComplete(_p.id, _pAP.level, task.type, task.goals[task.goalIndex - 1], task.current);
 				if (_levelClear)
-					onRequestGenerate();
+				{
+					_p.runNextTurn();
+					onSignal("ap-lvcomplete");
+				}
 			});
 			_pAP.loadTaskSkip(dlg);
 			openSubState(dlg);
@@ -780,66 +794,4 @@ class APGameState extends ClassicGameState
 	}
 
 	// !------------------------- DEPRECATED
-
-	/**
-		Called when the board requests a bumper to be generated. Usually when it goes into Idle state.
-		@deprecated move to `APPlayerState` and `onBoardStateChanged`
-	**/
-	function onRequestGenerate()
-	{
-		if (_ap.clientStatus == ClientStatus.READY)
-		{
-			_ap.clientStatus = ClientStatus.PLAYING;
-			if (_itemBuffer.length > 0)
-			{
-				onItemsReceived(_itemBuffer);
-				_itemBuffer = [];
-			}
-		}
-
-		// if (++_allClears == 1)
-		// 	_ap.LocationChecks([APLocation.AllClear]);
-		if (_levelClear)
-		{
-			FlxG.sound.play(AssetPaths.levelup__wav);
-			pushToast(_t("game/ap/levelcomplete"), FlxColor.LIME, 3000, true);
-			_boardAP.levelClear();
-			return;
-		}
-
-		// var prevBumper = _hud.nextBumper;
-		// super.onRequestGenerate();
-		// var newBumper = _hud.nextBumper;
-		/*
-			if (newBumper != null && newBumper != prevBumper)
-			{
-				for (key => schedule in _schedule)
-				{
-					if (schedule.inStock <= 0 || schedule.available <= 0)
-						continue;
-					if (++schedule.sinceLast < schedule.minDelay)
-						continue;
-					if (schedule.sinceLast >= schedule.maxDelay || _rng.bool(schedule.eligibleTurns / schedule.maxEligible * 100))
-					{
-						schedule.sinceLast = 0;
-						schedule.inStock--;
-						schedule.onBoard++;
-						switch (key)
-						{
-							case "booster":
-								newBumper.addFlair("booster");
-							case "treasure":
-								newBumper.addFlair("treasure");
-							case "hazard":
-								var emptyPos = _boardClassic.getRandomSpace(true);
-								if (emptyPos != null)
-									_boardClassic.putObstacleAt(emptyPos[0], emptyPos[1], new APHazardPlaceholder(0, 0, _bg.generateColor(true), _boardClassic));
-						}
-						if (newBumper.flairCount > 0)
-							break;
-					}
-				}
-			}
-		 */
-	}
 }

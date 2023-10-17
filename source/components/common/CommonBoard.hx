@@ -28,12 +28,6 @@ abstract class CommonBoard extends FlxTypedGroup<FlxBasic>
 	public var onBoardStateChanged(get, never):Event<String->Void>;
 
 	/**
-		Event that fires when the game requests that a next bumper be generated.
-		@deprecated Is this needed with `onBoardStateChanged`?
-	**/
-	public var onRequestGenerate(default, null) = new Event<Void->Void>();
-
-	/**
 		Event that fires when the next bumper is being launched.
 		@param callback Function for the receiver to call to send along a bumper.
 	**/
@@ -488,10 +482,7 @@ abstract class CommonBoard extends FlxTypedGroup<FlxBasic>
 	private function smIdle(elapsed:Float)
 	{
 		if (_csm.justChanged) // If the state just changed to idle:
-		{
-			onRequestGenerate.dispatch(); // NOTE: probably don't need this event anymore
 			curChain = 0; // Reset chain to zero
-		}
 	}
 
 	/** State machine call for moving state. **/
