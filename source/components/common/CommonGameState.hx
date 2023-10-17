@@ -27,12 +27,6 @@ abstract class CommonGameState extends FlxState
 	/** A shortcut to the local player. **/
 	private var _p(get, never):CommonPlayerState;
 
-	/**
-		The bumper generator for this game.
-		@deprecated Use the generator stored in `PlayerState` instead
-	**/
-	private var _bg:BumperGenerator;
-
 	/** Pulls a string from the i18n bank. **/
 	private var _t:I18nFunction;
 

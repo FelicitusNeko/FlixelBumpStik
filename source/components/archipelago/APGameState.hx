@@ -427,7 +427,11 @@ class APGameState extends ClassicGameState
 
 	// !------------------------- EVENT HANDLERS
 
-	/** Called by AP client when an item is received. **/
+	/**
+		Called by AP client when an item is received.
+		@param items Items that have been received.
+		@deprecated we're probably moving this to `APPlayerState`
+	**/
 	private function onItemsReceived(items:Array<NetworkItem>)
 	{
 		if (_ap.clientStatus != ClientStatus.PLAYING)
@@ -465,7 +469,7 @@ class APGameState extends ClassicGameState
 						case TreasureBumper:
 						// _schedule["treasure"].inStock++;
 						case RainbowTrap:
-							_boardAP.trapTrigger = Rainbow(_bg.colorsInPlay);
+						// _boardAP.trapTrigger = Rainbow(_bg.colorsInPlay);
 						case SpinnerTrap:
 							_boardAP.trapTrigger = Spinner;
 						case KillerTrap:

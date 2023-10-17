@@ -19,12 +19,6 @@ class APHUD extends ClassicHUD
 	/** The task list display component. **/
 	private var _taskListbox:FlxUIList;
 
-	/**
-		The internal list of tasks to clear.
-		@deprecated actual tasks to be moved to `APPlayerState`; here will be stored a Map<APTaskType, FlxUIText> instead
-	**/
-	private var _taskList:Array<APTask> = [];
-
 	/** The list of tasks to clear. **/
 	private var _tasks:Array<FlxUIText> = [];
 
@@ -45,16 +39,6 @@ class APHUD extends ClassicHUD
 
 	/** Event that fires when the Task Skip button is clicked. **/
 	public var onTaskSkipClick(default, null) = new Event<Void->Void>();
-
-	/**
-		Fires when a task has been cleared.
-		@param level The level number related to the cleared task.
-		@param type The type of task.
-		@param goal The goal achieved.
-		@param current The current value for the goal.
-		@deprecated to be moved to `APPlayerState`
-	**/
-	public var onTaskCleared(default, null) = new Event<(Null<Int>, APTaskType, Int, Int) -> Void>();
 
 	// !------------------------- INSTANTIATION
 
