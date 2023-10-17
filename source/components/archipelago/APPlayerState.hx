@@ -169,6 +169,8 @@ class APPlayerState extends ClassicPlayerState
 		_reg["score.accured.game"] = 0;
 		_reg["block.accrued.level"] = 0;
 		_reg["block.accrued.game"] = 0;
+		_reg["ap.last"] = -1;
+		_reg["ap.slot"] = -1;
 	}
 
 	// !------------------------- PROPERTY HANDLERS
