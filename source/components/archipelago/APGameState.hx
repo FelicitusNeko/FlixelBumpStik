@@ -286,9 +286,6 @@ class APGameState extends ClassicGameState
 	/** The APPlayerState instance for the current game. **/
 	private var _pAP(get, never):APPlayerState;
 
-	/** If this is set, the game will transition to a different scene on the next call to `update`. **/
-	private var _queueTo:Null<FlxState> = null;
-
 	// !------------------------- INSTANTIATION
 
 	public function new(ap:Client, slotData:Dynamic)
@@ -757,19 +754,19 @@ class APGameState extends ClassicGameState
 
 	override function update(elapsed:Float)
 	{
-		super.update(elapsed);
-		if (_checkBuffer.length > 0)
-		{
-			_ap.LocationChecks(_checkBuffer);
-			_checkBuffer = [];
-		}
-		_ap.poll();
-
 		if (_queueTo != null)
-		{
 			_ap.disconnect_socket();
-			FlxG.switchState(_queueTo);
+		else
+		{
+			if (_checkBuffer.length > 0 && _ap.state == SLOT_CONNECTED)
+			{
+				_ap.LocationChecks(_checkBuffer);
+				_checkBuffer = [];
+			}
+			_ap.poll();
 		}
+
+		super.update(elapsed);
 	}
 
 	// !------------------------- DEPRECATED

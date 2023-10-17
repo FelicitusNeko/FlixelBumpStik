@@ -34,6 +34,9 @@ abstract class CommonGameState extends FlxState
 	/** Pulls a string from the i18n bank. **/
 	private var _t:I18nFunction;
 
+	/** If this is set, the game will transition to a different scene on the next call to `update`. **/
+	private var _queueTo:Null<FlxState> = null;
+
 	/** Read-only. The internal name for this game. **/
 	public var gameName(get, never):String;
 
@@ -235,5 +238,8 @@ abstract class CommonGameState extends FlxState
 		#end
 
 		super.update(elapsed);
+
+		if (_queueTo != null)
+			FlxG.switchState(_queueTo);
 	}
 }
