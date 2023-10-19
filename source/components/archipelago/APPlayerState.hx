@@ -153,7 +153,7 @@ class APPlayerState extends ClassicPlayerState
 		});
 		addRule({
 			name: "allClearAP",
-			condition: If(() -> (board.bCount == 0 && _reg["jackpot"] > 0)),
+			condition: If(() -> (board.bCount <= 0 && _reg["jackpot"] > 0)),
 			execute: Execute(() -> updateTask(AllClear, _bg.colors)),
 			priority: 39
 		});
