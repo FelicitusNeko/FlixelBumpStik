@@ -172,17 +172,40 @@ enum abstract APLocation(Int) from Int to Int
 /** AP Item definitions. **/
 enum abstract APItem(Int) from Int to Int
 {
+	/** Does nothing. **/
 	var Nothing = 595000;
+
+	/** Awards a score bonus proportional to the current level. **/
 	var ScoreBonus;
+
+	/** Allows the player to advance a task by one step. **/
 	var TaskSkip;
+
+	/** A Turner allows the player to change the direction of a bumper on the field. This item increases the player's starting Turner count by one. **/
 	var StartingTurner;
+
+	/** Unused placeholder. **/
 	var Blank004;
+
+	/** A Paint Can allows the player to change the color of a bumper on the field. This item increases the player's starting Paint Can count by one. **/
 	var StartPaintCan;
+
+	/** Can be cleared to send a check and permanently increase the player's score multiplier by .2×. **/
 	var BonusBooster;
+
+	/** Starting in level 2, generates an immobile bumper that cannot be cleared for five turns. **/
 	var HazardBumper;
+
+	/** Can be cleared to send a check and award a score bonus equivalent to one additional chain on that bumper. **/
 	var TreasureBumper;
+
+	/** Changes the color of every bumper on the field. **/
 	var RainbowTrap;
+
+	/** Changes the direction of every bumper on the field. **/
 	var SpinnerTrap;
+
+	/** Terminates the player's current board. **/
 	var KillerTrap;
 
 	@:to
