@@ -197,9 +197,7 @@ class APEntryState extends FlxState
 	}
 
 	function onBack()
-	{
 		FlxG.switchState(new MenuState());
-	}
 
 	override function update(elapsed:Float)
 	{
