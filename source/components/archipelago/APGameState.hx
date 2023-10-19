@@ -293,7 +293,7 @@ class APGameState extends ClassicGameState
 	{
 		_ap = ap;
 		_ap.clientStatus = ClientStatus.READY;
-		_ap._hOnItemsReceived = onItemsReceived;
+		_ap.onItemsReceived.add(onItemsReceived);
 
 		super();
 	}

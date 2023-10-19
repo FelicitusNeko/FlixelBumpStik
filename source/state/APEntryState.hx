@@ -120,25 +120,14 @@ class APEntryState extends FlxState
 			postError('noSlot');
 		else
 		{
-			// TODO: auto-switch between wss/ws as needed
 			var uri = '${_hostInput.text}:${_portInput.text}';
 			if (!wsCheck.match(uri))
 				uri = 'ws://$uri';
 
-			var ap = new Client('BumpStik-${_slotInput.text}', "Bumper Stickers", uri);
 			_state = Connecting;
+			var ap = new Client('BumpStik-${_slotInput.text}', "Bumper Stickers", uri);
 
-			var connectSubState = new APConnectingSubState(ap);
-			connectSubState.closeCallback = () ->
-			{
-				trace("Connecting substate is closing; dropping listeners");
-				ap._hOnRoomInfo = null;
-				ap._hOnSlotRefused = null;
-				ap._hOnSocketDisconnected = null;
-				ap._hOnSlotConnected = null;
-			};
-
-			ap._hOnRoomInfo = () ->
+			ap.onRoomInfo.add(() ->
 			{
 				trace("Got room info - sending connect packet");
 
@@ -148,30 +137,33 @@ class APEntryState extends FlxState
 				var tags = ["AP"];
 				#end
 				ap.ConnectSlot(_slotInput.text, _pwInput.text.length > 0 ? _pwInput.text : null, 0x7, tags, {major: 0, minor: 3, build: 8});
-			};
+			});
 
-			ap._hOnSlotRefused = (errors:Array<String>) ->
+			ap.onSlotRefused.add((errors:Array<String>) ->
 			{
 				trace("Slot refused", errors);
 				closeSubState();
 				switch (errors[0])
 				{
-					case x = "InvalidSlot" | "InvalidGame": postError(x, ["name" => _slotInput.text]);
-					case x = "IncompatibleVersion" | "InvalidPassword" | "InvalidItemsHandling": postError(x);
-					case x: postError("default", ["error" => x]);
+					case x = "InvalidSlot" | "InvalidGame":
+						postError(x, ["name" => _slotInput.text]);
+					case x = "IncompatibleVersion" | "InvalidPassword" | "InvalidItemsHandling":
+						postError(x);
+					case x:
+						postError("default", ["error" => x]);
 				}
 				_state = Entry;
-			}
+			});
 
-			ap._hOnSocketDisconnected = () ->
+			ap.onSocketDisconnected.add(() ->
 			{
 				trace("Disconnected");
 				closeSubState();
 				postError("connectionReset");
 				_state = Entry;
-			};
+			});
 
-			ap._hOnSlotConnected = (slotData:Dynamic) ->
+			ap.onSlotConnected.add((slotData:Dynamic) ->
 			{
 				trace("Connected - preparing to switch to game state");
 				closeSubState();
@@ -186,7 +178,17 @@ class APEntryState extends FlxState
 				apGames.close();
 
 				_state = Ready(ap, slotData);
-			}
+			});
+
+			var connectSubState = new APConnectingSubState(ap);
+			connectSubState.closeCallback = () ->
+			{
+				trace("Connecting substate is closing; dropping listeners");
+				ap.onRoomInfo.removeAll();
+				ap.onSlotRefused.removeAll();
+				ap.onSocketDisconnected.removeAll();
+				ap.onSlotConnected.removeAll();
+			};
 
 			connectSubState.onCancel.add(ap.disconnect_socket);
 
