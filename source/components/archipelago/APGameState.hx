@@ -492,6 +492,7 @@ class APGameState extends ClassicGameState
 		@param type The type of task.
 		@param goal The goal achieved.
 		@param current The current value for the goal.
+		@deprecated we're probably moving this to `APPlayerState`
 	**/
 	private function onTaskComplete(id:String, level:Null<Int>, task:APTaskType, goal:Int, current:Int)
 	{
@@ -576,7 +577,7 @@ class APGameState extends ClassicGameState
 		if (index >= 0)
 			switch (state)
 			{
-				case "initial":
+				case "initial": // TODO: test this is working
 					if (_ap.clientStatus == ClientStatus.READY)
 					{
 						_ap.clientStatus = ClientStatus.PLAYING;
@@ -705,7 +706,7 @@ class APGameState extends ClassicGameState
 		Called when a `Signal` is received from the player state.
 		@param signal The signal string.
 	**/
-	override function onSignal(signal:String)
+	override function onSignal(signal:String) // TODO: modular design here too?
 		switch (signal)
 		{
 			case "ap-lvcomplete":
