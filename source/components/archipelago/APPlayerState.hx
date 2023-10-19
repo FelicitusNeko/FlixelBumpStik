@@ -4,12 +4,14 @@ import haxe.DynamicAccess;
 import haxe.Exception;
 import haxe.Serializer;
 import haxe.Unserializer;
+import ap.PacketTypes;
 import boardObject.Bumper;
 import boardObject.archipelago.APHazardPlaceholder;
 import flixel.FlxG;
 import flixel.math.FlxRandom;
 import lime.app.Event;
 import utilities.DeploymentSchedule;
+import components.archipelago.APDefinitions;
 import components.classic.ClassicPlayerState;
 import components.common.CommonBoard;
 
@@ -431,6 +433,63 @@ class APPlayerState extends ClassicPlayerState
 		dlg.loadTasksV2(tasks.slice(1).filter(i -> !i.complete));
 
 	// !------------------------- EVENT HANDLERS
+
+	/**
+		Called by AP client when an item is received.
+		@param items Items that have been received.
+	**/
+	private function onItemsReceived(items:Array<NetworkItem>)
+	{
+		// if (_ap.clientStatus != ClientStatus.PLAYING)
+		// 	_itemBuffer = _itemBuffer.concat(items);
+		// else
+		for (itemObj in items.filter(i -> i.index > _reg["ap.last"]))
+		{
+			var item:APItem = itemObj.item;
+			if (item == Nothing)
+				continue;
+
+			// trace("Item received: " + item);
+			var substitutes:Map<String, Dynamic> = [];
+			switch (item)
+			{
+				case ScoreBonus:
+					var bonus = 200 * Math.round(Math.pow(2, level - 1));
+					score += bonus;
+					substitutes.set("bonus", bonus);
+				case TaskSkip:
+					taskSkip++;
+				case StartingTurner:
+					_reg["turner.starting"]++;
+					turner++;
+				// case Blank004:
+				// this shouldn't happen currently
+				case StartPaintCan:
+					_reg["paint.starting"]++;
+					paint++;
+				case BonusBooster:
+					_sched["booster"].inStock++;
+				case HazardBumper:
+					_sched["hazard"].inStock++;
+				case TreasureBumper:
+					_sched["treasure"].inStock++;
+				case RainbowTrap:
+					apBoard.trapTrigger = Rainbow(_bg.colorsInPlay);
+				case SpinnerTrap:
+					apBoard.trapTrigger = Spinner;
+				case KillerTrap:
+					apBoard.trapTrigger = Killer;
+				case x:
+					substitutes.set("id", x);
+					trace('Unknown item ID received: ${itemObj.item}');
+			}
+			// pushToast(_t("game/ap/received", ["item" => Std.string(_t(item, substitutes))]),
+			// 	[RainbowTrap, SpinnerTrap, KillerTrap].contains(item) ? FlxColor.ORANGE : FlxColor.CYAN);
+
+			_reg["ap.last"] = itemObj.index;
+		}
+	}
+
 	// !------------------------- OVERRIDES
 
 	/**
