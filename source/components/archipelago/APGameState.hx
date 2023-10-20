@@ -81,6 +81,7 @@ class APGameState extends ClassicGameState
 		_ap = ap;
 		_ap.clientStatus = ClientStatus.READY;
 		_ap.onItemsReceived.add(onItemsReceived);
+		// TODO: check for disconnections
 
 		super();
 	}
