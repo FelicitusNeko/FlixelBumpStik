@@ -30,7 +30,7 @@ class ClassicHUD extends CommonHUD
 	{
 		super();
 
-		if (_rightSide)
+		if (rightSide)
 		{
 			_pcButton = new FlxButton(5, 5, _t("game/classic/paint/count", ["_" => 0]), onPaintCanClick.dispatch);
 			_pcButton.allowSwiping = false;

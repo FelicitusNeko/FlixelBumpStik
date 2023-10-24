@@ -23,7 +23,7 @@ abstract class CommonHUD extends FlxSpriteGroup
 	var _blockCounter:HUDCounter;
 
 	/** Whether the HUD is displayed on the right side (`true`) or bottom (`false`). **/
-	var _rightSide = true;
+	public var rightSide(get, never):Bool;
 
 	/** The current score displayed on the HUD. **/
 	public var score(get, set):Int;
@@ -53,9 +53,7 @@ abstract class CommonHUD extends FlxSpriteGroup
 		super(0, 0);
 		_t = BumpStikGame.g().i18n.tr;
 
-		_rightSide = FlxG.width > FlxG.height;
-
-		if (_rightSide)
+		if (rightSide)
 		{
 			// TODO: work on getting the size right for different aspect ratios
 			var quarterWidth = Math.round(FlxG.width / 4),
@@ -79,6 +77,9 @@ abstract class CommonHUD extends FlxSpriteGroup
 	}
 
 	// !------------------------- PROPERTY HANDLERS
+
+	inline function get_rightSide()
+		return FlxG.width > FlxG.height;
 
 	inline function get_score()
 		return _scoreCounter.value;

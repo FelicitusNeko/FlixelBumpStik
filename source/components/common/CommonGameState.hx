@@ -87,7 +87,7 @@ abstract class CommonGameState extends FlxState
 
 		camMain.antialiasing = true;
 
-		if (FlxG.width > FlxG.height)
+		if (_hud.rightSide)
 			camHUD = new FlxCamera(Math.round(FlxG.width * .75), 0, Math.round(FlxG.width / 4), FlxG.height);
 		else
 			camHUD = new FlxCamera(0, Math.round(FlxG.height * .8), FlxG.width, Math.round(FlxG.height / 5));
@@ -190,7 +190,7 @@ abstract class CommonGameState extends FlxState
 			var camMain = FlxG.camera;
 			var camHUD = FlxG.cameras.list[1];
 
-			if (FlxG.width > FlxG.height)
+			if (_hud.rightSide)
 			{
 				camMain.zoom = Math.min((FlxG.width - camHUD.width) / _p.board.tWidth, FlxG.height / _p.board.tHeight) * (14 / 15);
 				camMain.focusOn(_p.board.center.add(camHUD.width / 2 / FlxG.camera.zoom, 0));

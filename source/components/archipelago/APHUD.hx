@@ -46,7 +46,7 @@ class APHUD extends ClassicHUD
 	{
 		super();
 
-		if (_rightSide)
+		if (rightSide)
 		{
 			var more = "+<X>";
 			var listy = _blockCounter.y + _blockCounter.height;
