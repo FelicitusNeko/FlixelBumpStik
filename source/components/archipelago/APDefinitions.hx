@@ -208,6 +208,25 @@ enum abstract APItem(Int) from Int to Int
 	/** Terminates the player's current board. **/
 	var KillerTrap;
 
+	/** _Read-only._ Whether the item is a trap. **/
+	public var isTrap(get, never):Bool;
+
+	/** _Read-only._ Whether the item is a special bumper type. **/
+	public var isBumper(get, never):Bool;
+
+	/** _Read-only._ Whether the item is a utility. **/
+	public var isUtility(get, never):Bool;
+
+	inline function get_isTrap()
+		return [RainbowTrap, SpinnerTrap, KillerTrap].contains(this);
+
+	inline function get_isBumper()
+		return [TreasureBumper, BonusBooster, HazardBumper].contains(this);
+
+	inline function get_isUtility()
+		return [TaskSkip, StartPaintCan, StartingTurner].contains(this);
+
+	/** Returns a i18n token representing this item. **/
 	@:to
 	public inline function toString()
 		return "game/ap/" + switch (this)
