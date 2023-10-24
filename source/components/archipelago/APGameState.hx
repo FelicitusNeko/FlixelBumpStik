@@ -54,7 +54,7 @@ class APGameState extends ClassicGameState
 	private var _toastQueue:Array<QueuedToast> = [];
 
 	/** The items have been received from the server which have yet to be processed. **/
-	private var _itemBuffer:Array<NetworkItem> = [];
+	// private var _itemBuffer:Array<NetworkItem> = [];
 
 	/** Any checks that have been marked to be sent in the next Update call. **/
 	private var _checkBuffer:Array<APLocation> = [];
@@ -80,7 +80,6 @@ class APGameState extends ClassicGameState
 	{
 		_ap = ap;
 		_ap.clientStatus = ClientStatus.READY;
-		_ap.onItemsReceived.add(onItemsReceived);
 		// TODO: check for disconnections
 
 		super();
@@ -211,64 +210,6 @@ class APGameState extends ClassicGameState
 	// !------------------------- EVENT HANDLERS
 
 	/**
-		Called by AP client when an item is received.
-		@param items Items that have been received.
-		@deprecated we're probably moving this to `APPlayerState`
-	**/
-	private function onItemsReceived(items:Array<NetworkItem>)
-	{
-		if (_ap.clientStatus != ClientStatus.PLAYING)
-			_itemBuffer = _itemBuffer.concat(items);
-		else
-			for (itemObj in items)
-				if (itemObj.index > _lastProcessed)
-				{
-					var item:APItem = itemObj.item;
-					if (item == Nothing)
-						continue;
-
-					// trace("Item received: " + item);
-					var substitutes:Map<String, Dynamic> = [];
-					switch (item)
-					{
-						case ScoreBonus:
-							var bonus = 200 * Math.round(Math.pow(2, _pAP.level - 1));
-							_hudAP.score += bonus;
-							substitutes.set("bonus", bonus);
-						case TaskSkip:
-							_hudAP.taskSkip++;
-						case StartingTurner:
-							// _startTurners++;
-							_hudAP.turners++;
-						// case Blank004:
-						// this shouldn't happen currently
-						case StartPaintCan:
-							// _startPaintCans++;
-							_hudClassic.paintCans++;
-						case BonusBooster:
-						// _schedule["booster"].inStock++;
-						case HazardBumper:
-						// _schedule["hazard"].inStock++;
-						case TreasureBumper:
-						// _schedule["treasure"].inStock++;
-						case RainbowTrap:
-						// _boardAP.trapTrigger = Rainbow(_bg.colorsInPlay);
-						case SpinnerTrap:
-							_boardAP.trapTrigger = Spinner;
-						case KillerTrap:
-							_boardAP.trapTrigger = Killer;
-						case x:
-							substitutes.set("id", x);
-							trace('Unknown item ID received: ${itemObj.item}');
-					}
-					pushToast(_t("game/ap/received", ["item" => Std.string(_t(item, substitutes))]),
-						[RainbowTrap, SpinnerTrap, KillerTrap].contains(item) ? FlxColor.ORANGE : FlxColor.CYAN);
-
-					_lastProcessed = itemObj.index;
-				}
-	}
-
-	/**
 		Called when a task is completed.
 		@param id The seconding player's identity string.
 		@param level The level number related to the cleared task.
@@ -364,11 +305,11 @@ class APGameState extends ClassicGameState
 					if (_ap.clientStatus == ClientStatus.READY)
 					{
 						_ap.clientStatus = ClientStatus.PLAYING;
-						if (_itemBuffer.length > 0)
-						{
-							onItemsReceived(_itemBuffer);
-							_itemBuffer = [];
-						}
+						// if (_itemBuffer.length > 0)
+						// {
+						// 	onItemsReceived(_itemBuffer);
+						// 	_itemBuffer = [];
+						// }
 					}
 
 				case "gameover":
@@ -483,6 +424,10 @@ class APGameState extends ClassicGameState
 		}
 	}
 
+	function onBroadcast(id:String, msg:String, ?color:FlxColor, ?priority:Bool)
+		if (_p.id == id)
+			pushToast(msg, color, 2000, priority);
+
 	// !------------------------- OVERRIDES (Classic)
 
 	/**
@@ -553,6 +498,7 @@ class APGameState extends ClassicGameState
 	{
 		super.attachPlayer(player);
 		_pAP.onTaskCleared.add(onTaskComplete);
+		_pAP.onBroadcast.add(onBroadcast);
 	}
 
 	/**
@@ -562,6 +508,8 @@ class APGameState extends ClassicGameState
 	override function detachPlayer(player)
 	{
 		super.detachPlayer(player);
+		_pAP.onTaskCleared.remove(onTaskComplete);
+		_pAP.onBroadcast.remove(onBroadcast);
 	}
 
 	override function update(elapsed:Float)

@@ -4,11 +4,13 @@ import haxe.DynamicAccess;
 import haxe.Exception;
 import haxe.Serializer;
 import haxe.Unserializer;
+import ap.Client;
 import ap.PacketTypes;
 import boardObject.Bumper;
 import boardObject.archipelago.APHazardPlaceholder;
 import flixel.FlxG;
 import flixel.math.FlxRandom;
+import flixel.util.FlxColor;
 import lime.app.Event;
 import utilities.DeploymentSchedule;
 import components.archipelago.APDefinitions;
@@ -58,10 +60,19 @@ class APPlayerState extends ClassicPlayerState
 	public var onTaskCleared(default, null):Event<(String, Null<Int>, APTaskType, Int, Int) -> Void>;
 
 	/**
+		Event that fires when the player state wants to broadcast a status toast.
+		@param id The sending player's identity string.
+		@param msg The message to be broadcast.
+		@param color _Optional._ The background color for the message.
+		@param priority _Optional._ Whether the popup toast should skip the queue and be displayed next.
+	**/
+	public var onBroadcast(default, null):Event<(String, String, ?FlxColor, ?Bool) -> Void>;
+
+	/**
 		Event that fires when a Hazard Bumper needs to be deployed.
 		@param id The sending player's identity string.
 	**/
-	public var onDeployHazard(default, null):Event<String->Void>;
+	public var onDeployHazard(default, null):Event<String->Void>; // TODO: do I actually need this?
 
 	/** The player's current board, as an `APBoard`. **/
 	public var apBoard(get, never):APBoard;
@@ -122,6 +133,7 @@ class APPlayerState extends ClassicPlayerState
 		onLevelChanged = new Event<(String, Int, Array<APTaskV2>) -> Void>();
 		onTaskUpdated = new Event<(String, Int, APTaskV2) -> Void>();
 		onTaskCleared = new Event<(String, Null<Int>, APTaskType, Int, Int) -> Void>();
+		onBroadcast = new Event<(String, String, ?FlxColor, ?Bool) -> Void>();
 		onDeployHazard = new Event<String->Void>();
 
 		addRule({
@@ -348,6 +360,16 @@ class APPlayerState extends ClassicPlayerState
 
 	// !------------------------- METHODS
 
+	public function attachClient(ap:Client)
+	{
+		ap.onItemsReceived.add(onItemsReceived);
+	}
+
+	public function detachClient(ap:Client)
+	{
+		ap.onItemsReceived.remove(onItemsReceived);
+	}
+
 	/**
 		Adds a task to the list.
 		@param type The type of task.
@@ -483,8 +505,8 @@ class APPlayerState extends ClassicPlayerState
 					substitutes.set("id", x);
 					trace('Unknown item ID received: ${itemObj.item}');
 			}
-			// pushToast(_t("game/ap/received", ["item" => Std.string(_t(item, substitutes))]),
-			// 	[RainbowTrap, SpinnerTrap, KillerTrap].contains(item) ? FlxColor.ORANGE : FlxColor.CYAN);
+			onBroadcast.dispatch(id, _t("game/ap/received", ["item" => Std.string(_t(item, substitutes))]), item.isTrap ? FlxColor.ORANGE : FlxColor.CYAN,
+				false);
 
 			_reg["ap.last"] = itemObj.index;
 		}
