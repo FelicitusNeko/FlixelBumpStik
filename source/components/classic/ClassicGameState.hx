@@ -45,25 +45,17 @@ class ClassicGameState extends CommonGameState
 		_hud.attachState(_p);
 		prepareBoard();
 
-		if (gameType == "classic")
-		{
-			#if kiosktest
-			var restart = new FlxButton(0, 0, "Restart", () ->
-			{
-				clearGame();
-				FlxG.switchState(new ClassicGameState());
-			});
-			_hud.add(restart);
-			#elseif debug
-			var test = new FlxButton(0, 0, "Test", () ->
-			{
-				trace("Test is currently GNDN");
-			});
-			_hud.add(test);
-			#end
-		}
-
 		_p.runNextTurn();
+	}
+
+	function utilBtn()
+	{
+		#if kiosktest
+		clearGame();
+		FlxG.switchState(new ClassicGameState());
+		#else
+		_pClassic.paint++;
+		#end
 	}
 
 	// !------------------------- PROPERTY HANDLERS

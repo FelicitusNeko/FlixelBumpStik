@@ -107,16 +107,6 @@ class APGameState extends ClassicGameState
 		_camGeneral.bgColor = FlxColor.TRANSPARENT;
 
 		FlxG.autoPause = false;
-
-		// TODO: Restart Board button
-		#if debug
-		var test = new FlxButton(0, 0, "Test", () ->
-		{
-			// goes nowhere does nothing
-			_hudAP.taskSkip++;
-		});
-		_hud.add(test);
-		#end
 	}
 
 	override function destroy()
@@ -126,6 +116,11 @@ class APGameState extends ClassicGameState
 		_camGeneral.destroy();
 		FlxG.autoPause = true;
 		super.destroy();
+	}
+
+	override function utilBtn()
+	{
+		_hudAP.taskSkip++;
 	}
 
 	// !------------------------- PROPERTY HANDLERS

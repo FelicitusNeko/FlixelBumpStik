@@ -9,6 +9,7 @@ import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxState;
 import flixel.math.FlxPoint;
+import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
 import flixel.util.FlxSave;
 import openfl.system.System;
@@ -18,6 +19,15 @@ import components.dialogs.DialogBox;
 
 abstract class CommonGameState extends FlxState
 {
+	private static var _utilButton:Null<String> =
+		#if kiosktest
+		"Restart"
+		#elseif debug
+		"Test"
+		#else
+		null
+		#end;
+
 	/** The list of players for this game. **/
 	private var _playersv2:Array<CommonPlayerState> = [];
 
@@ -90,8 +100,13 @@ abstract class CommonGameState extends FlxState
 		camHUD.antialiasing = true;
 		camHUD.focusOn(new FlxPoint(_hud.width / 2, _hud.height / 2));
 
+		if (_utilButton != null)
+			_hud.add(new FlxButton(0, 0, "Test", utilBtn));
+
 		super.create();
 	}
+
+	abstract function utilBtn():Void;
 
 	// !------------------------- PROPERTY HANDLERS
 
