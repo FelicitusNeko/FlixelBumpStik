@@ -12,9 +12,10 @@ using flixel.util.FlxSpriteUtil;
 
 class APConnectingSubState extends FlxSubState
 {
-	public var onCancel(default, null) = new Event<Void->Void>();
-
 	private var _ap:Client;
+
+	public var result(default, null) = "Unknown";
+	public var slotData(default, null):Dynamic = null;
 
 	public function new(ap:Client)
 	{
@@ -31,7 +32,7 @@ class APConnectingSubState extends FlxSubState
 
 		var cancelButton = new FlxButton(0, 0, t("base/dlg/cancel"), () ->
 		{
-			onCancel.dispatch();
+			result = "Cancel";
 			close();
 		});
 
@@ -53,7 +54,41 @@ class APConnectingSubState extends FlxSubState
 			add(item);
 		}
 
+		_ap.onSlotRefused.add(onSlotRefused);
+		_ap.onSocketDisconnected.add(onSocketDisconnected);
+		_ap.onSlotConnected.add(onSlotConnected);
+
 		super.create();
+	}
+
+	function onSlotRefused(errors:Array<String>)
+	{
+		trace("Slot refused", errors);
+		result = errors[0];
+		close();
+	}
+
+	function onSocketDisconnected()
+	{
+		trace("Disconnected");
+		result = "Disconnected";
+		close();
+	}
+
+	function onSlotConnected(slotData:Dynamic)
+	{
+		trace("Connected");
+		result = "Connected";
+		this.slotData = slotData;
+		close();
+	}
+
+	override function destroy()
+	{
+		_ap.onSlotRefused.remove(onSlotRefused);
+		_ap.onSocketDisconnected.remove(onSocketDisconnected);
+		_ap.onSlotConnected.remove(onSlotConnected);
+		super.destroy();
 	}
 
 	override function update(elapsed:Float)

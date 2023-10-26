@@ -1,10 +1,10 @@
 package state;
 
 import haxe.DynamicAccess;
-import haxe.Timer;
 import Main.I18nFunction;
 import ap.Client;
 import components.archipelago.APGameState;
+import components.archipelago.BumpStikClient;
 import components.dialogs.DialogBox;
 import flixel.FlxG;
 import flixel.FlxState;
@@ -41,7 +41,7 @@ class APEntryState extends FlxState
 	{
 		_t = BumpStikGame.g().i18n.tr;
 
-		// TODO: save last game's settings as default; Reset button to return to base default
+		// TODO: Reset and/or Clear button
 		var apGames = new FlxSave();
 		apGames.bind("apGames");
 		var lastGame:DynamicAccess<String> = apGames.data.lastGame;
@@ -65,6 +65,7 @@ class APEntryState extends FlxState
 		add(playButton);
 
 		var backButton = new FlxButton(0, 0, _t("base/back"), onBack);
+		backButton.onUp.sound = FlxG.sound.load(AssetPaths.mback__wav);
 		backButton.x = (FlxG.width / 2) + 10;
 		backButton.y = FlxG.height - backButton.height - 10;
 		add(backButton);
@@ -125,72 +126,38 @@ class APEntryState extends FlxState
 				uri = 'ws://$uri';
 
 			_state = Connecting;
-			var ap = new Client('BumpStik-${_slotInput.text}', "Bumper Stickers", uri);
+			var ap = new BumpStikClient(_slotInput.text, "Bumper Stickers", uri, _pwInput.text.length > 0 ? _pwInput.text : null);
 
-			ap.onRoomInfo.add(() ->
+			var connectSubState = new APConnectingSubState(ap);
+			connectSubState.closeCallback = () ->
 			{
-				trace("Got room info - sending connect packet");
-
-				#if debug
-				var tags = ["AP", "Testing"];
-				#else
-				var tags = ["AP"];
-				#end
-				ap.ConnectSlot(_slotInput.text, _pwInput.text.length > 0 ? _pwInput.text : null, 0x7, tags, {major: 0, minor: 3, build: 8});
-			});
-
-			ap.onSlotRefused.add((errors:Array<String>) ->
-			{
-				trace("Slot refused", errors);
-				closeSubState();
-				switch (errors[0])
+				_state = Entry;
+				switch (connectSubState.result)
 				{
+					case "Connected":
+						var apGames = new FlxSave();
+						apGames.bind("apGames");
+						apGames.data.lastGame = {
+							server: _hostInput.text,
+							port: _portInput.text,
+							slot: _slotInput.text
+						};
+						apGames.close();
+
+						_state = Ready(ap, connectSubState.slotData);
+					case "Disconnected":
+						postError("connectionReset");
+					case "Cancel":
 					case x = "InvalidSlot" | "InvalidGame":
 						postError(x, ["name" => _slotInput.text]);
 					case x = "IncompatibleVersion" | "InvalidPassword" | "InvalidItemsHandling":
 						postError(x);
 					case x:
 						postError("default", ["error" => x]);
-				}
-				_state = Entry;
-			});
-
-			ap.onSocketDisconnected.add(() ->
-			{
-				trace("Disconnected");
-				closeSubState();
-				postError("connectionReset");
-				_state = Entry;
-			});
-
-			ap.onSlotConnected.add((slotData:Dynamic) ->
-			{
-				trace("Connected - preparing to switch to game state");
-				closeSubState();
-
-				var apGames = new FlxSave();
-				apGames.bind("apGames");
-				apGames.data.lastGame = {
-					server: _hostInput.text,
-					port: _portInput.text,
-					slot: _slotInput.text
 				};
-				apGames.close();
-
-				_state = Ready(ap, slotData);
-			});
-
-			var connectSubState = new APConnectingSubState(ap);
-			connectSubState.closeCallback = () ->
-			{
-				trace("Connecting substate is closing; dropping listeners");
-				ap.onRoomInfo.removeAll();
-				ap.onSlotRefused.removeAll();
-				ap.onSocketDisconnected.removeAll();
-				ap.onSlotConnected.removeAll();
-			};
-
-			connectSubState.onCancel.add(ap.disconnect_socket);
+				if (_state == Entry)
+					ap.disconnect_socket();
+			}
 
 			openSubState(connectSubState);
 		}
@@ -206,7 +173,7 @@ class APEntryState extends FlxState
 		{
 			case Ready(ap, slotData):
 				FlxG.switchState(new APGameState(ap, slotData));
-				_state = Entry;
+				_state = Entry; // shouldn't affect anything but will prevent multiple creation of game state
 			default:
 		}
 	}
