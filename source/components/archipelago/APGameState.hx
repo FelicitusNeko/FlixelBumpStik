@@ -2,22 +2,16 @@ package components.archipelago;
 
 import haxe.DynamicAccess;
 import haxe.Exception;
-import haxe.Serializer;
-import haxe.Unserializer;
 import ap.Client;
 import ap.PacketTypes.ClientStatus;
-import ap.PacketTypes.NetworkItem;
 import boardObject.Bumper;
-import boardObject.archipelago.APHazardPlaceholder;
 import flixel.FlxCamera;
 import flixel.FlxG;
-import flixel.FlxState;
-import flixel.math.FlxRandom;
+import flixel.FlxSprite;
 import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
 import flixel.util.FlxSave;
 import state.MenuState;
-import utilities.DeploymentSchedule;
 import components.archipelago.APDefinitions;
 import components.archipelago.APTaskType;
 import components.classic.ClassicGameState;
@@ -65,6 +59,9 @@ class APGameState extends ClassicGameState
 	/** Whether the user is attempting to use a Turner. **/
 	private var _turnerMode = false; // TODO: probably a better way to do this
 
+	/** Image that appears when AP client disconnects. **/
+	private var _disconnect:FlxSprite;
+
 	/** The APBoard instance for the current game. **/
 	private var _boardAP(get, never):APBoard;
 
@@ -105,11 +102,26 @@ class APGameState extends ClassicGameState
 		_camGeneral = FlxG.cameras.add(new FlxCamera(0, 0, FlxG.width, FlxG.height), false);
 		_camGeneral.bgColor = FlxColor.TRANSPARENT;
 
+		_disconnect = new FlxSprite(5, _camGeneral.height - 55);
+		_disconnect.loadGraphic(AssetPaths.disconnect__png);
+		_disconnect.scale.set(.5, .5);
+		_disconnect.camera = _camGeneral;
+		_disconnect.visible = false;
+		add(_disconnect);
+
+		_ap.onSocketConnected.add(onSocketConnect);
+		_ap.onSlotConnected.add(onSlotConnect);
+		_ap.onSocketDisconnected.add(onSocketDisconnect);
+
 		FlxG.autoPause = false;
 	}
 
 	override function destroy()
 	{
+		_ap.onSocketConnected.remove(onSocketConnect);
+		_ap.onSlotConnected.remove(onSlotConnect);
+		_ap.onSocketDisconnected.remove(onSocketDisconnect);
+
 		_ap.disconnect_socket();
 		FlxG.cameras.remove(_camGeneral);
 		_camGeneral.destroy();
@@ -428,6 +440,22 @@ class APGameState extends ClassicGameState
 		if (_p.id == id)
 			pushToast(msg, color, 2000, priority);
 
+	function onSocketDisconnect()
+	{
+		_disconnect.color = FlxColor.RED;
+		_disconnect.visible = true;
+	}
+
+	function onSocketConnect()
+	{
+		_disconnect.color = FlxColor.YELLOW;
+	}
+
+	function onSlotConnect(_)
+	{
+		_disconnect.visible = false;
+	}
+
 	// !------------------------- OVERRIDES (Classic)
 
 	/**
@@ -477,7 +505,13 @@ class APGameState extends ClassicGameState
 	override function createGame()
 	{
 		if (_playersv2.length == 0)
+		{
 			_playersv2.push(new APPlayerState("ap"));
+			if (_pAP.level == 0)
+				_pAP.level = 1;
+			_p.createGenerator();
+			_pAP.createBoard(true);
+		}
 
 		_hud = new APHUD();
 	}
@@ -527,6 +561,19 @@ class APGameState extends ClassicGameState
 		}
 
 		super.update(elapsed);
+	}
+
+	override function serialize():DynamicAccess<Dynamic>
+	{
+		var data = super.serialize();
+		data["apqueue"] = cast(_ap, BumpStikClient).checkQueue;
+		return data;
+	}
+
+	override function deserialize(data:DynamicAccess<Dynamic>, ignoreGameName:Bool = false)
+	{
+		super.deserialize(data, ignoreGameName);
+		_ap.LocationChecks(data["apqueue"]);
 	}
 
 	// !------------------------- DEPRECATED
