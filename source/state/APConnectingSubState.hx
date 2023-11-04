@@ -70,8 +70,11 @@ class APConnectingSubState extends FlxSubState
 
 	function onSocketDisconnected()
 	{
-		trace("Disconnected");
-		result = "Disconnected";
+		if (result == null)
+		{
+			trace("Disconnected");
+			result = "Disconnected";
+		}
 		close();
 	}
 
