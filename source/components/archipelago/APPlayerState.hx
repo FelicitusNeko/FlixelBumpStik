@@ -169,6 +169,18 @@ class APPlayerState extends ClassicPlayerState
 			execute: Execute(() -> updateTask(AllClear, _bg.colors)),
 			priority: 39
 		});
+
+		_sched = {};
+		for (s in ["booster", "hazard", "treasure"])
+			_sched[s] = {
+				inStock: 0,
+				maxAvailable: 0,
+				onBoard: 0,
+				clear: 0,
+				sinceLast: 0,
+				minDelay: 0,
+				maxDelay: 10
+			};
 	}
 
 	/** Initializes the value registry. **/
@@ -520,6 +532,7 @@ class APPlayerState extends ClassicPlayerState
 	**/
 	override function createBoard(force:Bool = false)
 	{
+		trace("APps.createBoard");
 		if (force || board == null || board.state == "gameover")
 		{
 			if (board != null)
@@ -527,8 +540,10 @@ class APPlayerState extends ClassicPlayerState
 			if (level < 1 || level > 5)
 				board = null;
 			else
+			{
 				board = new APBoard(0, 0, _reg["board.w"], _reg["board.h"]);
-			attachBoard();
+				attachBoard();
+			}
 		}
 	}
 
