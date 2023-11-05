@@ -297,7 +297,7 @@ class APHud extends ClassicHUD
 		turners = data["turners"];
 		taskSkip = data["taskSkip"];
 		_accruedScore = data["accScore"];
-		_accruedScoreThisLevel = data["ScoreTL"];
+		_accruedScoreThisLevel = data["accScoreTL"];
 		_accruedBlock = data["accBlock"];
 		_accruedBlockThisLevel = data["accBlockTL"];
 
