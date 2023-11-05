@@ -591,7 +591,7 @@ class APPlayerState extends ClassicPlayerState
 
 		for (b in bumpers)
 			if (b.hasFlair("booster"))
-				multiStack[1] += .2;
+				incMultiStackValue(1, .2);
 
 		super.onMatch(chain, combo, bumpers);
 	}

@@ -234,7 +234,24 @@ abstract class CommonPlayerState
 	**/
 	public inline function setMultiStackValue(pos:Int, val:Float)
 		if (pos >= 0 && pos < multiStack.length)
-			multiStack[pos] = val;
+		{
+			var stack = multiStack;
+			stack[pos] = val;
+			multiStack = stack;
+		}
+
+	/**
+		Modifies an individual value in the multiplier stack. Quietly fails if `pos` is out of range.
+		@param pos The multiplier value to set.
+		@param val The value to add to (or, if negative, subtract from) the given position.
+	**/
+	public inline function incMultiStackValue(pos:Int, val:Float)
+		if (pos >= 0 && pos < multiStack.length)
+		{
+			var stack = multiStack;
+			stack[pos] += val;
+			multiStack = stack;
+		}
 
 	/**
 		Adds to the score based on the multiplier stack.

@@ -64,6 +64,7 @@ class ClassicPlayerState extends CommonPlayerState
 			{
 				FlxG.sound.play(AssetPaths.levelup__wav);
 				_reg["color.next"] += _reg["color.inc"];
+				incMultiStackValue(0, .2);
 				return Notice(new NewColorSubstate(_bg.colorOpts[_bg.colors++], board.center));
 			}),
 			priority: 50
