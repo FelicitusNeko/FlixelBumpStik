@@ -150,6 +150,8 @@ class APPlayerState extends ClassicPlayerState
 			name: "levelComplete",
 			condition: If(() ->
 			{
+				if (tasks.length == 0)
+					return false;
 				for (task in tasks)
 					if (!task.complete)
 						return false;
@@ -254,25 +256,27 @@ class APPlayerState extends ClassicPlayerState
 		return block + _reg["block.accrued.level"];
 
 	inline private function get_totalScore()
-		return score + _reg["score.accrued.level"] + _reg["score.accrued.game"];
+		return levelScore + _reg["score.accrued.game"];
 
 	inline private function get_totalBlock()
-		return block + _reg["block.accrued.level"] + _reg["block.accrued.game"];
+		return levelBlock + _reg["block.accrued.game"];
 
 	private function set_level(level)
 	{
+		trace("APps.set_level", level);
 		_levelPopulating = true;
 		_reg["score.accrued.game"] += _reg["score.accrued.level"];
 		_reg["block.accrued.game"] += _reg["block.accrued.level"];
 		_reg["score.accrued.level"] = _reg["block.accrued.level"] = 0;
 
 		this.tasks = [];
-		if (level > 0)
+		if (level > 0 && level <= 5)
 			addTask(LevelHeader, [level]);
 
 		switch (this.level = level)
 		{
 			case 1:
+				trace("Setting level 1");
 				_reg["board.w"] = _reg["board.h"] = 3;
 				_reg["color.start"] = 2;
 				_reg["color.max"] = 3;
@@ -361,9 +365,9 @@ class APPlayerState extends ClassicPlayerState
 				throw new Exception(_t("game/ap/error/levelgen", ["level" => level]));
 		}
 
+		_levelPopulating = false;
 		onLevelChanged.dispatch(id, level, tasks);
 
-		_levelPopulating = false;
 		return level;
 	}
 
@@ -375,6 +379,7 @@ class APPlayerState extends ClassicPlayerState
 	public function attachClient(ap:Client)
 	{
 		ap.onItemsReceived.add(onItemsReceived);
+		_reg["ap.slot"] = ap.slotnr;
 	}
 
 	public function detachClient(ap:Client)
@@ -525,6 +530,17 @@ class APPlayerState extends ClassicPlayerState
 	}
 
 	// !------------------------- OVERRIDES
+
+	/**
+		Creates a bumper generator.
+		@param initColors The number of colors to start with. Defaults to 3.
+		@param colorSet The set of colors to use. Defaults to the standard Bumper Stickers palette.
+	**/
+	public override function createGenerator()
+	{
+		_bg = new BumperGenerator(_reg["color.start"], APColor.set);
+		_bg.shuffleColors();
+	}
 
 	/**
 		Creates a new board.

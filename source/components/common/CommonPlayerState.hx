@@ -283,9 +283,9 @@ abstract class CommonPlayerState
 		@param initColors The number of colors to start with. Defaults to 3.
 		@param colorSet The set of colors to use. Defaults to the standard Bumper Stickers palette.
 	**/
-	public function createGenerator(initColors = 3, ?colorSet:Array<FlxColor>)
+	public function createGenerator()
 	{
-		_bg = new BumperGenerator(initColors, colorSet);
+		_bg = new BumperGenerator(3);
 		if (_bgColorShuffle)
 			_bg.shuffleColors();
 	}
