@@ -32,16 +32,16 @@ abstract APTaskV2(IAPTaskV2) from IAPTaskV2 to IAPTaskV2
 	/** The current number achieved for this task. **/
 	public var current(get, set):Int;
 
-	/** The current goal for this task. **/
+	/** _Read-only._ The current goal for this task. **/
 	public var curGoal(get, never):Int;
 
-	/** The number of goals to achieve for this task.**/
+	/** _Read-only._ The number of goals to achieve for this task.**/
 	public var goalCount(get, never):Int;
 
-	/** Whether this task has been completed. **/
+	/** _Read-only._ Whether this task has been completed. **/
 	public var complete(get, never):Bool;
 
-	/** The number of goals left to clear to complete the task. **/
+	/** _Read-only._ The number of goals left to clear to complete the task. **/
 	public var goalsLeft(get, never):Int;
 
 	inline function get_goalIndex()
@@ -53,8 +53,6 @@ abstract APTaskV2(IAPTaskV2) from IAPTaskV2 to IAPTaskV2
 			value = 0;
 		if (value > goalCount)
 			value = goalCount;
-		// if (this.uiText != null)
-		// 	this.uiText.color = value >= goalCount ? FlxColor.LIME : FlxColor.WHITE;
 		return this.goalIndex = value;
 	}
 
