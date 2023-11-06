@@ -12,6 +12,8 @@ enum abstract APColor(FlxColor) from FlxColor to FlxColor
 	var Purple = 0xff7c78bd;
 	var Yellow = 0xffe7ee95;
 
+	public static var set = [Red, Green, Rose, Beige, Purple, Yellow];
+
 	@:to
 	public inline function toString()
 		switch (this)
