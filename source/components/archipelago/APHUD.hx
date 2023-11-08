@@ -115,6 +115,8 @@ class APHUD extends ClassicHUD
 		var retval = super.attachState(state);
 		if (retval)
 		{
+			trace("APHUD.attachState");
+
 			var apPS = cast(state, APPlayerState);
 			apPS.onLevelChanged.add(onLevelChanged);
 			apPS.onTurnerChanged.add(onTurnerChanged);
@@ -147,8 +149,12 @@ class APHUD extends ClassicHUD
 
 	function onLevelChanged(id:String, level:Int, tasks:Array<APTaskV2>)
 	{
+		trace("APHUD.onLevelChanged");
+
 		if (!_connected.contains(id))
 			return;
+
+		trace("connect!");
 
 		_taskListbox.clear();
 		for (task in _tasks)
