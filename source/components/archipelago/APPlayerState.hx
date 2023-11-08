@@ -263,6 +263,9 @@ class APPlayerState extends ClassicPlayerState
 
 	private function set_level(level)
 	{
+		if (this.level == level) // don't needlessly regenerate level
+			return level;
+
 		trace("APps.set_level", level);
 		_levelPopulating = true;
 		_reg["score.accrued.game"] += _reg["score.accrued.level"];
