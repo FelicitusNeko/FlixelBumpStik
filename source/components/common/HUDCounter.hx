@@ -27,6 +27,7 @@ class HUDCounter extends FlxSpriteGroup
 		var labelText = new FlxText(0, 0, 0, label, 16);
 
 		_counterText = new FlxBitmapText(FlxBitmapFont.fromAngelCode(AssetPaths.Diginum__png, AssetPaths.Diginum__xml));
+		_counterText.setPosition(1, 17); // HACK: due to change in how FlxBitmapFont works
 		_counterText.autoSize = false;
 		_counterText.setBorderStyle(FlxTextBorderStyle.SHADOW);
 		_counterText.scale = new FlxPoint(.6, .6);

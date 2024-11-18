@@ -42,12 +42,14 @@ class AllClearSubstate extends FlxSubState
 
 		var backdrop = new FlxSprite(_center.x, _center.y);
 		backdrop.makeGraphic(Math.round(Math.max(text.width, jackpotText.width * jackpotText.scale.x)) + 16,
-			Math.round(text.height + (jackpotText.height * jackpotText.scale.y)) + 16, FlxColor.TRANSPARENT);
+			//Math.round(text.height + (jackpotText.height * jackpotText.scale.y)) + 16, FlxColor.TRANSPARENT);
+			Math.round(text.height + (jackpotText.height * jackpotText.scale.y)) + 24, FlxColor.TRANSPARENT);
 		backdrop.drawRoundRect(1, 1, backdrop.width - 2, backdrop.height - 2, 20, 20, FlxColor.BLACK, {color: FlxColor.WHITE, thickness: 3});
 
 		backdrop.setPosition(_center.x - backdrop.width / 2, _center.y - backdrop.height / 2);
 		text.setPosition(_center.x - text.width / 2, backdrop.y + 8);
-		jackpotText.setPosition(_center.x - jackpotText.width / 2, backdrop.y + backdrop.height - (jackpotText.height * .75) - 8);
+		//jackpotText.setPosition(_center.x - jackpotText.width / 2, backdrop.y + backdrop.height - (jackpotText.height * .75) - 8);
+		jackpotText.setPosition(_center.x - jackpotText.width / 2, backdrop.y + backdrop.height - jackpotText.height - 8);
 
 		for (item in [backdrop, jackpotText, text])
 		{
