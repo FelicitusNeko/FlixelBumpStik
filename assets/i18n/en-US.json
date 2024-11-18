@@ -83,6 +83,8 @@
         }
       },
       "goal": "Great job! You've completed your goal for this seed.",
+      "release": "Release",
+      "collect": "Collect",
       "error": {
         "levelgen": "The game called to generate Level :level, which is not a valid level number."
       },
