@@ -80,7 +80,7 @@ abstract class CommonGameState extends FlxState
 		save.destroy(); // we're not outputting save data here, so just dispose the save object
 
 		add(_hud);
-		attachHUD();
+		attachHUD(); // TODO: HUD should attach earlier, which probably requires it to be created earlier
 
 		var camMain = FlxG.camera;
 		var camHUD:FlxCamera;
