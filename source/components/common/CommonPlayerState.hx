@@ -509,7 +509,7 @@ abstract class CommonPlayerState
 		s.serialize(score);
 		s.serialize(block);
 		s.serialize(launched);
-		s.serialize(next == null);
+		s.serialize(next != null);
 		if (next != null)
 			s.serialize(next.serialize());
 		s.serialize(multiStack);
@@ -529,9 +529,9 @@ abstract class CommonPlayerState
 	private function hxUnserialize(u:Unserializer)
 	{
 		init();
+		
 		this.id = u.unserialize();
 		this.board = deserializeBoard(u.unserialize());
-		attachBoard();
 		this.score = u.unserialize();
 		this.block = u.unserialize();
 		this.launched = u.unserialize();
@@ -542,5 +542,7 @@ abstract class CommonPlayerState
 		_bg = u.unserialize();
 		_bgColorShuffle = u.unserialize();
 		_reg = u.unserialize();
+
+		attachBoard();
 	}
 }
