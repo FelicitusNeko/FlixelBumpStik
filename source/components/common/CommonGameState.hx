@@ -248,6 +248,7 @@ abstract class CommonGameState extends FlxState
 	**/
 	function deserialize(data:DynamicAccess<Dynamic>, ignoreGameName = false)
 	{
+		// TODO: need to create a HUD from here since CreateGame() doesn't get called
 		if (data["gameName"] != gameName && !ignoreGameName)
 			throw new Exception("Game name mismatch");
 
