@@ -216,18 +216,6 @@ abstract class CommonPlayerState
 	}
 
 	/**
-		Launches the current bumper in stock.
-		@param l The Launcher to launch from.
-	**/
-	public function launch(l:Launcher)
-	{
-		l.launchBumper(next);
-		onLaunch.dispatch(id, next);
-		next = null;
-		launched++;
-	}
-
-	/**
 		Sets an individual value in the multiplier stack. Quietly fails if `pos` is out of range.
 		@param pos The multiplier value to set.
 		@param val The new value to set in the given position.
@@ -353,12 +341,15 @@ abstract class CommonPlayerState
 		Receives onLauncherSelect events from the board.
 		@param cb The bumper to be sent to the Launcher.
 	**/
-	function onLaunchSelect(cb:BumperCallback) // NOTE: maybe rework how this works
+	function onLaunchSelect(cb:BumperCallback)
 	{
+		// TODO: replace callback paramater with onLaunch listener
 		FlxG.sound.play(AssetPaths.launch__wav);
 
+		onLaunch.dispatch(id, next);
 		var b = next == null ? _bg.weightedGenerate() : next;
 		next = null;
+		launched++;
 		addScore(5);
 		cb(b);
 	}
