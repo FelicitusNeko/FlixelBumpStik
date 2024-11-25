@@ -177,24 +177,24 @@ class BumperGenerator
 	@:keep
 	private function hxSerialize(s:Serializer)
 	{
+		s.serialize(_drops);
+		s.serialize(_rng.initialSeed);
+		s.serialize(_rng.currentSeed);
 		s.serialize(colorOpts);
 		s.serialize(initColors);
 		s.serialize(colors);
 		s.serialize(colorLimit);
-		s.serialize(_drops);
-		s.serialize(_rng.initialSeed);
-		s.serialize(_rng.currentSeed);
 	}
 
 	@:keep
 	private function hxUnserialize(u:Unserializer)
 	{
+		_drops = u.unserialize();
+		_rng = new FlxRandom(u.unserialize());
+		_rng.currentSeed = u.unserialize();
 		colorOpts = u.unserialize();
 		initColors = u.unserialize();
 		colors = u.unserialize();
 		colorLimit = u.unserialize();
-		_drops = u.unserialize();
-		_rng = new FlxRandom(u.unserialize());
-		_rng.currentSeed = u.unserialize();
 	}
 }
