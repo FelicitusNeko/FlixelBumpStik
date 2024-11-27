@@ -42,7 +42,7 @@ class ClassicGameState extends CommonGameState
 		super.create();
 
 		attachPlayer(_p);
-		_hud.attachState(_p);
+		//_hud.attachState(_p);
 		prepareBoard();
 
 		_p.runNextTurn();
@@ -233,16 +233,22 @@ class ClassicGameState extends CommonGameState
 			p.createBoard();
 			_playersv2.push(p);
 		}
-
-		if (_hud == null)
-			_hud = new ClassicHUD();
 	}
+
+	function createHUD()
+		return _hud = new ClassicHUD();
 
 	/** Connects this game state to the HUD's events. **/
 	function attachHUD()
 	{
 		_hud.onNextBumperClick.add(onNextBumperClick);
 		_hudClassic.onPaintCanClick.add(onPaintCanClick);
+
+		_hud.attachState(_p);
+		_hud.score = _p.score;
+		_hud.block = _p.block;
+		_hud.nextBumper = _p.next;
+		_hudClassic.paintCans = _pClassic.paint;
 	}
 
 	/**
@@ -254,6 +260,13 @@ class ClassicGameState extends CommonGameState
 		super.attachPlayer(player);
 		var playerCl = cast(player, ClassicPlayerState);
 		playerCl.onBumperSelected.add(onBumperSelect);
+	}
+
+	/** Disconnects this game state from the HUD's events. **/
+	function detachHUD()
+	{
+		_hud.onNextBumperClick.remove(onNextBumperClick);
+		_hudClassic.onPaintCanClick.remove(onPaintCanClick);
 	}
 
 	/**

@@ -32,7 +32,7 @@ abstract class CommonGameState extends FlxState
 	private var _playersv2:Array<CommonPlayerState> = [];
 
 	/** The GUI for this game. **/
-	private var _hud:CommonHUD;
+	private var _hud(default, set):Null<CommonHUD>;
 
 	/** A shortcut to the local player. **/
 	private var _p(get, never):CommonPlayerState;
@@ -60,27 +60,36 @@ abstract class CommonGameState extends FlxState
 	override function create()
 	{
 		var save = new FlxSave();
-		save.bind(gameName);
 
-		if (save.data.version != BumpStikGame.curSaveVer || // if the save is outdated
-			BumpStikGame.curSaveVer < 0) // or if we're in unstable testing mode
+		if (save.bind(gameName))
 		{
-			// potentially upgrade save data
-			// for now, just discard it
-			createGame();
+			if (save.data.gameName != gameName) // game identifier mismatch; ignore save
+				createGame();
+			else if (save.data.version == -1) // save made in test
+			{
+				// deserialize(save.data);
+				createGame();
+			}
+			else if (save.data.version < BumpStikGame.curSaveVer)
+			{
+				// potentially upgrade save data
+				// for now, just discard it
+				createGame();
+			}
+			else if (save.data.version > BumpStikGame.curSaveVer)
+				throw new Exception('Save data is newer than game');
+			else
+			{
+				deserialize(save.data);
+				// deserialize does not create a hud, though
+			}
+			save.destroy(); // we're not outputting save data here, so just dispose the save object
 		}
-		else if (save.data.gameName != gameName)
-			createGame();
 		else
-		{
-			trace('save data $gameName found');
-			deserialize(save.data);
-		}
+			createGame();
 
-		save.destroy(); // we're not outputting save data here, so just dispose the save object
-
-		add(_hud);
-		attachHUD(); // TODO: HUD should attach earlier, which probably requires it to be created earlier
+		_hud = createHUD();
+		//attachHUD(); // TODO: HUD should attach earlier, which probably requires it to be created earlier
 
 		var camMain = FlxG.camera;
 		var camHUD:FlxCamera;
@@ -110,17 +119,36 @@ abstract class CommonGameState extends FlxState
 
 	// !------------------------- PROPERTY HANDLERS
 
-	abstract function get_gameName():String;
-
-	abstract function get_gameType():String;
+	inline function set__hud(value) {
+		if (this._hud != null) {
+			remove(this._hud);
+			detachHUD();
+		}
+		this._hud = value;
+		if (this._hud != null) {
+			add(this._hud);
+			attachHUD();
+		}
+		return this._hud;
+	}
 
 	inline function get__p()
 		return _playersv2.length == 0 ? null : _playersv2[0];
+
+	abstract function get_gameName():String;
+
+	abstract function get_gameType():String;
 
 	// !------------------------- METHODS
 
 	/** Starts a new game. **/
 	abstract function createGame():Void;
+
+	/**
+	 * Creates a new HUD.
+	 * @return A new `CommonHUD` sprite.
+	 */
+	abstract function createHUD():CommonHUD;
 
 	/** Connects this game state to the HUD's events. **/
 	abstract function attachHUD():Void;
@@ -133,6 +161,9 @@ abstract class CommonGameState extends FlxState
 	{
 		player.onBoardStateChanged.add(onBoardStateChanged);
 	}
+
+	/** Disconnects this game state from the HUD's events. **/
+	abstract function detachHUD():Void;
 
 	/**
 		Disconnects this game state from a player state's events.

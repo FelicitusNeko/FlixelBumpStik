@@ -12,9 +12,10 @@ import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
 import flixel.util.FlxSave;
 import state.MenuState;
+import components.common.CommonHUD;
+import components.classic.ClassicGameState;
 import components.archipelago.APDefinitions;
 import components.archipelago.APTaskType;
-import components.classic.ClassicGameState;
 import components.dialogs.DialogBox;
 
 /** A queued toast popup message. **/
@@ -512,16 +513,21 @@ class APGameState extends ClassicGameState
 			_p.createGenerator();
 			_pAP.createBoard(true);
 		}
-
-		_hud = new APHUD();
 	}
+
+	override function createHUD():CommonHUD
+		return _hud = new APHUD();
 
 	/** Connects this game state to the HUD's events. **/
 	override function attachHUD()
 	{
-		super.attachHUD();
 		_hudAP.onTurnerClick.add(onTurnerClick);
 		_hudAP.onTaskSkipClick.add(onTaskSkipClick);
+
+		super.attachHUD();
+		_pAP.onLevelChanged.dispatch(_pAP.id, _pAP.level, _pAP.tasks);
+		_hudAP.turners = _pAP.turner;
+		_hudAP.taskSkip = _pAP.taskSkip;
 	}
 
 	/**
@@ -533,6 +539,14 @@ class APGameState extends ClassicGameState
 		super.attachPlayer(player);
 		_pAP.onTaskCleared.add(onTaskComplete);
 		_pAP.onBroadcast.add(onBroadcast);
+	}
+
+	/** Disconnects this game state from the HUD's events. **/
+	override function detachHUD()
+	{
+		super.detachHUD();
+		_hudAP.onTurnerClick.remove(onTurnerClick);
+		_hudAP.onTaskSkipClick.remove(onTaskSkipClick);
 	}
 
 	/**
