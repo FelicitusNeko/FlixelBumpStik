@@ -181,9 +181,9 @@ class BumperGenerator
 		s.serialize(_rng.initialSeed);
 		s.serialize(_rng.currentSeed);
 		s.serialize(colorOpts);
+		s.serialize(colorLimit);
 		s.serialize(initColors);
 		s.serialize(colors);
-		s.serialize(colorLimit);
 	}
 
 	@:keep
@@ -193,8 +193,8 @@ class BumperGenerator
 		_rng = new FlxRandom(u.unserialize());
 		_rng.currentSeed = u.unserialize();
 		colorOpts = u.unserialize();
+		colorLimit = u.unserialize();
 		initColors = u.unserialize();
 		colors = u.unserialize();
-		colorLimit = u.unserialize();
 	}
 }
