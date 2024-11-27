@@ -77,7 +77,7 @@ abstract class CommonGameState extends FlxState
 				createGame();
 			}
 			else if (save.data.version > BumpStikGame.curSaveVer)
-				throw new Exception('Save data is newer than game');
+				throw new Exception("Save data is newer than game");
 			else
 			{
 				deserialize(save.data);
@@ -88,8 +88,7 @@ abstract class CommonGameState extends FlxState
 		else
 			createGame();
 
-		_hud = createHUD();
-		//attachHUD(); // TODO: HUD should attach earlier, which probably requires it to be created earlier
+		_hud = createHUD(); // TODO: make sure HUD receives AP tasks
 
 		var camMain = FlxG.camera;
 		var camHUD:FlxCamera;
@@ -279,7 +278,6 @@ abstract class CommonGameState extends FlxState
 	**/
 	function deserialize(data:DynamicAccess<Dynamic>, ignoreGameName = false)
 	{
-		// TODO: need to create a HUD from here since CreateGame() doesn't get called
 		if (data["gameName"] != gameName && !ignoreGameName)
 			throw new Exception("Game name mismatch");
 
