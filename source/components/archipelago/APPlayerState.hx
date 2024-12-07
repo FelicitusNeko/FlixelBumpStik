@@ -101,7 +101,7 @@ class APPlayerState extends ClassicPlayerState
 	/** The player's current level. Setting this value will affect the task list.**/
 	public var level(default, set):Int;
 
-	/** The player's current list of tasks. **/
+	/** _Read-only._ The player's current list of tasks. **/
 	public var tasks(get, null):Array<APTaskV2>;
 
 	/** The player's current special bumper schedule. **/
@@ -414,12 +414,12 @@ class APPlayerState extends ClassicPlayerState
 				default: 0;
 			}
 
-		this.tasks.push({
+		tasks = tasks.concat([{
 			type: type,
 			goals: goals,
 			goalIndex: 0,
 			current: 0,
-		});
+		}]);
 		updateTask(type, current);
 	}
 
