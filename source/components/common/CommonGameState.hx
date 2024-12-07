@@ -88,7 +88,7 @@ abstract class CommonGameState extends FlxState
 		else
 			createGame();
 
-		_hud = createHUD(); // TODO: make sure HUD receives AP tasks
+		createHUD(); // TODO: make sure HUD receives AP tasks
 
 		var camMain = FlxG.camera;
 		var camHUD:FlxCamera;
