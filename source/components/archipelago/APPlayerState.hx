@@ -554,14 +554,11 @@ class APPlayerState extends ClassicPlayerState
 		trace("APps.createBoard");
 		if (force || board == null || board.state == "gameover")
 		{
-			if (board != null)
-				detachBoard();
 			if (level < 1 || level > 5)
 				board = null;
 			else
 			{
 				board = new APBoard(0, 0, _reg["board.w"], _reg["board.h"]);
-				attachBoard();
 			}
 		}
 	}
@@ -641,6 +638,7 @@ class APPlayerState extends ClassicPlayerState
 	/** Resets the player state. **/
 	override function reset()
 	{
+		trace("APps.reset");
 		_reg["score.accrued.level"] += score;
 		_reg["block.accrued.level"] += block;
 

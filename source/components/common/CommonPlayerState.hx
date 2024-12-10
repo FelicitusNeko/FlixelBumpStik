@@ -113,7 +113,7 @@ abstract class CommonPlayerState
 	public var id(default, null):String;
 
 	/** The player's current board. **/
-	public var board(default, null):CommonBoard;
+	public var board(default, set):CommonBoard;
 
 	/** The player's current score. **/
 	public var score(default, set) = 0;
@@ -189,6 +189,13 @@ abstract class CommonPlayerState
 
 	/** _Abstract._ Initializes the value registry. **/
 	abstract function initReg():Void;
+
+	private function set_board(board) {
+		if (this.board != null) detachBoard();
+		this.board = board;
+		if (board != null) attachBoard();
+		return this.board;
+	}
 
 	private function set_score(score)
 	{
@@ -462,6 +469,7 @@ abstract class CommonPlayerState
 	/** Resets the player state. **/
 	public function reset()
 	{
+		trace("Xps.reset");
 		score = 0;
 		block = 0;
 		next = null;

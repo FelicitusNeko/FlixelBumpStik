@@ -124,13 +124,9 @@ class ClassicPlayerState extends CommonPlayerState
 	**/
 	public function createBoard(force = false)
 	{
+		trace("Cps.createBoard");
 		if (force || board == null || board.state == "gameover")
-		{
-			if (board != null)
-				detachBoard();
 			board = new ClassicBoard(0, 0);
-			attachBoard();
-		}
 	}
 
 	/** Attaches the player state to its board's events. **/
