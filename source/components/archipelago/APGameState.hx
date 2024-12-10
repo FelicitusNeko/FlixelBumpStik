@@ -330,6 +330,7 @@ class APGameState extends ClassicGameState
 
 				case "gameover":
 					restartGame();
+					_p.runNextTurn();
 			}
 	}
 
