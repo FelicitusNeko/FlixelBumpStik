@@ -156,6 +156,7 @@ class ClassicPlayerState extends CommonPlayerState
 	{
 		super.reset();
 		paint = 0;
+		_reg["jackpot"] = 0;
 		_reg["paint.next"] = 1000;
 		_reg["paint.inc"] = 1500;
 	}
