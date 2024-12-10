@@ -74,6 +74,9 @@ class APPlayerState extends ClassicPlayerState
 	**/
 	public var onDeployHazard(default, null):Event<String->Void>; // TODO: do I actually need this?
 
+	/** The player's Archipelago multiworld client instance. **/
+	public var apClient(default, set):Client;
+
 	/** The player's current board, as an `APBoard`. **/
 	public var apBoard(get, never):APBoard;
 
@@ -226,6 +229,14 @@ class APPlayerState extends ClassicPlayerState
 		updateTask(LevelCleared, levelBlock);
 		updateTask(TotalCleared, totalBlock);
 		return retval;
+	}
+
+	private function set_apClient(client)
+	{
+		if (this.apClient != null) detachClient(this.apClient);
+		this.apClient = client;
+		if (client != null) attachClient(client);
+		return client;
 	}
 
 	inline private function get_apBoard()

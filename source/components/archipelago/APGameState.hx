@@ -232,7 +232,6 @@ class APGameState extends ClassicGameState
 	**/
 	private function onTaskComplete(id:String, level:Null<Int>, task:APTaskType, goal:Int, current:Int)
 	{
-		// TODO: here's where we actually send checks
 		trace("Task complete", task, '$current/$goal');
 
 		if (task == LevelHeader)
@@ -313,7 +312,7 @@ class APGameState extends ClassicGameState
 		if (index >= 0)
 			switch (state)
 			{
-				case "initial": // TODO: test this is working
+				case "initial": // NOTE: this only executes after the first move
 					if (_ap.clientStatus == ClientStatus.READY)
 					{
 						_ap.clientStatus = ClientStatus.PLAYING;
@@ -535,6 +534,7 @@ class APGameState extends ClassicGameState
 	**/
 	override function attachPlayer(player)
 	{
+		_pAP.apClient = _ap;
 		super.attachPlayer(player);
 		_pAP.onTaskCleared.add(onTaskComplete);
 		_pAP.onBroadcast.add(onBroadcast);
@@ -554,6 +554,7 @@ class APGameState extends ClassicGameState
 	**/
 	override function detachPlayer(player)
 	{
+		_pAP.apClient = null;
 		super.detachPlayer(player);
 		_pAP.onTaskCleared.remove(onTaskComplete);
 		_pAP.onBroadcast.remove(onBroadcast);
