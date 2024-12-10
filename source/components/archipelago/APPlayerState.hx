@@ -233,9 +233,11 @@ class APPlayerState extends ClassicPlayerState
 
 	private function set_apClient(client)
 	{
-		if (this.apClient != null) detachClient(this.apClient);
+		if (this.apClient != null)
+			detachClient(this.apClient);
 		this.apClient = client;
-		if (client != null) attachClient(client);
+		if (client != null)
+			attachClient(client);
 		return client;
 	}
 
@@ -371,9 +373,9 @@ class APPlayerState extends ClassicPlayerState
 					s.maxAvailable = 999;
 
 			case 6 | -1:
-			// this will finish the game
-			// game state will handle this when onLevelChanged is called
-			// just handling the state so it doesn't fall through into throw
+				// this will finish the game
+				// game state will handle this when onLevelChanged is called
+				// just handling the state so it doesn't fall through into throw
 
 			case x:
 				throw new Exception(_t("game/ap/error/levelgen", ["level" => level]));
@@ -425,12 +427,14 @@ class APPlayerState extends ClassicPlayerState
 				default: 0;
 			}
 
-		tasks = tasks.concat([{
-			type: type,
-			goals: goals,
-			goalIndex: 0,
-			current: 0,
-		}]);
+		tasks = tasks.concat([
+			{
+				type: type,
+				goals: goals,
+				goalIndex: 0,
+				current: 0,
+			}
+		]);
 		updateTask(type, current);
 	}
 
@@ -636,11 +640,15 @@ class APPlayerState extends ClassicPlayerState
 						// TODO: report treasure clear to game state
 						chain++;
 						updateTask(Treasures, sched.clear);
+						onTaskCleared.dispatch(id, level, Treasures, sched.clear, 0);
 					case "booster":
 						// TODO: report booster clear to game state
 						updateTask(Boosters, sched.clear);
+						onTaskCleared.dispatch(id, level, Boosters, sched.clear, 0);
 					case "hazard":
 						updateTask(Hazards, sched.clear);
+						if (sched.clear == 25) // NOTE: maybe don't hardcode this
+							onTaskCleared.dispatch(id, level, Hazards, sched.clear, 0);
 				}
 			}
 		super.onClear(chain, bumper);

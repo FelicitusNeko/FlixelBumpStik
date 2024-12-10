@@ -291,6 +291,11 @@ class APGameState extends ClassicGameState
 				case [Hazards, 5, _]:
 					L5AllHazards;
 
+				case [Treasures, _, x]:
+					Treasure1 + x - 1;
+				case [Boosters, _, x]:
+					Booster1 + x - 1;
+
 				default:
 					null;
 			}
