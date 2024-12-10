@@ -122,10 +122,10 @@ class ClassicPlayerState extends CommonPlayerState
 		Creates a new board.
 		@param force Create a board even if one is present and in progress. Default `false`.
 	**/
-	public function createBoard(force = false)
+	public function createBoard(?force:Bool)
 	{
 		trace("Cps.createBoard");
-		if (force || board == null || board.state == "gameover")
+		if (force == true || board == null || board.state == "gameover")
 			board = new ClassicBoard(0, 0);
 	}
 

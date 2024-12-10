@@ -289,7 +289,7 @@ abstract class CommonPlayerState
 		_Abstract._ Creates a new board.
 		@param force Create a board even if one is present and in progress.
 	**/
-	abstract public function createBoard(force:Bool = false):Void;
+	abstract public function createBoard(?force:Bool):Void;
 
 	/** Attaches the player state to its board's events. **/
 	function attachBoard()

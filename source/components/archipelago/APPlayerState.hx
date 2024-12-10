@@ -549,10 +549,10 @@ class APPlayerState extends ClassicPlayerState
 		Creates a new board.
 		@param force Create a board even if one is present and in progress. Default `false`.
 	**/
-	override function createBoard(force:Bool = false)
+	public override function createBoard(?force:Bool)
 	{
 		trace("APps.createBoard");
-		if (force || board == null || board.state == "gameover")
+		if (force == true || board == null || board.state == "gameover")
 		{
 			if (level < 1 || level > 5)
 				board = null;
