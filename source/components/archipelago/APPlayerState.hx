@@ -381,6 +381,8 @@ class APPlayerState extends ClassicPlayerState
 				throw new Exception(_t("game/ap/error/levelgen", ["level" => level]));
 		}
 
+		multiStack = [.4 + (_reg["color.start"] * .2), 1.0 + (_sched["booster"].clear * .2)];
+
 		_levelPopulating = false;
 		onLevelChanged.dispatch(id, level, tasks);
 
