@@ -541,7 +541,5 @@ abstract class CommonPlayerState
 		_bg = u.unserialize();
 		_bgColorShuffle = u.unserialize();
 		_reg = u.unserialize();
-
-		attachBoard();
 	}
 }
