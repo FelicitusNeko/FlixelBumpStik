@@ -465,8 +465,6 @@ class APPlayerState extends ClassicPlayerState
 				onTaskCleared.dispatch(id, level, task.type, task.curGoal, task.current);
 				task.goalIndex++;
 			}
-			// TODO: this is still to be handled by the HUD
-			// task.uiText.text = task;
 
 			onTaskUpdated.dispatch(id, x, task);
 		}
@@ -639,12 +637,10 @@ class APPlayerState extends ClassicPlayerState
 				switch (key)
 				{
 					case "treasure":
-						// TODO: report treasure clear to game state
 						chain++;
 						updateTask(Treasures, sched.clear);
 						onTaskCleared.dispatch(id, level, Treasures, sched.clear, 0);
 					case "booster":
-						// TODO: report booster clear to game state
 						updateTask(Boosters, sched.clear);
 						onTaskCleared.dispatch(id, level, Boosters, sched.clear, 0);
 					case "hazard":
@@ -702,8 +698,9 @@ class APPlayerState extends ClassicPlayerState
 	/** Loads the board data. **/
 	override function deserializeBoard(data:DynamicAccess<Dynamic>):CommonBoard
 	{
-		var boardData:DynamicAccess<Dynamic> = data["board"];
-		var board = new APBoard(0, 0, boardData["width"], boardData["height"]);
+		//var boardData:DynamicAccess<Dynamic> = data["board"];
+		//trace(boardData);
+		var board = new APBoard(0, 0, data["width"], data["height"]);
 		board.deserialize(data);
 		return board;
 	}
@@ -712,6 +709,7 @@ class APPlayerState extends ClassicPlayerState
 	@:keep
 	override function hxUnserialize(u:Unserializer)
 	{
+		this.tasks = [];
 		super.hxUnserialize(u);
 		_rng = new FlxRandom(u.unserialize());
 		_rng.currentSeed = u.unserialize();
