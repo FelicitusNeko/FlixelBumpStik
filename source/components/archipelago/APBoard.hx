@@ -129,14 +129,11 @@ class APBoard extends ClassicBoard
 	{
 		var retval = super.serialize();
 
-		if (_obstacles.getFirstAlive() != null)
+		retval["obstacles"] = [];
+		_obstacles.forEachAlive(o ->
 		{
-			retval["obstacles"] = [];
-			_obstacles.forEachAlive(o ->
-			{
-				retval["obstacles"].push(o.serialize());
-			});
-		}
+			retval["obstacles"].push(o.serialize());
+		});
 
 		return retval;
 	}
@@ -146,15 +143,14 @@ class APBoard extends ClassicBoard
 		super.deserialize(data);
 
 		var obstaclesData:Array<DynamicAccess<Dynamic>> = data["obstacles"];
-		if (obstaclesData != null)
-			for (obstacleData in obstaclesData)
+		for (obstacleData in obstaclesData)
+		{
+			var obstacle:BoardObject = switch (obstacleData["type"])
 			{
-				var obstacle:BoardObject = switch (obstacleData["type"])
-				{
-					case "hazardPlaceholder": APHazardPlaceholder.fromSaved(obstacleData);
-					case x: throw new Exception('Unknown board object type $x');
-				}
-				putObstacleAt(obstacleData["boardX"], obstacleData["boardY"], obstacle);
+				case "hazardPlaceholder": APHazardPlaceholder.fromSaved(obstacleData);
+				case x: throw new Exception('Unknown board object type $x');
 			}
+			putObstacleAt(obstacleData["boardX"], obstacleData["boardY"], obstacle);
+		}
 	}
 }
