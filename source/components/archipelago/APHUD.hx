@@ -154,8 +154,6 @@ class APHUD extends ClassicHUD
 		if (!_connected.contains(id))
 			return;
 
-		trace("connect!");
-
 		_taskListbox.clear();
 		for (task in _tasks)
 			task.destroy();
@@ -163,6 +161,8 @@ class APHUD extends ClassicHUD
 		_tasks = tasks.map(i -> new FlxUIText(0, 0, 0, i));
 		for (x => task in _tasks)
 		{
+			if (tasks[x].complete)
+				task.color = FlxColor.LIME;
 			if (tasks[x].type == LevelHeader)
 			{
 				task.size += 4;
