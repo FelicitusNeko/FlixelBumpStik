@@ -471,6 +471,7 @@ class APPlayerState extends ClassicPlayerState
 
 		if (!_levelPopulating)
 		{
+			// BUG: level header not getting cleared when everything else is finished
 			var levelTask = tl[0];
 			if (levelTask.type == LevelHeader && !levelTask.complete && tl.length > 1)
 			{
