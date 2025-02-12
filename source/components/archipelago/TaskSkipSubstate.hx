@@ -16,12 +16,11 @@ using flixel.util.FlxSpriteUtil;
 
 class TaskSkipSubstate extends FlxSubState
 {
-	var _tasks:Array<APTask> = [];
 	var _tasksv2:Array<APTaskV2> = [];
 	var _t:I18nFunction = null;
 	var _center:FlxPoint;
 
-	public var onTaskSkip(default, null) = new Event<APTask->Void>();
+	public var onTaskSkip(default, null) = new Event<APTaskV2->Void>();
 
 	public function new(center:FlxPoint)
 	{
@@ -54,7 +53,7 @@ class TaskSkipSubstate extends FlxSubState
 
 		var accept = new FlxUIButton(0, 0, _t("game/ap/skip/confirm"), () ->
 		{
-			var selTask = _tasks[list.scrollIndex];
+			var selTask = _tasksv2[list.scrollIndex];
 			selTask.force();
 			onTaskSkip.dispatch(selTask);
 			close();
@@ -90,10 +89,6 @@ class TaskSkipSubstate extends FlxSubState
 
 		super.create();
 	}
-
-	@:allow(components.archipelago.APHUD.loadTaskSkip)
-	function loadTasks(tasks:Array<APTask>)
-		_tasks = tasks;
 
 	@:allow(components.archipelago.APPlayerState.loadTaskSkip)
 	function loadTasksV2(tasks:Array<APTaskV2>)
