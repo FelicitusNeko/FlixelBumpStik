@@ -1,15 +1,11 @@
 package components.archipelago;
 
-import haxe.DynamicAccess;
-import haxe.Exception;
 import flixel.addons.ui.FlxUIList;
 import flixel.addons.ui.FlxUIText;
 import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
 import lime.app.Event;
-import components.archipelago.APTask;
 import components.classic.ClassicHUD;
-import components.common.CommonGameState;
 import components.common.CommonHUD;
 import components.common.CommonPlayerState;
 

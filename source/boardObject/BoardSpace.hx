@@ -1,7 +1,6 @@
 package boardObject;
 
 import components.common.CommonBoard;
-import flixel.FlxSprite;
 import flixel.util.FlxColor;
 import boardObject.Bumper;
 

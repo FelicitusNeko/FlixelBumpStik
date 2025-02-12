@@ -7,10 +7,8 @@ import haxe.Unserializer;
 import haxe.ds.ArraySort;
 import Main.I18nFunction;
 import boardObject.Bumper;
-import boardObject.Launcher;
 import flixel.FlxG;
 import flixel.FlxSubState;
-import flixel.util.FlxColor;
 import lime.app.Event;
 import components.common.CommonBoard;
 

@@ -1,7 +1,6 @@
 package components.archipelago;
 
 import Main.I18nFunction;
-import flixel.FlxCamera;
 import flixel.FlxSprite;
 import flixel.FlxSubState;
 import flixel.addons.ui.FlxUIButton;

@@ -6,7 +6,6 @@ import flixel.FlxSubState;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
-import lime.app.Event;
 
 using flixel.util.FlxSpriteUtil;
 

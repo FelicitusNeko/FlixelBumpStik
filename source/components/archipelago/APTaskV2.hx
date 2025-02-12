@@ -1,10 +1,7 @@
 package components.archipelago;
 
-import haxe.DynamicAccess;
 import haxe.Serializer;
 import haxe.Unserializer;
-import flixel.addons.ui.FlxUIText;
-import flixel.util.FlxColor;
 
 /** The definition for an Archipelago check task. **/
 typedef IAPTaskV2 =

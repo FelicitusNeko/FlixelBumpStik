@@ -1,14 +1,6 @@
 package components.classic;
 
-import haxe.DynamicAccess;
-import boardObject.Bumper;
-import flixel.FlxG;
-import flixel.FlxSprite;
-import flixel.text.FlxText;
-import flixel.tweens.FlxEase;
-import flixel.tweens.FlxTween;
 import flixel.ui.FlxButton;
-import flixel.util.FlxColor;
 import lime.app.Event;
 import components.common.CommonHUD;
 import components.common.CommonPlayerState;

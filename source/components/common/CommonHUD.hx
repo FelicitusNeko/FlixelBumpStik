@@ -1,6 +1,5 @@
 package components.common;
 
-import haxe.DynamicAccess;
 import Main.I18nFunction;
 import boardObject.Bumper;
 import flixel.FlxG;

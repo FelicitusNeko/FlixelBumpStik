@@ -1,7 +1,6 @@
 package components.classic;
 
 import haxe.DynamicAccess;
-import haxe.Exception;
 import haxe.Serializer;
 import haxe.Unserializer;
 import boardObject.Bumper;

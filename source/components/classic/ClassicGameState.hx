@@ -1,17 +1,11 @@
 package components.classic;
 
-import haxe.DynamicAccess;
-import haxe.Json;
 import haxe.Timer;
 import boardObject.Bumper;
 import flixel.FlxG;
-import flixel.math.FlxPoint;
 import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
-import flixel.util.FlxSave;
-import components.archipelago.TurnerSubstate;
 import components.classic.ClassicHUD;
-import components.common.CommonBoard;
 import components.common.CommonGameState;
 import components.common.CommonPlayerState;
 

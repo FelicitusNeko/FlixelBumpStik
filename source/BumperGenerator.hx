@@ -1,6 +1,5 @@
 package;
 
-import haxe.DynamicAccess;
 import haxe.Serializer;
 import haxe.Unserializer;
 import boardObject.Bumper;
