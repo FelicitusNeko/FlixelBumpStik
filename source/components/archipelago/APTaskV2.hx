@@ -89,13 +89,14 @@ abstract APTaskV2(IAPTaskV2) from IAPTaskV2 to IAPTaskV2
 		@return Whether the goal index has advanced. `false` if it was already complete.
 	**/
 	public inline function force(finish = false)
-		return switch (complete)
+	{
+		if (goalIndex != goalCount)
 		{
-			case true: false;
-			case false:
-				finish ? (goalIndex = goalCount) : goalIndex++;
-				true;
+			finish ? (goalIndex = goalCount) : goalIndex++;
+			return true;
 		}
+		return false;
+	}
 
 	@:to
 	public function toString()
