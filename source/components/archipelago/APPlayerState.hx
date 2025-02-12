@@ -698,8 +698,8 @@ class APPlayerState extends ClassicPlayerState
 	/** Loads the board data. **/
 	override function deserializeBoard(data:DynamicAccess<Dynamic>):CommonBoard
 	{
-		//var boardData:DynamicAccess<Dynamic> = data["board"];
-		//trace(boardData);
+		// var boardData:DynamicAccess<Dynamic> = data["board"];
+		// trace(boardData);
 		var board = new APBoard(0, 0, data["width"], data["height"]);
 		board.deserialize(data);
 		return board;
