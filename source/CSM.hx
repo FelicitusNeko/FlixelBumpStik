@@ -163,7 +163,7 @@ class CSM // stands for Chaining State Machine
 		else
 		{
 			if (_chainList.exists(currentState))
-				trace('Trigger $trigger" not defined for $currentState');
+				trace('Trigger $trigger not defined for $currentState');
 			else
 				trace('No trigger for $currentState');
 			return false;
