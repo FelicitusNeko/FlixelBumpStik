@@ -142,11 +142,7 @@ class APPlayerState extends ClassicPlayerState
 		addRule({
 			name: "gameComplete",
 			condition: If(() -> level >= 6),
-			execute: Process(() ->
-			{
-				// TODO: send complete to server
-				return Signal("ap-complete");
-			}),
+			execute: Process(() -> Signal("ap-complete")),
 			priority: 5
 		});
 		addRule({
@@ -160,12 +156,7 @@ class APPlayerState extends ClassicPlayerState
 						return false;
 				return true;
 			}),
-			execute: Process(() ->
-			{
-				FlxG.sound.play(AssetPaths.levelup__wav);
-				apBoard.levelClear();
-				return Signal("ap-lvcomplete");
-			}),
+			execute: Process(() -> Signal("ap-lvcomplete")),
 			priority: 20
 		});
 		addRule({

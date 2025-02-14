@@ -395,7 +395,7 @@ class APGameState extends ClassicGameState
 					onTaskComplete(_p.id, _pAP.level, task.type, task.goals[task.goalIndex - 1], task.current);
 				if (_levelClear)
 				{
-					_p.runNextTurn();
+					//_p.runNextTurn();
 					onSignal("ap-lvcomplete");
 				}
 			});
@@ -471,6 +471,9 @@ class APGameState extends ClassicGameState
 		switch (signal)
 		{
 			case "ap-lvcomplete":
+				FlxG.sound.play(AssetPaths.levelup__wav);
+				// TODO: make sure board is in idle state (it shouldn't not be, though?)
+				_pAP.apBoard.levelClear();
 				pushToast(_t("game/ap/levelcomplete"), FlxColor.LIME, 3000, true);
 			case "ap-complete":
 				_ap.clientStatus = ClientStatus.GOAL;
