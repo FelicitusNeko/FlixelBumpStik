@@ -54,9 +54,6 @@ class APGameState extends ClassicGameState
 	/** Any checks that have been marked to be sent in the next Update call. **/
 	private var _checkBuffer:Array<APLocation> = [];
 
-	/** Stores whether a level has been cleared. The level clear sequence will then be fired when a new bumper is requested. **/
-	private var _levelClear = false;
-
 	/** Whether the user is attempting to use a Turner. **/
 	private var _turnerMode = false; // TODO: probably a better way to do this
 
@@ -234,74 +231,69 @@ class APGameState extends ClassicGameState
 	{
 		trace("Task cleared", task, '$current/$goal');
 
-		if (task == LevelHeader)
-			_levelClear = true;
-		else
+		var check:Null<Int> = switch ([task, _pAP.level, goal])
 		{
-			var check:Null<Int> = switch ([task, _pAP.level, goal])
-			{
-				case [Score, 1, x]:
-					L1Score250 + Math.round(x / 250 - 1);
-				case [LevelScore, 1, x]:
-					L1LScore500 + Math.round(x / 500 - 1);
-				case [LevelCleared, 1, x]:
-					L1LBumpers25 + Math.round(x / 25 - 1);
-				case [Combo, 1, _]:
-					L1Combo5;
+			case [Score, 1, x]:
+				L1Score250 + Math.round(x / 250 - 1);
+			case [LevelScore, 1, x]:
+				L1LScore500 + Math.round(x / 500 - 1);
+			case [LevelCleared, 1, x]:
+				L1LBumpers25 + Math.round(x / 25 - 1);
+			case [Combo, 1, _]:
+				L1Combo5;
 
-				case [Score, 2, x]:
-					L2Score500 + Math.round(x / 500 - 1);
-				case [LevelScore, 2, x]:
-					L2LScore1000 + Math.round(x / 1000 - 1);
-				case [LevelCleared, 2, x]:
-					L2LBumpers25 + Math.round(x / 25 - 1);
-				case [Combo, 2, _]:
-					L2Combo5;
-				case [Chain, 2, _]:
-					L2Chain2;
+			case [Score, 2, x]:
+				L2Score500 + Math.round(x / 500 - 1);
+			case [LevelScore, 2, x]:
+				L2LScore1000 + Math.round(x / 1000 - 1);
+			case [LevelCleared, 2, x]:
+				L2LBumpers25 + Math.round(x / 25 - 1);
+			case [Combo, 2, _]:
+				L2Combo5;
+			case [Chain, 2, _]:
+				L2Chain2;
 
-				case [Score, 3, x]:
-					L3Score800 + Math.round(x / 800 - 1);
-				case [LevelScore, 3, x]:
-					L3LScore2000 + Math.round(x / 2000 - 1);
-				case [LevelCleared, 3, x]:
-					L3LBumpers25 + Math.round(x / 25 - 1);
-				case [Combo, 3, 5]:
-					L3Combo5;
-				case [Combo, 3, 7]:
-					L3Combo7;
-				case [Chain, 3, 2]:
-					L3Chain2;
-				case [AllClear, 3, _]:
-					L3AllClear3Col;
+			case [Score, 3, x]:
+				L3Score800 + Math.round(x / 800 - 1);
+			case [LevelScore, 3, x]:
+				L3LScore2000 + Math.round(x / 2000 - 1);
+			case [LevelCleared, 3, x]:
+				L3LBumpers25 + Math.round(x / 25 - 1);
+			case [Combo, 3, 5]:
+				L3Combo5;
+			case [Combo, 3, 7]:
+				L3Combo7;
+			case [Chain, 3, 2]:
+				L3Chain2;
+			case [AllClear, 3, _]:
+				L3AllClear3Col;
 
-				case [Score, 4, x]:
-					L4Score1500 + Math.round(x / 1500 - 1);
-				case [LevelScore, 4, x]:
-					L4LScore3000 + Math.round(x / 3000 - 1);
-				case [LevelCleared, 4, x]:
-					L4LBumpers25 + Math.round(x / 25 - 1);
-				case [Combo, 4, 5]: L4Combo5;
-				case [Combo, 4, 7]: L4Combo7;
-				case [Chain, 4, 2]: L4Chain2;
-				case [Chain, 4, 3]: L4Chain3;
+			case [Score, 4, x]:
+				L4Score1500 + Math.round(x / 1500 - 1);
+			case [LevelScore, 4, x]:
+				L4LScore3000 + Math.round(x / 3000 - 1);
+			case [LevelCleared, 4, x]:
+				L4LBumpers25 + Math.round(x / 25 - 1);
+			case [Combo, 4, 5]: L4Combo5;
+			case [Combo, 4, 7]: L4Combo7;
+			case [Chain, 4, 2]: L4Chain2;
+			case [Chain, 4, 3]: L4Chain3;
 
-				case [TotalScore, 5, _]:
-					L5TScore50k;
-				case [Hazards, 5, _]:
-					L5AllHazards;
+			case [TotalScore, 5, _]:
+				L5TScore50k;
+			case [Hazards, 5, _]:
+				L5AllHazards;
 
-				case [Treasures, _, x]:
-					Treasure1 + x - 1;
-				case [Boosters, _, x]:
-					Booster1 + x - 1;
+			case [Treasures, _, x]:
+				Treasure1 + x - 1;
+			case [Boosters, _, x]:
+				Booster1 + x - 1;
 
-				default:
-					null;
-			}
-			if (check != null)
-				_checkBuffer.push(check);
+			default:
+				null;
 		}
+		if (check != null)
+			_checkBuffer.push(check);
 	}
 
 	/**
@@ -393,11 +385,7 @@ class APGameState extends ClassicGameState
 				_pAP.updateTask(task.type, task.current);
 				if (![Treasures, Boosters].contains(task.type))
 					onTaskCleared(_p.id, _pAP.level, task.type, task.goals[task.goalIndex - 1], task.current);
-				if (_levelClear)
-				{
-					//_p.runNextTurn();
-					onSignal("ap-lvcomplete");
-				}
+				_p.runNextTurn();
 			});
 			_pAP.loadTaskSkip(dlg);
 			openSubState(dlg);
