@@ -5,19 +5,15 @@ package utilities;
 typedef IDeploymentSchedule =
 {
 	/** This many are queued to be deployed. **/
-	// var toDeploy:Int;
 	var inStock:Int;
 
 	/** This many can be deployed at the current level. **/
-	// var deployable:Int;
 	var maxAvailable:Int;
 
 	/** This many are yet to be cleared. **/
-	// var toClear:Int;
 	var onBoard:Int;
 
 	/** This many have been cleared. **/
-	// var cleared:Int;
 	var clear:Int;
 
 	/** It has been this many turns since one has been deployed since becoming available. **/
