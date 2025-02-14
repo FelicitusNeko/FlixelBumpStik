@@ -93,6 +93,8 @@ class ClassicGameState extends CommonGameState
 							openSubState(s);
 						case Wait(msec):
 							Timer.delay(() -> onBoardStateChanged(id, state), msec);
+						case Signal(sig):
+							onSignal(sig);
 						default:
 					}
 				case "gameoverwait":
