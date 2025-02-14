@@ -497,9 +497,6 @@ class APPlayerState extends ClassicPlayerState
 	**/
 	private function onItemsReceived(items:Array<NetworkItem>)
 	{
-		// if (_ap.clientStatus != ClientStatus.PLAYING)
-		// 	_itemBuffer = _itemBuffer.concat(items);
-		// else
 		for (itemObj in items.filter(i -> i.index > _reg["ap.last"]))
 		{
 			var item:APItem = itemObj.item;

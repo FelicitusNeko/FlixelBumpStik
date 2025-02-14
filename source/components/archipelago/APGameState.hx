@@ -48,9 +48,6 @@ class APGameState extends ClassicGameState
 	/** The queue of popup toasts to display. **/
 	private var _toastQueue:Array<QueuedToast> = [];
 
-	/** The items have been received from the server which have yet to be processed. **/
-	// private var _itemBuffer:Array<NetworkItem> = [];
-
 	/** Any checks that have been marked to be sent in the next Update call. **/
 	private var _checkBuffer:Array<APLocation> = [];
 
@@ -311,14 +308,7 @@ class APGameState extends ClassicGameState
 			{
 				case "initial": // NOTE: this only executes *after* the first move
 					if (_ap.clientStatus == ClientStatus.READY)
-					{
 						_ap.clientStatus = ClientStatus.PLAYING;
-						// if (_itemBuffer.length > 0)
-						// {
-						// 	onItemsReceived(_itemBuffer);
-						// 	_itemBuffer = [];
-						// }
-					}
 
 				case "gameover":
 					restartGame();
