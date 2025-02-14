@@ -289,7 +289,7 @@ class APGameState extends ClassicGameState
 			default:
 				null;
 		}
-		if (check != null)
+		if (check != null && !_checkBuffer.contains(check))
 			_checkBuffer.push(check);
 	}
 
