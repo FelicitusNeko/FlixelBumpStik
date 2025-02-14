@@ -317,7 +317,7 @@ class APGameState extends ClassicGameState
 		if (index >= 0)
 			switch (state)
 			{
-				case "initial": // NOTE: this only executes after the first move
+				case "initial": // NOTE: this only executes *after* the first move
 					if (_ap.clientStatus == ClientStatus.READY)
 					{
 						_ap.clientStatus = ClientStatus.PLAYING;

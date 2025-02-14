@@ -168,8 +168,6 @@ class ClassicPlayerState extends CommonPlayerState
 		s.serialize(paint);
 	}
 
-	// TODO: make boards hxSerializable
-
 	/** Loads the board data. **/
 	function deserializeBoard(data:DynamicAccess<Dynamic>):CommonBoard
 	{

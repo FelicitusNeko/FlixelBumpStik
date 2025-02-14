@@ -684,8 +684,6 @@ class APPlayerState extends ClassicPlayerState
 		s.serialize(_sched);
 	}
 
-	// TODO: make boards hxSerializable
-
 	/** Loads the board data. **/
 	override function deserializeBoard(data:DynamicAccess<Dynamic>):CommonBoard
 	{
