@@ -8,7 +8,6 @@ import ap.Client;
 import ap.PacketTypes;
 import boardObject.Bumper;
 import boardObject.archipelago.APHazardPlaceholder;
-import flixel.FlxG;
 import flixel.math.FlxRandom;
 import flixel.util.FlxColor;
 import lime.app.Event;
