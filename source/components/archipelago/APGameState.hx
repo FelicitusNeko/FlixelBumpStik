@@ -230,9 +230,9 @@ class APGameState extends ClassicGameState
 		@param current The current value for the goal.
 		@deprecated we're probably moving this to `APPlayerState`
 	**/
-	private function onTaskComplete(id:String, level:Null<Int>, task:APTaskType, goal:Int, current:Int)
+	private function onTaskCleared(id:String, level:Null<Int>, task:APTaskType, goal:Int, current:Int)
 	{
-		trace("Task complete", task, '$current/$goal');
+		trace("Task cleared", task, '$current/$goal');
 
 		if (task == LevelHeader)
 			_levelClear = true;
@@ -392,7 +392,7 @@ class APGameState extends ClassicGameState
 				_pAP.taskSkip--;
 				_pAP.updateTask(task.type, task.current);
 				if (![Treasures, Boosters].contains(task.type))
-					onTaskComplete(_p.id, _pAP.level, task.type, task.goals[task.goalIndex - 1], task.current);
+					onTaskCleared(_p.id, _pAP.level, task.type, task.goals[task.goalIndex - 1], task.current);
 				if (_levelClear)
 				{
 					//_p.runNextTurn();
@@ -545,7 +545,7 @@ class APGameState extends ClassicGameState
 	{
 		_pAP.apClient = _ap;
 		super.attachPlayer(player);
-		_pAP.onTaskCleared.add(onTaskComplete);
+		_pAP.onTaskCleared.add(onTaskCleared);
 		_pAP.onBroadcast.add(onBroadcast);
 	}
 
@@ -565,7 +565,7 @@ class APGameState extends ClassicGameState
 	{
 		_pAP.apClient = null;
 		super.detachPlayer(player);
-		_pAP.onTaskCleared.remove(onTaskComplete);
+		_pAP.onTaskCleared.remove(onTaskCleared);
 		_pAP.onBroadcast.remove(onBroadcast);
 	}
 
