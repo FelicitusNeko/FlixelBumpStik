@@ -141,7 +141,7 @@ class APPlayerState extends ClassicPlayerState
 		addRule({
 			name: "gameComplete",
 			condition: If(() -> level >= 6),
-			execute: Process(() -> Signal("ap-complete")),
+			execute: Return(Signal("ap-complete")),
 			priority: 5
 		});
 		addRule({
@@ -155,7 +155,7 @@ class APPlayerState extends ClassicPlayerState
 						return false;
 				return true;
 			}),
-			execute: Process(() -> Signal("ap-lvcomplete")),
+			execute: Return(Signal("ap-lvcomplete")),
 			priority: 20
 		});
 		addRule({
@@ -466,7 +466,6 @@ class APPlayerState extends ClassicPlayerState
 			var levelTask = tl[0];
 			if (levelTask.type == LevelHeader && !levelTask.complete && tl.length > 1)
 			{
-				trace("checking task clear");
 				var allTasksCleared = true;
 				for (task in tl.slice(1))
 				{
@@ -478,11 +477,8 @@ class APPlayerState extends ClassicPlayerState
 					levelTask.force(true);
 					levelTask.current = levelTask.curGoal;
 					onTaskCleared.dispatch(id, level, LevelHeader, levelTask.curGoal, levelTask.current);
-					trace("clearing level task", levelTask.complete);
-				} else trace("level task not clear", levelTask);
+				}
 			}
-			else
-				trace("not checking task clear", levelTask);
 		}
 	}
 
