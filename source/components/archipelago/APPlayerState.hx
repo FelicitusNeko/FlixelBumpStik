@@ -682,6 +682,7 @@ class APPlayerState extends ClassicPlayerState
 		s.serialize(turner);
 		s.serialize(level);
 		s.serialize(tasks);
+		s.serialize(_sched);
 	}
 
 	// TODO: make boards hxSerializable
@@ -708,5 +709,6 @@ class APPlayerState extends ClassicPlayerState
 		this.turner = u.unserialize();
 		this.level = u.unserialize();
 		this.tasks = u.unserialize();
+		this._sched = u.unserialize();
 	}
 }
