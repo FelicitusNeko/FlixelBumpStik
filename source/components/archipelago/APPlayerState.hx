@@ -440,6 +440,7 @@ class APPlayerState extends ClassicPlayerState
 	public function updateTask(type:APTaskType, current:Int)
 	{
 		var tl = this.tasks;
+		var hasUpdated = false;
 
 		if (tl.length == 0)
 			return;
@@ -449,6 +450,7 @@ class APPlayerState extends ClassicPlayerState
 			if (task.type != type || task.current > current)
 				continue;
 
+			hasUpdated = true;
 			task.current = current;
 			while (task.current >= task.curGoal && task.goalIndex < task.goalCount)
 			{
@@ -459,20 +461,28 @@ class APPlayerState extends ClassicPlayerState
 			onTaskUpdated.dispatch(id, x, task);
 		}
 
-		if (!_levelPopulating)
+		if (!_levelPopulating && hasUpdated)
 		{
 			var levelTask = tl[0];
 			if (levelTask.type == LevelHeader && !levelTask.complete && tl.length > 1)
 			{
+				trace("checking task clear");
 				var allTasksCleared = true;
 				for (task in tl.slice(1))
+				{
 					allTasksCleared = allTasksCleared && task.complete;
+					trace(task.complete, allTasksCleared);
+				}
 				if (allTasksCleared)
 				{
 					levelTask.force(true);
-					onTaskCleared.dispatch(id, level, LevelHeader, levelTask.curGoal, levelTask.curGoal);
-				}
+					levelTask.current = levelTask.curGoal;
+					onTaskCleared.dispatch(id, level, LevelHeader, levelTask.curGoal, levelTask.current);
+					trace("clearing level task", levelTask.complete);
+				} else trace("level task not clear", levelTask);
 			}
+			else
+				trace("not checking task clear", levelTask);
 		}
 	}
 
