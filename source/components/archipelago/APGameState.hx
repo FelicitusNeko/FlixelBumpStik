@@ -574,7 +574,8 @@ class APGameState extends ClassicGameState
 	override function deserialize(data:DynamicAccess<Dynamic>, ignoreGameName:Bool = false)
 	{
 		super.deserialize(data, ignoreGameName);
-		_ap.LocationChecks(data["apqueue"]);
+		var checks:Array<Int> = data["apqueue"];
+		if (checks.length > 0) _ap.LocationChecks(checks);
 	}
 
 	// !------------------------- DEPRECATED
