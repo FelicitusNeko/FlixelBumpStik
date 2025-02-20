@@ -432,7 +432,7 @@ abstract class CommonPlayerState
 				case Return(r):
 					return r;
 				case Throw(s):
-					throw new Exception(s);
+					throw new Exception('Rule ${rule.name} threw: "${s}"');
 			}
 		}
 
