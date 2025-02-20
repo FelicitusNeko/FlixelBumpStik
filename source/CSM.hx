@@ -46,12 +46,14 @@ class CSM // stands for Chaining State Machine
 
 	function set_currentState(currentState)
 	{
+		_changedThisFrame = true;
+		this.currentState = currentState;
+
 		#if lime
 		onStateChanged.dispatch(currentState);
 		#end
 
-		_changedThisFrame = true;
-		return this.currentState = currentState;
+		return currentState;
 	}
 
 	/**
