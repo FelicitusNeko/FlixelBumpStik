@@ -312,7 +312,7 @@ class APGameState extends ClassicGameState
 
 				case "gameover":
 					restartGame();
-					_p.runNextTurn(); // TODO: this is probably not necessary? the state change should call it already
+					_p.runNextTurn(); // NOTE: would like to avoid calling this here, but we need a Next bumper
 			}
 	}
 
@@ -450,7 +450,6 @@ class APGameState extends ClassicGameState
 		{
 			case "ap-lvcomplete":
 				FlxG.sound.play(AssetPaths.levelup__wav);
-				// TODO: make sure board is in idle state (it shouldn't not be, though?)
 				_pAP.apBoard.levelClear();
 				pushToast(_t("game/ap/levelcomplete"), FlxColor.LIME, 3000, true);
 			case "ap-complete":

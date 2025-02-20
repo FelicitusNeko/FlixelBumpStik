@@ -649,6 +649,7 @@ class APPlayerState extends ClassicPlayerState
 		_reg["score.accrued.level"] += score;
 		_reg["block.accrued.level"] += block;
 
+		// BUG: incrementing level before resetting sets tasks to existing values; doing it after needlessly creates a board that won't get used
 		if (level == 0 || tasks.length == 0 || (tasks[0].type == LevelHeader && tasks[0].complete))
 			level++;
 
@@ -687,8 +688,6 @@ class APPlayerState extends ClassicPlayerState
 	/** Loads the board data. **/
 	override function deserializeBoard(data:DynamicAccess<Dynamic>):CommonBoard
 	{
-		// var boardData:DynamicAccess<Dynamic> = data["board"];
-		// trace(boardData);
 		var board = new APBoard(0, 0, data["width"], data["height"]);
 		board.deserialize(data);
 		return board;
