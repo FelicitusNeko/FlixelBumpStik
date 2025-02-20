@@ -468,10 +468,7 @@ class APPlayerState extends ClassicPlayerState
 			{
 				var allTasksCleared = true;
 				for (task in tl.slice(1))
-				{
 					allTasksCleared = allTasksCleared && task.complete;
-					trace(task.complete, allTasksCleared);
-				}
 				if (allTasksCleared)
 				{
 					levelTask.force(true);
