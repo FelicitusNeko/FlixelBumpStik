@@ -472,12 +472,12 @@ abstract class CommonPlayerState
 		block = 0;
 		next = null;
 		multiStack = _dfltMultiStack.slice(0);
+	}
 
+	public function resetFinally()
+	{
 		createBoard(true);
-
 		_bg.reset();
-		if (_bgColorShuffle)
-			_bg.shuffleColors();
 	}
 
 	/**

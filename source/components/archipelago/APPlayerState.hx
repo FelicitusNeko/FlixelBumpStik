@@ -458,7 +458,7 @@ class APPlayerState extends ClassicPlayerState
 				task.goalIndex++;
 			}
 
-			onTaskUpdated.dispatch(id, x, task);
+			if (!_levelPopulating) onTaskUpdated.dispatch(id, x, task);
 		}
 
 		if (!_levelPopulating && hasUpdated)
@@ -649,11 +649,12 @@ class APPlayerState extends ClassicPlayerState
 		_reg["score.accrued.level"] += score;
 		_reg["block.accrued.level"] += block;
 
-		// BUG: incrementing level before resetting sets tasks to existing values; doing it after needlessly creates a board that won't get used
+		super.reset();
+
 		if (level == 0 || tasks.length == 0 || (tasks[0].type == LevelHeader && tasks[0].complete))
 			level++;
 
-		super.reset();
+		resetFinally();
 
 		if (level < 6)
 		{
@@ -669,6 +670,12 @@ class APPlayerState extends ClassicPlayerState
 			for (sch in _sched)
 				sch.reset();
 		}
+	}
+
+	override function resetFinally() {
+		super.resetFinally();
+		if (_bgColorShuffle)
+			_bg.shuffleColors();
 	}
 
 	/** Saves the player state to text via Haxe's `Serializer`. **/
