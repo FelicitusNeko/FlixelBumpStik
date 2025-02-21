@@ -210,7 +210,8 @@ class APGameState extends ClassicGameState
 			_paintCanCancelButton = null;
 		}
 
-		prepareBoard();
+		if (_pAP.level >= 1 && _pAP.level <= 5)
+			prepareBoard();
 	}
 
 	// !------------------------- EVENT HANDLERS
