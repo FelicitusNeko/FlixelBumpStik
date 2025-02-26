@@ -46,6 +46,13 @@
 
 	<!-- ______________________________ Haxedefines _____________________________ -->
 
+	<!--Prevent ESC from quitting the game in debug mode-->
+	<!-- <haxedef name="noescape" if="debug" /> -->
+	<!--Cause the game to ignore save files in debug mode-->
+	<!-- <haxedef name="nosave" if="debug" /> -->
+	<!--Set the game to kiosk testing mode, for public display-->
+	<!-- <haxedef name="kiosktest" /> -->
+
 	<!--Enable the Flixel core recording system-->
 	<!--<haxedef name="FLX_RECORD" />-->
 

@@ -8,7 +8,7 @@ import flixel.FlxState;
 class BumpStikGame extends FlxGame
 {
 	/** _Read-only._ The current save version. Earlier saves than this may be converted or deleted. **/
-	#if debug
+	#if nosave
 	public static final curSaveVer = -1;
 	#else
 	public static final curSaveVer = 2;
