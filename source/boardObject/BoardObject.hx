@@ -59,9 +59,6 @@ abstract class BoardObject extends FlxSpriteGroup
 
 	function set_owner(owner:CommonBoard):CommonBoard
 	{
-		// if (this.owner == owner)
-		// 	return owner;
-
 		var oldOrigin = this.owner != null ? this.owner.origin : new FlxPoint(0, 0);
 		var newOrigin = owner != null ? owner.origin : new FlxPoint(0, 0);
 
