@@ -458,7 +458,8 @@ class APPlayerState extends ClassicPlayerState
 				task.goalIndex++;
 			}
 
-			if (!_levelPopulating) onTaskUpdated.dispatch(id, x, task);
+			if (!_levelPopulating)
+				onTaskUpdated.dispatch(id, x, task);
 		}
 
 		if (!_levelPopulating && hasUpdated)
@@ -488,6 +489,7 @@ class APPlayerState extends ClassicPlayerState
 		Called by AP client when an item is received.
 		@param items Items that have been received.
 	**/
+	@:allow(components.archipelago.APGameState.create)
 	private function onItemsReceived(items:Array<NetworkItem>)
 	{
 		for (itemObj in items.filter(i -> i.index > _reg["ap.last"]))
@@ -672,7 +674,8 @@ class APPlayerState extends ClassicPlayerState
 		}
 	}
 
-	override function resetFinally() {
+	override function resetFinally()
+	{
 		super.resetFinally();
 		if (_bgColorShuffle)
 			_bg.shuffleColors();

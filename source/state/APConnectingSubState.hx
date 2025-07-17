@@ -1,5 +1,6 @@
 package state;
 
+import ap.PacketTypes.NetworkItem;
 import ap.Client;
 import flixel.FlxSprite;
 import flixel.FlxSubState;
@@ -12,15 +13,20 @@ using flixel.util.FlxSpriteUtil;
 class APConnectingSubState extends FlxSubState
 {
 	private var _ap:Client;
+	private var _items:Array<NetworkItem> = [];
 
 	public var result(default, null) = "Unknown";
 	public var slotData(default, null):Dynamic = null;
+	public var items(get, null):Array<NetworkItem>;
 
 	public function new(ap:Client)
 	{
 		super(FlxColor.fromRGBFloat(0, 0, 0, .5));
 		_ap = ap;
 	}
+
+	private function get_items()
+		return _items.slice(0);
 
 	override function create()
 	{
@@ -56,6 +62,7 @@ class APConnectingSubState extends FlxSubState
 		_ap.onSlotRefused.add(onSlotRefused);
 		_ap.onSocketDisconnected.add(onSocketDisconnected);
 		_ap.onSlotConnected.add(onSlotConnected);
+		_ap.onItemsReceived.add(onItemsReceived);
 
 		super.create();
 	}
@@ -85,11 +92,15 @@ class APConnectingSubState extends FlxSubState
 		close();
 	}
 
+	function onItemsReceived(items:Array<NetworkItem>)
+		_items = _items.concat(items);
+
 	override function destroy()
 	{
 		_ap.onSlotRefused.remove(onSlotRefused);
 		_ap.onSocketDisconnected.remove(onSocketDisconnected);
 		_ap.onSlotConnected.remove(onSlotConnected);
+		_ap.onItemsReceived.remove(onItemsReceived);
 		super.destroy();
 	}
 

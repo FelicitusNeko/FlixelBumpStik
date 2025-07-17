@@ -3,7 +3,7 @@ package components.archipelago;
 import haxe.DynamicAccess;
 import haxe.Exception;
 import ap.Client;
-import ap.PacketTypes.ClientStatus;
+import ap.PacketTypes;
 import boardObject.Bumper;
 import flixel.FlxCamera;
 import flixel.FlxG;
@@ -36,8 +36,8 @@ class APGameState extends ClassicGameState
 	/** The Archipelago client. **/
 	private var _ap:Client;
 
-	/** The index of the last item that has been processed. **/
-	private var _lastProcessed = -1;
+	/** Incoming items from the multiworld, sent with the Connected packet. **/
+	private var _items:Array<NetworkItem>;
 
 	/** The primary camera where the game board lives. **/
 	private var _camGeneral:FlxCamera;
@@ -68,10 +68,11 @@ class APGameState extends ClassicGameState
 
 	// !------------------------- INSTANTIATION
 
-	public function new(ap:Client, slotData:Dynamic)
+	public function new(ap:Client, slotData:Dynamic, ?items:Array<NetworkItem>)
 	{
 		_ap = ap;
 		_ap.clientStatus = ClientStatus.READY;
+		_items = items;
 
 		super();
 	}
@@ -108,6 +109,8 @@ class APGameState extends ClassicGameState
 		_ap.onSocketDisconnected.add(onSocketDisconnect);
 
 		FlxG.autoPause = false;
+		if (_items != null)
+			_pAP.onItemsReceived(_items);
 	}
 
 	override function destroy()
@@ -575,7 +578,8 @@ class APGameState extends ClassicGameState
 	{
 		super.deserialize(data, ignoreGameName);
 		var checks:Array<Int> = data["apqueue"];
-		if (checks.length > 0) _ap.LocationChecks(checks);
+		if (checks.length > 0)
+			_ap.LocationChecks(checks);
 	}
 
 	// !------------------------- DEPRECATED

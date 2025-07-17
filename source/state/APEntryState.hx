@@ -1,5 +1,6 @@
 package state;
 
+import ap.PacketTypes.NetworkItem;
 import haxe.DynamicAccess;
 import Main.I18nFunction;
 import ap.Client;
@@ -18,7 +19,7 @@ private enum APConnState
 {
 	Entry;
 	Connecting;
-	Ready(ap:Client, slotData:Dynamic);
+	Ready(ap:Client, slotData:Dynamic, ?items:Array<NetworkItem>);
 }
 
 class APEntryState extends FlxState
@@ -144,7 +145,7 @@ class APEntryState extends FlxState
 						};
 						apGames.close();
 
-						_state = Ready(ap, connectSubState.slotData);
+						_state = Ready(ap, connectSubState.slotData, connectSubState.items);
 					case "Disconnected":
 						postError("connectionReset");
 					case "Cancel":
@@ -171,8 +172,8 @@ class APEntryState extends FlxState
 		super.update(elapsed);
 		switch (_state)
 		{
-			case Ready(ap, slotData):
-				FlxG.switchState(new APGameState(ap, slotData));
+			case Ready(ap, slotData, items):
+				FlxG.switchState(new APGameState(ap, slotData, items));
 				_state = Entry; // shouldn't affect anything but will prevent multiple creation of game state
 			default:
 		}
