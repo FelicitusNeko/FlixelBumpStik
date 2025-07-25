@@ -65,7 +65,7 @@ abstract class CommonGameState extends FlxState
 		{
 			if (save.data.gameName != gameName) // game identifier mismatch; ignore save
 				createGame();
-			else if (save.data.version == -1) // save made in test
+			else if (save.data.version == -1 || save.data.version == null) // save made in test, or is unmarked v1
 			{
 				// deserialize(save.data);
 				createGame();
@@ -80,7 +80,11 @@ abstract class CommonGameState extends FlxState
 				throw new Exception("Save data is newer than game");
 			else
 			{
-				deserialize(save.data);
+				try {
+					deserialize(save.data);
+				} catch (e) {
+					createGame();
+				}
 				// deserialize does not create a hud, though
 			}
 			save.destroy(); // we're not outputting save data here, so just dispose the save object
