@@ -458,6 +458,7 @@ class APGameState extends ClassicGameState
 				pushToast(_t("game/ap/levelcomplete"), FlxColor.LIME, 3000, true);
 			case "ap-complete":
 				_ap.clientStatus = ClientStatus.GOAL;
+				_ap.poll();
 				var dlg = new DialogBox(_t("game/ap/goal"), {
 					buttons: [
 						{
