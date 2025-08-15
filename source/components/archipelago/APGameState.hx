@@ -109,7 +109,10 @@ class APGameState extends ClassicGameState
 		_ap.onSocketDisconnected.add(onSocketDisconnect);
 
 		FlxG.autoPause = false;
-		if (_items != null)
+
+		if (_pAP.level == -1 || _pAP.level == 6)
+			onSignal("ap-complete");
+		else if (_items != null)
 			_pAP.onItemsReceived(_items);
 	}
 
