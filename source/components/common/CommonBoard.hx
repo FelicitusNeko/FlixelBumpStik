@@ -913,5 +913,10 @@ abstract class CommonBoard extends FlxTypedGroup<FlxBasic>
 			}
 			putBumperAt(bumperData["boardX"], bumperData["boardY"], bumper);
 		}
+
+		// force into checking state to make sure board and launchers are consistent
+		for (launcher in _launchers)
+			launcher.enabled = false;
+		_csm.currentState = "checking";
 	}
 }
