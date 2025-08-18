@@ -319,7 +319,12 @@ class APGameState extends ClassicGameState
 
 				case "gameover":
 					restartGame();
-					_p.runNextTurn(); // NOTE: would like to avoid calling this here, but we need a Next bumper
+					// HACK: so that important signals such as ap-complete get processed; consolidate later
+					switch (_p.runNextTurn())
+					{
+						case Signal(sig): onSignal(sig);
+						default:
+					}
 			}
 	}
 
@@ -382,7 +387,12 @@ class APGameState extends ClassicGameState
 				_pAP.updateTask(task.type, task.current);
 				if (![Treasures, Boosters].contains(task.type))
 					onTaskCleared(_p.id, _pAP.level, task.type, task.goals[task.goalIndex - 1], task.current);
-				_p.runNextTurn(); // TODO: don't call runNextTurn here, we might miss a signal
+				// HACK: so that important signals such as ap-lvcomplete get processed; consolidate later
+				switch (_p.runNextTurn())
+				{
+					case Signal(sig): onSignal(sig);
+					default:
+				}
 			});
 			_pAP.loadTaskSkip(dlg);
 			openSubState(dlg);
