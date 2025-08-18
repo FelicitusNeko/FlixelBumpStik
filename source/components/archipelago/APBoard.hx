@@ -112,6 +112,7 @@ class APBoard extends ClassicBoard
 
 	function smLevelClear(elapsed:Float)
 	{
+		// TODO: this function completes immediately if there are no bumpers on the board
 		_delay -= elapsed;
 		if (_randomClearList != null && _randomClearList.length > 0)
 		{
